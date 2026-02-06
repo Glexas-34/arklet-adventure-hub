@@ -1,0 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 280 60% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 280 50% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 280 50% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 320 100% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 80% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 280 30% 20%;
+    --muted-foreground: 280 15% 65%;
+
+    --accent: 170 100% 50%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 280 40% 25%;
+    --input: 280 40% 18%;
+    --ring: 320 100% 50%;
+
+    --radius: 1rem;
+
+    /* Rarity Colors - Updated */
+    --rarity-common: 200 18% 82%;
+    --rarity-uncommon: 122 39% 49%;
+    --rarity-rare: 207 90% 54%;
+    --rarity-legendary: 36 100% 50%;
+    --rarity-mythic: 340 82% 52%;
+    --rarity-secret: 291 64% 42%;
+    --rarity-ultra-secret: 350 100% 55%;
+    --rarity-mystical: 187 100% 45%;
+
+    /* Gradients */
+    --gradient-header: linear-gradient(90deg, hsl(330 100% 50%), hsl(280 80% 55%), hsl(170 100% 50%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(280 60% 25%), hsl(320 70% 40%), hsl(200 80% 50%));
+    --gradient-card: linear-gradient(135deg, hsl(280 50% 18%), hsl(300 45% 22%));
+    --gradient-pack: linear-gradient(135deg, hsl(200 80% 50%), hsl(280 70% 55%));
+    --gradient-button: linear-gradient(135deg, hsl(187 100% 50%), hsl(207 90% 54%));
+
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(320 100% 50% / 0.5);
+    --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.5);
+  }
+
+  .dark {
+    --background: 280 60% 8%;
+    --foreground: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-fredoka;
+  }
+}
+
+@layer utilities {
+  .gradient-header {
+    background: var(--gradient-header);
+  }
+
+  .gradient-sidebar {
+    background: var(--gradient-sidebar);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .gradient-pack {
+    background: var(--gradient-pack);
+  }
+
+  .gradient-button {
+    background: var(--gradient-button);
+  }
+
+  .rarity-common { color: hsl(var(--rarity-common)); }
+  .rarity-uncommon { color: hsl(var(--rarity-uncommon)); }
+  .rarity-rare { color: hsl(var(--rarity-rare)); }
+  .rarity-legendary { color: hsl(var(--rarity-legendary)); }
+  .rarity-mythic { color: hsl(var(--rarity-mythic)); }
+  .rarity-secret { color: hsl(var(--rarity-secret)); }
+  .rarity-ultra-secret { color: hsl(var(--rarity-ultra-secret)); }
+  .rarity-mystical { color: hsl(var(--rarity-mystical)); }
+
+  .bg-rarity-common { background-color: hsl(var(--rarity-common)); }
+  .bg-rarity-uncommon { background-color: hsl(var(--rarity-uncommon)); }
+  .bg-rarity-rare { background-color: hsl(var(--rarity-rare)); }
+  .bg-rarity-legendary { background-color: hsl(var(--rarity-legendary)); }
+  .bg-rarity-mythic { background-color: hsl(var(--rarity-mythic)); }
+  .bg-rarity-secret { background-color: hsl(var(--rarity-secret)); }
+  .bg-rarity-ultra-secret { background-color: hsl(var(--rarity-ultra-secret)); }
+  .bg-rarity-mystical { background-color: hsl(var(--rarity-mystical)); }
+
+  .border-rarity-common { border-color: hsl(var(--rarity-common)); }
+  .border-rarity-uncommon { border-color: hsl(var(--rarity-uncommon)); }
+  .border-rarity-rare { border-color: hsl(var(--rarity-rare)); }
+  .border-rarity-legendary { border-color: hsl(var(--rarity-legendary)); }
+  .border-rarity-mythic { border-color: hsl(var(--rarity-mythic)); }
+  .border-rarity-secret { border-color: hsl(var(--rarity-secret)); }
+  .border-rarity-ultra-secret { border-color: hsl(var(--rarity-ultra-secret)); }
+  .border-rarity-mystical { border-color: hsl(var(--rarity-mystical)); }
+
+  .glow-common { box-shadow: 0 0 20px hsl(var(--rarity-common) / 0.5); }
+  .glow-uncommon { box-shadow: 0 0 20px hsl(var(--rarity-uncommon) / 0.6); }
+  .glow-rare { box-shadow: 0 0 25px hsl(var(--rarity-rare) / 0.6); }
+  .glow-legendary { box-shadow: 0 0 30px hsl(var(--rarity-legendary) / 0.7); }
+  .glow-mythic { box-shadow: 0 0 35px hsl(var(--rarity-mythic) / 0.7); }
+  .glow-secret { box-shadow: 0 0 40px hsl(var(--rarity-secret) / 0.7); }
+  .glow-ultra-secret { box-shadow: 0 0 45px hsl(var(--rarity-ultra-secret) / 0.8); }
+  .glow-mystical {
+    box-shadow: 0 0 50px hsl(var(--rarity-mystical) / 0.9), 0 0 80px hsl(var(--rarity-mystical) / 0.5);
+    animation: mystical-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes mystical-pulse {
+    0%, 100% { box-shadow: 0 0 50px hsl(var(--rarity-mystical) / 0.9), 0 0 80px hsl(var(--rarity-mystical) / 0.5); }
+    50% { box-shadow: 0 0 70px hsl(var(--rarity-mystical) / 1), 0 0 100px hsl(var(--rarity-mystical) / 0.7); }
+  }
+
+  @keyframes jump {
+    0% { transform: translateY(0) scale(1); }
+    20% { transform: translateY(-30px) scale(1.1); }
+    40% { transform: translateY(0) scale(1); }
+    60% { transform: translateY(-15px) scale(1.05); }
+    80% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  .animate-jump {
+    animation: jump 0.6s ease-out;
+  }
+
+  /* Kid-friendly animations */
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  @keyframes rainbow-border {
+    0% { border-color: #ef4444; }
+    16% { border-color: #f97316; }
+    33% { border-color: #eab308; }
+    50% { border-color: #22c55e; }
+    66% { border-color: #3b82f6; }
+    83% { border-color: #a855f7; }
+    100% { border-color: #ef4444; }
+  }
+
+  .animate-wiggle {
+    animation: wiggle 0.5s ease-in-out;
+  }
+
+  .animate-wiggle-hover:hover {
+    animation: wiggle 0.6s ease-in-out infinite;
+  }
+
+  .animate-pop {
+    animation: pop 0.4s ease-out;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-rainbow-border {
+    animation: rainbow-border 3s linear infinite;
+    border-width: 2px;
+  }
+
+  /* Confetti particles */
+  @keyframes confetti-fall {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(
+        calc((var(--speed) * 40px - 80px)),
+        calc(var(--speed) * 120px + 200px)
+      ) rotate(calc(var(--spin) * 360deg));
+      opacity: 0;
+    }
+  }
+
+  .confetti-particle {
+    animation: confetti-fall 1.6s ease-out forwards;
+  }
+
+  /* Animated background */
+  .animated-bg {
+    position: relative;
+  }
+
+  .animated-bg::before,
+  .animated-bg::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.06;
+  }
+
+  .animated-bg::before {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, hsl(320 100% 50%), transparent 70%);
+    top: 10%;
+    left: -5%;
+    animation: float-bg 25s ease-in-out infinite;
+  }
+
+  .animated-bg::after {
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, hsl(170 100% 50%), transparent 70%);
+    bottom: 10%;
+    right: -5%;
+    animation: float-bg 30s ease-in-out infinite reverse;
+  }
+
+  @keyframes float-bg {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(30px, -20px); }
+    50% { transform: translate(-10px, 30px); }
+    75% { transform: translate(20px, 10px); }
+  }
+
+  /* Mobile safe area for bottom nav */
+  .mobile-nav-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Scrollbar hide utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
