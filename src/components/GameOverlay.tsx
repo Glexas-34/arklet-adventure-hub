@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trophy, Clock, X, Users } from "lucide-react";
+import { Trophy, Clock, X, Users, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GameRoom, GamePlayer } from "@/hooks/useMultiplayerGame";
 import { rarityInfo } from "@/data/gameData";
@@ -11,6 +11,13 @@ interface GameOverlayProps {
   timeRemaining: number | null;
   onLeave: () => void;
 }
+
+const modeLabels: Record<string, string> = {
+  classic: "Classic Opening",
+  steal_and_get: "Steal & Get",
+  block_buster: "Block Buster",
+  fishing: "Fishing Reeling",
+};
 
 export function GameOverlay({
   room,
@@ -25,7 +32,7 @@ export function GameOverlay({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const isGameOver = room.status === "finished" || (room.winner_nickname && room.status === "playing");
+  const isClassic = room.game_mode === "classic";
 
   return (
     <motion.div
@@ -44,16 +51,23 @@ export function GameOverlay({
               </span>
             </div>
 
-            {/* Target */}
-            <div className="text-sm">
-              <span className="text-muted-foreground">Target: </span>
-              <span 
-                className="font-bold"
-                style={{ color: rarityInfo[room.target_rarity]?.color }}
-              >
-                {room.target_rarity}+
-              </span>
-            </div>
+            {/* Target (Classic) or Mode label (others) */}
+            {isClassic ? (
+              <div className="text-sm">
+                <span className="text-muted-foreground">Target: </span>
+                <span
+                  className="font-bold"
+                  style={{ color: rarityInfo[room.target_rarity]?.color }}
+                >
+                  {room.target_rarity}+
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-sm">
+                <Package size={16} className="text-primary" />
+                <span className="font-bold text-primary">{modeLabels[room.game_mode] || room.game_mode}</span>
+              </div>
+            )}
 
             {/* Players */}
             <div className="flex items-center gap-2 text-sm">
@@ -62,12 +76,12 @@ export function GameOverlay({
             </div>
           </div>
 
-          {/* Winner announcement */}
-          {room.winner_nickname && (
+          {/* Winner announcement (Classic only) */}
+          {isClassic && room.winner_nickname && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 
+              className="flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20
                          border border-yellow-500/50 rounded-xl px-4 py-2"
             >
               <Trophy className="text-yellow-500" size={20} />
@@ -97,14 +111,16 @@ export function GameOverlay({
                 {player.is_host && " 👑"}
               </div>
               {player.current_item ? (
-                <div 
+                <div
                   className="font-bold"
                   style={{ color: rarityInfo[player.current_rarity as keyof typeof rarityInfo]?.color }}
                 >
                   {player.current_item}
                 </div>
               ) : (
-                <div className="text-muted-foreground italic">Opening...</div>
+                <div className="text-muted-foreground italic">
+                  {isClassic ? "Opening..." : "Playing..."}
+                </div>
               )}
             </div>
           ))}
@@ -118,29 +134,40 @@ export function GameOverlay({
           animate={{ opacity: 1, scale: 1 }}
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
         >
-          <div className="bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30 
+          <div className="bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30
                          rounded-2xl p-8 text-center max-w-md">
-            <Trophy size={64} className="mx-auto text-yellow-500 mb-4" />
-            <h2 className="text-3xl font-bold mb-4">Game Over!</h2>
-            
-            {room.winner_nickname ? (
-              <div className="space-y-2 mb-6">
-                <p className="text-xl">
-                  🎉 <span className="font-bold text-primary">{room.winner_nickname}</span> wins!
-                </p>
-                <p className="text-muted-foreground">
-                  Got <span 
-                    className="font-bold"
-                    style={{ color: rarityInfo[room.target_rarity]?.color }}
-                  >
-                    {room.winning_item}
-                  </span>
-                </p>
-              </div>
+            {isClassic ? (
+              <>
+                <Trophy size={64} className="mx-auto text-yellow-500 mb-4" />
+                <h2 className="text-3xl font-bold mb-4">Game Over!</h2>
+                {room.winner_nickname ? (
+                  <div className="space-y-2 mb-6">
+                    <p className="text-xl">
+                      🎉 <span className="font-bold text-primary">{room.winner_nickname}</span> wins!
+                    </p>
+                    <p className="text-muted-foreground">
+                      Got <span
+                        className="font-bold"
+                        style={{ color: rarityInfo[room.target_rarity]?.color }}
+                      >
+                        {room.winning_item}
+                      </span>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xl mb-6 text-muted-foreground">
+                    Time's up! No one got {room.target_rarity} or higher.
+                  </p>
+                )}
+              </>
             ) : (
-              <p className="text-xl mb-6 text-muted-foreground">
-                Time's up! No one got {room.target_rarity} or higher.
-              </p>
+              <>
+                <Package size={64} className="mx-auto text-primary mb-4" />
+                <h2 className="text-3xl font-bold mb-4">Time's Up!</h2>
+                <p className="text-lg mb-6 text-muted-foreground">
+                  All collected items have been added to your inventory!
+                </p>
+              </>
             )}
 
             <Button onClick={onLeave} className="gradient-button">

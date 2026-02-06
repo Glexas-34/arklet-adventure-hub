@@ -56,6 +56,7 @@ export type Database = {
         Row: {
           created_at: string
           ends_at: string | null
+          game_mode: string
           host_nickname: string
           id: string
           pin_code: string
@@ -69,6 +70,7 @@ export type Database = {
         Insert: {
           created_at?: string
           ends_at?: string | null
+          game_mode?: string
           host_nickname: string
           id?: string
           pin_code: string
@@ -82,6 +84,7 @@ export type Database = {
         Update: {
           created_at?: string
           ends_at?: string | null
+          game_mode?: string
           host_nickname?: string
           id?: string
           pin_code?: string

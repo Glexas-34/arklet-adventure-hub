@@ -16,11 +16,15 @@ import { JoinGameModal } from "@/components/JoinGameModal";
 import { GameOverlay } from "@/components/GameOverlay";
 import { NicknameModal } from "@/components/NicknameModal";
 import { useInventory } from "@/hooks/useInventory";
-import { useMultiplayerGame } from "@/hooks/useMultiplayerGame";
+import { useMultiplayerGame, GameMode } from "@/hooks/useMultiplayerGame";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useTrading } from "@/hooks/useTrading";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { Rarity } from "@/data/gameData";
+import { PRIVILEGED_USERS } from "@/hooks/useInventory";
+import { StealAndGetView } from "@/components/multiplayer/StealAndGetView";
+import { BlockBusterView } from "@/components/multiplayer/BlockBusterView";
+import { FishingReelingView } from "@/components/multiplayer/FishingReelingView";
 
 type View = "packs" | "inventory" | "index" | "leaderboard" | "trade";
 
@@ -32,7 +36,7 @@ const Index = () => {
   const [gamePinCode, setGamePinCode] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const { inventory, addItem, getTotalItems, getUniqueCount, clearInventory, updateItemCount } = useInventory();
+  const { inventory, addItem, getTotalItems, getUniqueCount, clearInventory, updateItemCount, grantAllBlooks } = useInventory();
   const {
     currentRoom,
     players,
@@ -50,6 +54,7 @@ const Index = () => {
     nickname,
     showNicknameModal,
     saveNickname,
+    changeNickname,
     updateUniqueCount,
     incrementWins,
   } = usePlayerProfile();
@@ -125,6 +130,13 @@ const Index = () => {
     }
   }, [isTrading, currentView]);
 
+  // Grant all blooks to privileged users
+  useEffect(() => {
+    if (nickname && PRIVILEGED_USERS.includes(nickname)) {
+      grantAllBlooks();
+    }
+  }, [nickname, grantAllBlooks]);
+
   // Space bar toggle for GUI visibility
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -137,19 +149,21 @@ const Index = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // When game starts, switch to packs view
+  // When game starts, switch to packs view (classic only; other modes render inline)
   useEffect(() => {
     if (currentRoom?.status === "playing") {
-      setCurrentView("packs");
+      if (currentRoom.game_mode === "classic") {
+        setCurrentView("packs");
+      }
       setShowHostModal(false);
       setShowJoinModal(false);
     }
-  }, [currentRoom?.status]);
+  }, [currentRoom?.status, currentRoom?.game_mode]);
 
-  // Sync unique count to profile when it changes
+  // Sync unique count to profile when it changes (skip admin)
   useEffect(() => {
     const uniqueCount = getUniqueCount();
-    if (nickname && uniqueCount > 0) {
+    if (nickname && !PRIVILEGED_USERS.includes(nickname) && uniqueCount > 0) {
       updateUniqueCount(uniqueCount);
     }
   }, [getUniqueCount, nickname, updateUniqueCount]);
@@ -181,8 +195,8 @@ const Index = () => {
     }
   }, []);
 
-  const handleCreateRoom = async (nickname: string, targetRarity: Rarity, timeLimit: number) => {
-    const result = await createRoom(nickname, targetRarity, timeLimit);
+  const handleCreateRoom = async (nickname: string, targetRarity: Rarity, timeLimit: number, gameMode: GameMode) => {
+    const result = await createRoom(nickname, targetRarity, timeLimit, gameMode);
     if (result.success && result.pinCode) {
       setGamePinCode(result.pinCode);
     }
@@ -213,7 +227,7 @@ const Index = () => {
           exit={{ opacity: 0, scale: 0.95 }}
           className="min-h-screen bg-background flex flex-col animated-bg"
         >
-          <GameHeader nickname={nickname} />
+          <GameHeader nickname={nickname} onChangeNickname={changeNickname} />
 
           {/* Game overlay when in multiplayer */}
           {currentRoom && currentRoom.status === "playing" && (
@@ -240,49 +254,71 @@ const Index = () => {
             />
 
             <motion.main
-              key={currentView}
+              key={currentView + (isInGame && currentRoom?.game_mode !== "classic" ? `-${currentRoom?.game_mode}` : "")}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className={`flex-1 overflow-hidden pb-16 md:pb-0 ${currentRoom?.status === "playing" ? "pt-28" : ""}`}
             >
-              {currentView === "packs" && (
-                <PacksView
+              {/* Non-classic game mode views (take over main area) */}
+              {isInGame && currentRoom?.game_mode === "steal_and_get" ? (
+                <StealAndGetView
+                  roomId={currentRoom.id}
+                  players={players}
+                  myPlayer={myPlayer}
+                  timeRemaining={timeRemaining}
                   onItemObtained={handleItemObtained}
-                  onRareReveal={handleRareReveal}
                 />
-              )}
-              {currentView === "inventory" && (
-                <InventoryView inventory={inventory} />
-              )}
-              {currentView === "index" && (
-                <IndexView inventory={inventory} />
-              )}
-              {currentView === "leaderboard" && (
-                <LeaderboardView currentNickname={nickname} />
-              )}
-              {currentView === "trade" && (
-                <TradeView
-                  inventory={inventory}
-                  nickname={nickname}
-                  partnerNickname={partnerNickname}
-                  isTrading={isTrading}
-                  myOffers={myOffers}
-                  theirOffers={theirOffers}
-                  tradeAccepted={tradeAccepted}
-                  partnerAccepted={partnerAccepted}
-                  onInitiateTrade={initiateTradeRequest}
-                  onAddItem={addItemToOffer}
-                  onRemoveItem={removeItemFromOffer}
-                  onAcceptTrade={acceptTrade}
-                  onDeclineTrade={declineTrade}
-                  onCancelTrade={cancelTrade}
-                  checkPlayerOnline={isPlayerOnline}
-                  waitingForResponse={waitingForTradeResponse}
+              ) : isInGame && currentRoom?.game_mode === "block_buster" ? (
+                <BlockBusterView
+                  timeRemaining={timeRemaining}
+                  onItemObtained={handleItemObtained}
                 />
+              ) : isInGame && currentRoom?.game_mode === "fishing" ? (
+                <FishingReelingView
+                  timeRemaining={timeRemaining}
+                  onItemObtained={handleItemObtained}
+                />
+              ) : (
+                <>
+                  {currentView === "packs" && (
+                    <PacksView
+                      onItemObtained={handleItemObtained}
+                      onRareReveal={handleRareReveal}
+                    />
+                  )}
+                  {currentView === "inventory" && (
+                    <InventoryView inventory={inventory} />
+                  )}
+                  {currentView === "index" && (
+                    <IndexView inventory={inventory} />
+                  )}
+                  {currentView === "leaderboard" && (
+                    <LeaderboardView currentNickname={nickname} />
+                  )}
+                  {currentView === "trade" && (
+                    <TradeView
+                      inventory={inventory}
+                      nickname={nickname}
+                      partnerNickname={partnerNickname}
+                      isTrading={isTrading}
+                      myOffers={myOffers}
+                      theirOffers={theirOffers}
+                      tradeAccepted={tradeAccepted}
+                      partnerAccepted={partnerAccepted}
+                      onInitiateTrade={initiateTradeRequest}
+                      onAddItem={addItemToOffer}
+                      onRemoveItem={removeItemFromOffer}
+                      onAcceptTrade={acceptTrade}
+                      onDeclineTrade={declineTrade}
+                      onCancelTrade={cancelTrade}
+                      checkPlayerOnline={isPlayerOnline}
+                      waitingForResponse={waitingForTradeResponse}
+                    />
+                  )}
+                </>
               )}
-
             </motion.main>
           </div>
 

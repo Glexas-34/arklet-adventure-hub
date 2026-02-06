@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { PRIVILEGED_USERS } from "@/hooks/useInventory";
  import { Trophy, Medal, Star, Crown, Sparkles, ArrowLeftRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -46,9 +47,13 @@ export function LeaderboardView({ currentNickname }: LeaderboardViewProps) {
 
   const fetchLeaderboard = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("player_profiles")
-         .select("id, nickname, unique_count, wins, successful_trades")
+         .select("id, nickname, unique_count, wins, successful_trades");
+      for (const name of PRIVILEGED_USERS) {
+        query = query.neq("nickname", name);
+      }
+      const { data, error } = await query
         .order("unique_count", { ascending: false })
         .limit(10);
 

@@ -112,6 +112,36 @@ export function usePlayerProfile() {
     }
   }, [profile]);
 
+  const changeNickname = useCallback(async (newNickname: string) => {
+    const { data: existing } = await supabase
+      .from("player_profiles")
+      .select("id")
+      .eq("nickname", newNickname)
+      .maybeSingle();
+
+    if (existing) {
+      return { success: false, error: "Nickname already taken" };
+    }
+
+    if (profile) {
+      const { error } = await supabase
+        .from("player_profiles")
+        .update({ nickname: newNickname, updated_at: new Date().toISOString() })
+        .eq("id", profile.id);
+
+      if (error) {
+        return { success: false, error: "Failed to update nickname" };
+      }
+      setProfile((prev) => prev ? { ...prev, nickname: newNickname } : null);
+    } else {
+      await fetchOrCreateProfile(newNickname);
+    }
+
+    localStorage.setItem(NICKNAME_KEY, newNickname);
+    setNickname(newNickname);
+    return { success: true };
+  }, [profile]);
+
   return {
     nickname,
     profile,
@@ -119,6 +149,7 @@ export function usePlayerProfile() {
     showNicknameModal,
     setShowNicknameModal,
     saveNickname,
+    changeNickname,
     updateUniqueCount,
     incrementWins,
   };

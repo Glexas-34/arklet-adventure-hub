@@ -2,11 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Rarity, rarityOrder } from "@/data/gameData";
 
+export type GameMode = "classic" | "steal_and_get" | "block_buster" | "fishing";
+
 export interface GameRoom {
   id: string;
   pin_code: string;
   host_nickname: string;
   target_rarity: Rarity;
+  game_mode: GameMode;
   time_limit_minutes: number;
   status: "waiting" | "playing" | "finished";
   winner_nickname: string | null;
@@ -40,7 +43,8 @@ export function useMultiplayerGame() {
   const createRoom = useCallback(async (
     hostNickname: string,
     targetRarity: Rarity,
-    timeLimitMinutes: number
+    timeLimitMinutes: number,
+    gameMode: GameMode = "classic"
   ) => {
     setError(null);
     const pinCode = generatePinCode();
@@ -54,6 +58,7 @@ export function useMultiplayerGame() {
           host_nickname: hostNickname,
           target_rarity: targetRarity,
           time_limit_minutes: timeLimitMinutes,
+          game_mode: gameMode,
         })
         .select()
         .single();
@@ -171,20 +176,22 @@ export function useMultiplayerGame() {
         })
         .eq("id", myPlayer.id);
 
-      // Check if target rarity achieved
-      const targetIndex = rarityOrder.indexOf(currentRoom.target_rarity);
-      const obtainedIndex = rarityOrder.indexOf(rarity);
+      // Only check for winner in classic mode
+      if (currentRoom.game_mode === "classic") {
+        const targetIndex = rarityOrder.indexOf(currentRoom.target_rarity);
+        const obtainedIndex = rarityOrder.indexOf(rarity);
 
-      if (obtainedIndex >= targetIndex && !currentRoom.winner_nickname) {
-        // This player wins!
-        await supabase
-          .from("game_rooms")
-          .update({
-            winner_nickname: myPlayer.nickname,
-            winning_item: itemName,
-          })
-          .eq("id", currentRoom.id)
-          .is("winner_nickname", null); // Only update if no winner yet
+        if (obtainedIndex >= targetIndex && !currentRoom.winner_nickname) {
+          // This player wins!
+          await supabase
+            .from("game_rooms")
+            .update({
+              winner_nickname: myPlayer.nickname,
+              winning_item: itemName,
+            })
+            .eq("id", currentRoom.id)
+            .is("winner_nickname", null); // Only update if no winner yet
+        }
       }
     } catch (err: any) {
       console.error("Error reporting item:", err);

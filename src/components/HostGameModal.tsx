@@ -12,12 +12,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Rarity, rarityOrder, rarityInfo } from "@/data/gameData";
-import { GamePlayer } from "@/hooks/useMultiplayerGame";
+import { GamePlayer, GameMode } from "@/hooks/useMultiplayerGame";
+
+const gameModes: { id: GameMode; label: string; emoji: string; description: string }[] = [
+  { id: "classic", label: "Classic Opening", emoji: "🎯", description: "Race to a target rarity" },
+  { id: "steal_and_get", label: "Steal & Get", emoji: "🎁", description: "Open mystery boxes, steal items" },
+  { id: "block_buster", label: "Block Buster", emoji: "🧱", description: "Breakout game with item drops" },
+  { id: "fishing", label: "Fishing Reeling", emoji: "🎣", description: "Cast & reel to catch items" },
+];
 
 interface HostGameModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateRoom: (nickname: string, targetRarity: Rarity, timeLimit: number) => Promise<{ success: boolean; pinCode?: string; error?: string }>;
+  onCreateRoom: (nickname: string, targetRarity: Rarity, timeLimit: number, gameMode: GameMode) => Promise<{ success: boolean; pinCode?: string; error?: string }>;
   onStartGame: () => void;
   pinCode: string | null;
   players: GamePlayer[];
@@ -36,6 +43,7 @@ export function HostGameModal({
   const [nickname, setNickname] = useState("");
   const [targetRarity, setTargetRarity] = useState<Rarity>("Rare");
   const [timeLimit, setTimeLimit] = useState(10);
+  const [gameMode, setGameMode] = useState<GameMode>("classic");
   const [isCreating, setIsCreating] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -44,7 +52,7 @@ export function HostGameModal({
   const handleCreate = async () => {
     if (!nickname.trim()) return;
     setIsCreating(true);
-    await onCreateRoom(nickname.trim(), targetRarity, timeLimit);
+    await onCreateRoom(nickname.trim(), targetRarity, timeLimit, gameMode);
     setIsCreating(false);
   };
 
@@ -56,8 +64,9 @@ export function HostGameModal({
     }
   };
 
-  // All rarities available for selection (Common to Mystical)
   const selectableRarities = rarityOrder;
+  const selectedMode = gameModes.find((m) => m.id === gameMode)!;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -70,8 +79,8 @@ export function HostGameModal({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30 
-                   rounded-2xl p-6 w-full max-w-md shadow-2xl"
+        className="bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30
+                   rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -94,26 +103,52 @@ export function HostGameModal({
               />
             </div>
 
+            {/* Gamemode Selector */}
             <div>
-              <Label>Ends in ___ Rarity</Label>
-              <Select
-                value={targetRarity}
-                onValueChange={(v) => setTargetRarity(v as Rarity)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {selectableRarities.map((rarity) => (
-                    <SelectItem key={rarity} value={rarity}>
-                      <span style={{ color: rarityInfo[rarity].color }}>
-                        {rarity}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Gamemode</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                {gameModes.map((mode) => (
+                  <motion.button
+                    key={mode.id}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setGameMode(mode.id)}
+                    className={`p-3 rounded-xl border-2 text-left transition-colors ${
+                      gameMode === mode.id
+                        ? "border-primary bg-primary/20"
+                        : "border-white/10 bg-black/20 hover:border-white/30"
+                    }`}
+                  >
+                    <div className="text-lg">{mode.emoji}</div>
+                    <div className="text-sm font-bold">{mode.label}</div>
+                    <div className="text-xs text-muted-foreground">{mode.description}</div>
+                  </motion.button>
+                ))}
+              </div>
             </div>
+
+            {/* Rarity selector — only for Classic */}
+            {gameMode === "classic" && (
+              <div>
+                <Label>Ends in ___ Rarity</Label>
+                <Select
+                  value={targetRarity}
+                  onValueChange={(v) => setTargetRarity(v as Rarity)}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectableRarities.map((rarity) => (
+                      <SelectItem key={rarity} value={rarity}>
+                        <span style={{ color: rarityInfo[rarity].color }}>
+                          {rarity}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div>
               <Label>Time Limit: {timeLimit} Minutes (Max. 30)</Label>
@@ -174,7 +209,10 @@ export function HostGameModal({
             </div>
 
             <div className="text-center text-sm text-muted-foreground">
-              <p>Target: <span className="font-bold" style={{ color: rarityInfo[targetRarity]?.color }}>{targetRarity}</span> or higher</p>
+              <p>Mode: <span className="font-bold text-primary">{selectedMode.emoji} {selectedMode.label}</span></p>
+              {gameMode === "classic" && (
+                <p>Target: <span className="font-bold" style={{ color: rarityInfo[targetRarity]?.color }}>{targetRarity}</span> or higher</p>
+              )}
             </div>
 
             <Button
