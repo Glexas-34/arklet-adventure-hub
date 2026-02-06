@@ -9,6 +9,7 @@ import { ArcadePlayerTicker } from "./ArcadePlayerTicker";
 import type { ArcadeReward } from "./games/types";
 import { useSound } from "@/hooks/useSound";
 import { Rarity } from "@/data/gameData";
+import { trackEvent } from "@/lib/analytics";
 
 import { ReactionTime } from "./games/ReactionTime";
 import { MathSprint } from "./games/MathSprint";
@@ -51,6 +52,13 @@ export function ArcadeView({ onItemObtained, nickname, otherPlayers = [] }: Arca
     setLastResult(result);
     setShowReward(true);
     onItemObtained(earned.itemName, earned.rarity);
+    trackEvent("arcade_game_completed", {
+      game_id: result.gameId,
+      score: result.score,
+      normalized_score: result.normalizedScore,
+      reward_item: earned.itemName,
+      reward_rarity: earned.rarity,
+    });
 
     if (result.normalizedScore >= 0.5) {
       playGameWin();
@@ -63,6 +71,7 @@ export function ArcadeView({ onItemObtained, nickname, otherPlayers = [] }: Arca
     playClick();
     playGameStart();
     setActiveGame(gameId);
+    trackEvent("arcade_game_started", { game_id: gameId });
   };
 
   const handleExit = () => {

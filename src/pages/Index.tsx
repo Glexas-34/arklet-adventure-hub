@@ -21,6 +21,7 @@ import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useTrading } from "@/hooks/useTrading";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { Rarity } from "@/data/gameData";
+import { trackPageView, trackEvent } from "@/lib/analytics";
 import { PRIVILEGED_USERS } from "@/hooks/useInventory";
 import { StealAndGetView } from "@/components/multiplayer/StealAndGetView";
 import { BlockBusterView } from "@/components/multiplayer/BlockBusterView";
@@ -103,6 +104,7 @@ const Index = () => {
   // Handle trade completion - transfer items
   useEffect(() => {
     if (tradeCompleted && activeSession) {
+      trackEvent("trade_completed", { items_given: myOffers.length, items_received: theirOffers.length });
       // Remove items I offered
       myOffers.forEach((offer) => {
         if (inventory[offer.item_name]) {
@@ -136,6 +138,11 @@ const Index = () => {
       grantAllBlooks();
     }
   }, [nickname, grantAllBlooks]);
+
+  // Track view changes
+  useEffect(() => {
+    trackPageView(currentView);
+  }, [currentView]);
 
   // Space bar toggle for GUI visibility
   useEffect(() => {
@@ -183,6 +190,7 @@ const Index = () => {
 
   const handleItemObtained = (name: string, rarity: Rarity) => {
     addItem(name, rarity);
+    trackEvent("item_obtained", { item_name: name, rarity });
     // Report to multiplayer if in game
     if (currentRoom?.status === "playing") {
       reportItem(name, rarity);
@@ -199,6 +207,7 @@ const Index = () => {
     const result = await createRoom(nickname, targetRarity, timeLimit, gameMode);
     if (result.success && result.pinCode) {
       setGamePinCode(result.pinCode);
+      trackEvent("game_created", { game_mode: gameMode, target_rarity: targetRarity, time_limit: timeLimit });
     }
     return result;
   };
@@ -207,6 +216,7 @@ const Index = () => {
     const result = await joinRoom(pinCode, nickname);
     if (result.success) {
       setShowJoinModal(false);
+      trackEvent("game_joined");
     }
     return result;
   };

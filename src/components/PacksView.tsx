@@ -5,6 +5,7 @@ import { PackPreview } from "./PackPreview";
 import { ResultBar } from "./ResultBar";
 import { packs, BlookItem, Rarity, rollPack } from "@/data/gameData";
 import { useSound } from "@/hooks/useSound";
+import { trackEvent } from "@/lib/analytics";
 
 interface PacksViewProps {
   onItemObtained: (name: string, rarity: Rarity) => void;
@@ -38,6 +39,7 @@ export function PacksView({ onItemObtained, onRareReveal }: PacksViewProps) {
     setResultItem(item);
     setShowResult(true);
     onItemObtained(name, rarity);
+    trackEvent("pack_opened", { pack_name: packName, item_name: name, rarity });
 
     // Play sound based on rarity
     if (rarity === "Ultra Secret" || rarity === "Mystical") {
