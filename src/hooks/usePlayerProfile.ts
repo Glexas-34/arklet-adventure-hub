@@ -8,6 +8,7 @@ export interface PlayerProfile {
   nickname: string;
   unique_count: number;
   wins: number;
+  user_number: number | null;
 }
 
 export function usePlayerProfile() {

@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, User, Pencil } from "lucide-react";
+import { Sparkles, User, Pencil, Hash } from "lucide-react";
 
 interface GameHeaderProps {
   nickname?: string | null;
+  userNumber?: number | null;
   onChangeNickname?: (newNickname: string) => Promise<{ success: boolean; error?: string }>;
 }
 
-export function GameHeader({ nickname, onChangeNickname }: GameHeaderProps) {
+export function GameHeader({ nickname, userNumber, onChangeNickname }: GameHeaderProps) {
   const [showProfile, setShowProfile] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState("");
@@ -129,7 +130,7 @@ export function GameHeader({ nickname, onChangeNickname }: GameHeaderProps) {
                 >
                   <div className="p-4">
                     {/* Profile display */}
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-3 mb-3">
                       <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                         <User className="w-5 h-5 text-primary" />
                       </div>
@@ -138,6 +139,15 @@ export function GameHeader({ nickname, onChangeNickname }: GameHeaderProps) {
                         <p className="font-bold text-foreground truncate">{nickname}</p>
                       </div>
                     </div>
+
+                    {/* User ID */}
+                    {userNumber != null && (
+                      <div className="flex items-center gap-1.5 mb-4 px-2 py-1.5 rounded-lg bg-white/5 border border-white/5">
+                        <Hash className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="text-xs text-muted-foreground">User ID:</span>
+                        <span className="text-xs font-mono font-bold text-foreground">{userNumber}</span>
+                      </div>
+                    )}
 
                     {/* Change username */}
                     {!isEditing ? (

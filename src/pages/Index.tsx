@@ -53,6 +53,7 @@ const Index = () => {
   } = useMultiplayerGame();
   const {
     nickname,
+    profile,
     showNicknameModal,
     saveNickname,
     changeNickname,
@@ -237,7 +238,7 @@ const Index = () => {
           exit={{ opacity: 0, scale: 0.95 }}
           className="min-h-screen bg-background flex flex-col animated-bg"
         >
-          <GameHeader nickname={nickname} onChangeNickname={changeNickname} />
+          <GameHeader nickname={nickname} userNumber={profile?.user_number} onChangeNickname={changeNickname} />
 
           {/* Game overlay when in multiplayer */}
           {currentRoom && currentRoom.status === "playing" && (

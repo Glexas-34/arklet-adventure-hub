@@ -105,6 +105,7 @@ export type Database = {
           successful_trades: number
           unique_count: number
           updated_at: string
+          user_number: number | null
           wins: number
         }
         Insert: {
@@ -114,6 +115,7 @@ export type Database = {
           successful_trades?: number
           unique_count?: number
           updated_at?: string
+          user_number?: number | null
           wins?: number
         }
         Update: {
@@ -123,6 +125,7 @@ export type Database = {
           successful_trades?: number
           unique_count?: number
           updated_at?: string
+          user_number?: number | null
           wins?: number
         }
         Relationships: []
