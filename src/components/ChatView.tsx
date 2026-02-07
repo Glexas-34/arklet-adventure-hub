@@ -19,9 +19,9 @@ export function ChatView({ nickname }: ChatViewProps) {
     setInput("");
     setSendError(null);
     setIsSending(true);
-    const success = await sendMessage(nickname, text);
-    if (!success) {
-      setSendError("Failed to send message. Please try again.");
+    const errorMsg = await sendMessage(nickname, text);
+    if (errorMsg) {
+      setSendError(errorMsg);
     }
     setIsSending(false);
   };

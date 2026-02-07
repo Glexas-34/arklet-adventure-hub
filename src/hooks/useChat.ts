@@ -65,11 +65,11 @@ export function useChat() {
     };
   }, []);
 
-  const sendMessage = useCallback(async (nickname: string, text: string): Promise<boolean> => {
+  const sendMessage = useCallback(async (nickname: string, text: string): Promise<string | null> => {
     const trimmed = text.trim();
-    if (!trimmed || !nickname) return false;
+    if (!trimmed || !nickname) return "Missing nickname or message";
 
-    // Optimistically add message to state immediately
+    // Add message to state immediately
     const tempId = `temp-${Date.now()}`;
     const optimisticMsg: ChatMessage = {
       id: tempId,
@@ -84,13 +84,16 @@ export function useChat() {
         .from("chat_messages")
         .insert({ sender_nickname: nickname, message: trimmed });
 
-      if (error) throw error;
-      return true;
-    } catch (error) {
+      if (error) {
+        console.error("Supabase insert error:", error);
+        // Keep the message visible locally, just warn about persistence
+        return `DB error: ${error.message}`;
+      }
+      return null;
+    } catch (error: any) {
       console.error("Error sending message:", error);
-      // Remove optimistic message on failure
-      setMessages((prev) => prev.filter((m) => m.id !== tempId));
-      return false;
+      // Keep the message visible locally
+      return `Error: ${error?.message || "Unknown error"}`;
     }
   }, []);
 
