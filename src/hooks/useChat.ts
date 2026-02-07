@@ -48,8 +48,13 @@ export function useChat() {
         (payload) => {
           const newMsg = payload.new as ChatMessage;
           setMessages((prev) => {
+            // Skip if already present (by real id)
             if (prev.some((m) => m.id === newMsg.id)) return prev;
-            return [newMsg, ...prev.slice(0, 49)];
+            // Remove matching temp message if exists (same sender + message text)
+            const withoutTemp = prev.filter(
+              (m) => !(m.id.startsWith("temp-") && m.sender_nickname === newMsg.sender_nickname && m.message === newMsg.message)
+            );
+            return [newMsg, ...withoutTemp.slice(0, 49)];
           });
         }
       )
@@ -64,25 +69,27 @@ export function useChat() {
     const trimmed = text.trim();
     if (!trimmed || !nickname) return false;
 
+    // Optimistically add message to state immediately
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMsg: ChatMessage = {
+      id: tempId,
+      sender_nickname: nickname,
+      message: trimmed,
+      created_at: new Date().toISOString(),
+    };
+    setMessages((prev) => [optimisticMsg, ...prev.slice(0, 49)]);
+
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("chat_messages")
-        .insert({ sender_nickname: nickname, message: trimmed })
-        .select("id, sender_nickname, message, created_at")
-        .single();
+        .insert({ sender_nickname: nickname, message: trimmed });
 
       if (error) throw error;
-
-      if (data) {
-        setMessages((prev) => {
-          // Avoid duplicate if real-time already delivered it
-          if (prev.some((m) => m.id === data.id)) return prev;
-          return [data as ChatMessage, ...prev.slice(0, 49)];
-        });
-      }
       return true;
     } catch (error) {
       console.error("Error sending message:", error);
+      // Remove optimistic message on failure
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
       return false;
     }
   }, []);
