@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Rarity, InventoryItem, packs } from "@/data/gameData";
 
 const STORAGE_KEY = "blookInv";
-export const PRIVILEGED_USERS = ["Admin___Levi", "jamesishim"];
+export const PRIVILEGED_USERS = ["Admin___Levi", "jamesishim", "Adam"];
 
 type Inventory = Record<string, InventoryItem>;
 
