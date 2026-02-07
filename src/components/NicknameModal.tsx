@@ -35,9 +35,11 @@ export function NicknameModal({ isOpen, onSave }: NicknameModalProps) {
     setIsSubmitting(true);
     
     const result = await onSave(nickname.trim());
-    
+
     if (!result.success) {
       setError(result.error || "Failed to save nickname");
+    } else {
+      window.scrollTo(0, 0);
     }
     setIsSubmitting(false);
   };

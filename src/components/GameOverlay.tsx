@@ -175,14 +175,14 @@ export function GameOverlay({
           {rankedPlayers.map((player, idx) => (
             <div
               key={player.id}
-              className={`flex-shrink-0 bg-black/50 rounded-lg px-3 py-2 text-sm relative
+              className={`flex-shrink-0 bg-black/50 rounded-lg px-4 py-3 relative
                          ${player.id === myPlayer?.id ? "border border-primary/50" : ""}
                          ${idx === 0 && player.current_item ? "ring-1 ring-yellow-500/50" : ""}`}
             >
               {idx === 0 && player.current_item && (
-                <Crown size={12} className="absolute -top-1.5 -right-1.5 text-yellow-500" />
+                <Crown size={14} className="absolute -top-1.5 -right-1.5 text-yellow-500" />
               )}
-              <div className="font-semibold text-xs text-muted-foreground">
+              <div className="font-semibold text-sm text-muted-foreground">
                 <span className="text-muted-foreground/60 mr-1">#{idx + 1}</span>
                 {player.nickname}
                 {player.is_host && " 👑"}
@@ -190,18 +190,18 @@ export function GameOverlay({
               {player.current_item ? (
                 isClassic ? (
                   <div
-                    className="font-bold"
+                    className="font-bold text-base"
                     style={{ color: rarityInfo[player.current_rarity as keyof typeof rarityInfo]?.color }}
                   >
                     {player.current_item}
                   </div>
                 ) : (
-                  <div className="font-bold text-primary">
+                  <div className="font-bold text-base text-primary">
                     {player.current_item}
                   </div>
                 )
               ) : (
-                <div className="text-muted-foreground italic">
+                <div className="text-sm text-muted-foreground italic">
                   {isClassic ? "Opening..." : "Playing..."}
                 </div>
               )}

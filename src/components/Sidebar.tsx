@@ -17,8 +17,8 @@ interface SidebarProps {
 
 const navItems = [
   { id: "packs" as const, label: "Open Packs", icon: Package },
-  { id: "inventory" as const, label: "Inventory", icon: Backpack },
-  { id: "index" as const, label: "Index", icon: BookOpen },
+  { id: "inventory" as const, label: "Your Inventory", icon: Backpack },
+  { id: "index" as const, label: "Arks Available", icon: BookOpen },
   { id: "leaderboard" as const, label: "Leaderboard", icon: Trophy },
   { id: "chat" as const, label: "Chat", icon: MessageSquare },
 ];

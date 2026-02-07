@@ -58,6 +58,7 @@ export function BlockBusterView({ timeRemaining, onItemObtained, onScoreChange }
     destroyed: 0,
   });
   const animRef = useRef<number>(0);
+  const initializedRef = useRef(false);
 
   // Commit items when game ends
   useEffect(() => {
@@ -246,14 +247,23 @@ export function BlockBusterView({ timeRemaining, onItemObtained, onScoreChange }
     animRef.current = requestAnimationFrame(gameLoop);
   }, [addCollectedItem, respawnBricks]);
 
+  // Stop game loop when time runs out
   useEffect(() => {
-    if (!started) return;
     if (timeRemaining === 0) {
       cancelAnimationFrame(animRef.current);
-      return;
+    }
+  }, [timeRemaining]);
+
+  // Start game loop and attach input handlers (runs once when started)
+  useEffect(() => {
+    if (!started || timeRemaining === 0) return;
+
+    // Only initialize bricks once
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      initBricks();
     }
 
-    initBricks();
     animRef.current = requestAnimationFrame(gameLoop);
 
     const handleMouse = (e: MouseEvent) => {
@@ -291,7 +301,7 @@ export function BlockBusterView({ timeRemaining, onItemObtained, onScoreChange }
       canvas?.removeEventListener("touchmove", handleTouch);
       canvas?.removeEventListener("touchstart", handleTouch);
     };
-  }, [started, timeRemaining, initBricks, gameLoop]);
+  }, [started, gameLoop, initBricks]);
 
   if (!started) {
     return (

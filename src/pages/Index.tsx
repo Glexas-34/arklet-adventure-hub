@@ -233,12 +233,16 @@ const Index = () => {
             title: "🎮 New Game Hosted!",
             description: `${room.host_nickname} is hosting ${modeLabel[room.game_mode] || room.game_mode} — PIN: ${pin}`,
             action: nicknameRef.current ? (
-              <ToastAction altText="Join game" onClick={() => {
-                if (nicknameRef.current) {
-                  joinRoomRef.current(pin, nicknameRef.current);
-                }
-              }}>
-                Join
+              <ToastAction
+                altText="Join game"
+                onClick={() => {
+                  if (nicknameRef.current) {
+                    joinRoomRef.current(pin, nicknameRef.current);
+                  }
+                }}
+                className="bg-green-600 hover:bg-green-500 text-white border-0 font-bold px-4"
+              >
+                Join Game
               </ToastAction>
             ) : undefined,
           });
@@ -316,7 +320,7 @@ const Index = () => {
           <GameHeader nickname={nickname} userNumber={profile?.user_number} onChangeNickname={changeNickname} />
 
           {/* Game overlay when in multiplayer */}
-          {currentRoom && currentRoom.status === "playing" && (
+          {currentRoom && (currentRoom.status === "playing" || currentRoom.status === "finished") && (
             <GameOverlay
               room={currentRoom}
               players={players}
@@ -427,7 +431,13 @@ const Index = () => {
           </div>
 
           {/* Mobile bottom navigation */}
-          <MobileNav currentView={currentView} onViewChange={setCurrentView} />
+          <MobileNav
+            currentView={currentView}
+            onViewChange={setCurrentView}
+            onHostGame={() => setShowHostModal(true)}
+            onJoinGame={() => setShowJoinModal(true)}
+            isInGame={isInGame}
+          />
 
           {/* Confetti overlay */}
           <Confetti trigger={showConfetti} intensity={confettiIntensity} onComplete={() => setShowConfetti(false)} />
