@@ -5034,6 +5034,37 @@ export function drawStealOrItem(): { type: "steal" } | { type: "item"; name: str
   return { type: "item", ...item };
 }
 
+// === Add Divine rarity (0.005%) to all existing packs ===
+const divineNames: Record<string, string> = {
+  "Wise School Pack": "The Omniscient",
+  "Spooky Pack": "Soul Reaper Supreme",
+  "Ocean Pack": "Poseidon Ascended",
+  "Space Pack": "Cosmic Singularity",
+  "Fantasy Pack": "Fate Weaver",
+  "Cyber Pack": "Sentient Nexus",
+  "Jungle Pack": "Gaia Incarnate",
+  "Winter Pack": "Absolute Zero",
+  "Desert Pack": "Eternal Sands",
+  "Volcano Pack": "Magma Godform",
+  "Candy Pack": "Sugar Godform",
+  "Toy Pack": "Toy Godform",
+  "Music Pack": "Symphony Eternal",
+  "Penguin Pack": "Penguin Godform",
+  "Dragon Pack": "Dragon Godform",
+  "Phoenix Pack": "Phoenix Godform",
+  "Angel Pack": "Seraph Supreme",
+  "Demon Pack": "Demon Godform",
+  "Titan Pack": "Titan Godform",
+};
+
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const dName = divineNames[packName] || packName.replace(" Pack", "") + " Godform";
+  // Reduce Common chance by 0.005 to make room for Divine
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.005).toFixed(3)];
+  items.push([dName, "Divine" as Rarity, 0.005]);
+});
+
 // Roll function with explicit chances
 export function rollPack(packName: string): [string, Rarity, number] {
   const pack = packs[packName];
