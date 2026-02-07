@@ -47,7 +47,10 @@ export function useChat() {
         },
         (payload) => {
           const newMsg = payload.new as ChatMessage;
-          setMessages((prev) => [newMsg, ...prev.slice(0, 49)]);
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === newMsg.id)) return prev;
+            return [newMsg, ...prev.slice(0, 49)];
+          });
         }
       )
       .subscribe();
@@ -62,11 +65,21 @@ export function useChat() {
     if (!trimmed || !nickname) return;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("chat_messages")
-        .insert({ sender_nickname: nickname, message: trimmed });
+        .insert({ sender_nickname: nickname, message: trimmed })
+        .select("id, sender_nickname, message, created_at")
+        .single();
 
       if (error) throw error;
+
+      if (data) {
+        setMessages((prev) => {
+          // Avoid duplicate if real-time already delivered it
+          if (prev.some((m) => m.id === data.id)) return prev;
+          return [data as ChatMessage, ...prev.slice(0, 49)];
+        });
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }
