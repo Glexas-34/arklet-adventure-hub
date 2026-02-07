@@ -93,18 +93,17 @@ export function ChatView({ nickname }: ChatViewProps) {
                   className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[75%] rounded-xl px-3 py-2 ${
+                    className={`max-w-[85%] rounded-xl px-3 py-2 ${
                       isOwn
                         ? "bg-primary/30 border border-primary/20"
                         : "bg-white/5 border border-white/5"
                     }`}
                   >
-                    {!isOwn && (
-                      <p className="text-xs font-bold text-primary mb-0.5">
-                        {msg.sender_nickname}
-                      </p>
-                    )}
-                    <p className="text-sm text-foreground break-words">{msg.message}</p>
+                    <p className="text-sm text-foreground break-words">
+                      <span className="font-bold text-primary">{msg.sender_nickname}</span>
+                      <span className="text-muted-foreground">:</span>{" "}
+                      {msg.message}
+                    </p>
                     <p className="text-[10px] text-muted-foreground mt-1 text-right">
                       {formatTime(msg.created_at)}
                     </p>
