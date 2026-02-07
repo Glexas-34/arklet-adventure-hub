@@ -9,6 +9,7 @@ import { IndexView } from "@/components/IndexView";
 import { LeaderboardView } from "@/components/LeaderboardView";
 import { TradeView } from "@/components/TradeView";
 import { TradeRequestModal } from "@/components/TradeRequestModal";
+import { ChatView } from "@/components/ChatView";
 
 import { Confetti } from "@/components/Confetti";
 import { HostGameModal } from "@/components/HostGameModal";
@@ -27,7 +28,7 @@ import { StealAndGetView } from "@/components/multiplayer/StealAndGetView";
 import { BlockBusterView } from "@/components/multiplayer/BlockBusterView";
 import { FishingReelingView } from "@/components/multiplayer/FishingReelingView";
 
-type View = "packs" | "inventory" | "index" | "leaderboard" | "trade";
+type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>("packs");
@@ -327,6 +328,9 @@ const Index = () => {
                       checkPlayerOnline={isPlayerOnline}
                       waitingForResponse={waitingForTradeResponse}
                     />
+                  )}
+                  {currentView === "chat" && (
+                    <ChatView nickname={nickname} />
                   )}
                 </>
               )}

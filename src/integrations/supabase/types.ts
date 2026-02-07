@@ -130,6 +130,27 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          id: string
+          sender_nickname: string
+          message: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          sender_nickname: string
+          message: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          sender_nickname?: string
+          message?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       trade_offers: {
         Row: {
           created_at: string

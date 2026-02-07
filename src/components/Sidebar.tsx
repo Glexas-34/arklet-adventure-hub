@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { Package, Backpack, BookOpen, Trash2, Users, LogIn, Trophy, ArrowLeftRight } from "lucide-react";
+import { Package, Backpack, BookOpen, Trash2, Users, LogIn, Trophy, ArrowLeftRight, MessageSquare } from "lucide-react";
 
-type View = "packs" | "inventory" | "index" | "leaderboard" | "trade";
+type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat";
 
 interface SidebarProps {
   currentView: View;
@@ -20,6 +20,7 @@ const navItems = [
   { id: "inventory" as const, label: "Inventory", icon: Backpack },
   { id: "index" as const, label: "Index", icon: BookOpen },
   { id: "leaderboard" as const, label: "Leaderboard", icon: Trophy },
+  { id: "chat" as const, label: "Chat", icon: MessageSquare },
 ];
 
 export function Sidebar({

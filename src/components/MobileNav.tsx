@@ -1,6 +1,6 @@
-import { Package, Backpack, BookOpen, Trophy } from "lucide-react";
+import { Package, Backpack, BookOpen, Trophy, MessageSquare } from "lucide-react";
 
-type View = "packs" | "inventory" | "index" | "leaderboard" | "trade";
+type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat";
 
 interface MobileNavProps {
   currentView: View;
@@ -12,6 +12,7 @@ const tabs = [
   { id: "inventory" as const, label: "Items", icon: Backpack },
   { id: "index" as const, label: "Index", icon: BookOpen },
   { id: "leaderboard" as const, label: "Scores", icon: Trophy },
+  { id: "chat" as const, label: "Chat", icon: MessageSquare },
 ];
 
 export function MobileNav({ currentView, onViewChange }: MobileNavProps) {
