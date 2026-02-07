@@ -201,6 +201,19 @@
     border-width: 2px;
   }
 
+  /* Emoji hover bounce */
+  @keyframes emoji-bounce {
+    0%, 100% { transform: scale(1) rotate(0deg) translateY(0); }
+    20% { transform: scale(1.3) rotate(-8deg) translateY(-4px); }
+    40% { transform: scale(0.95) rotate(6deg) translateY(2px); }
+    60% { transform: scale(1.2) rotate(-4deg) translateY(-3px); }
+    80% { transform: scale(1.05) rotate(2deg) translateY(1px); }
+  }
+
+  .group:hover .emoji-hover-bounce {
+    animation: emoji-bounce 0.7s ease-in-out infinite;
+  }
+
   /* Confetti particles */
   @keyframes confetti-fall {
     0% {

@@ -18,25 +18,33 @@ const COLORS = [
   "#76ff03", "#ff6d00", "#f50057", "#651fff",
 ];
 
+type ConfettiIntensity = "normal" | "mystical";
+
 interface ConfettiProps {
   trigger: boolean;
+  intensity?: ConfettiIntensity;
   onComplete?: () => void;
 }
 
-export function Confetti({ trigger, onComplete }: ConfettiProps) {
+export function Confetti({ trigger, intensity = "normal", onComplete }: ConfettiProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
+
+  const isMystical = intensity === "mystical";
+  const particleCount = isMystical ? 100 : 40;
+  const duration = isMystical ? 2200 : 1800;
+  const animDuration = isMystical ? "2.2s" : "1.6s";
 
   useEffect(() => {
     if (!trigger) return;
 
-    const newParticles: Particle[] = Array.from({ length: 40 }, (_, i) => ({
+    const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
-      x: 50 + (Math.random() - 0.5) * 20,
-      y: 40 + (Math.random() - 0.5) * 10,
+      x: 50 + (Math.random() - 0.5) * (isMystical ? 30 : 20),
+      y: 40 + (Math.random() - 0.5) * (isMystical ? 15 : 10),
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      size: 6 + Math.random() * 8,
+      size: isMystical ? 8 + Math.random() * 12 : 6 + Math.random() * 8,
       angle: Math.random() * 360,
-      speed: 2 + Math.random() * 4,
+      speed: 2 + Math.random() * (isMystical ? 6 : 4),
       spin: (Math.random() - 0.5) * 10,
       opacity: 1,
     }));
@@ -46,10 +54,10 @@ export function Confetti({ trigger, onComplete }: ConfettiProps) {
     const timeout = setTimeout(() => {
       setParticles([]);
       onComplete?.();
-    }, 1800);
+    }, duration);
 
     return () => clearTimeout(timeout);
-  }, [trigger, onComplete]);
+  }, [trigger, onComplete, particleCount, duration, isMystical]);
 
   if (particles.length === 0) return null;
 
@@ -69,7 +77,7 @@ export function Confetti({ trigger, onComplete }: ConfettiProps) {
             "--angle": `${p.angle}deg`,
             "--speed": `${p.speed}`,
             "--spin": `${p.spin}`,
-            animationDuration: "1.6s",
+            animationDuration: animDuration,
           } as React.CSSProperties}
         />
       ))}

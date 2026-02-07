@@ -37,6 +37,7 @@ const Index = () => {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [gamePinCode, setGamePinCode] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiIntensity, setConfettiIntensity] = useState<"normal" | "mystical">("normal");
 
   const { inventory, addItem, getTotalItems, getUniqueCount, clearInventory, updateItemCount, grantAllBlooks } = useInventory();
   const {
@@ -201,6 +202,7 @@ const Index = () => {
 
   const handleRareReveal = useCallback((rarity: Rarity) => {
     if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical"].includes(rarity)) {
+      setConfettiIntensity(rarity === "Mystical" ? "mystical" : "normal");
       setShowConfetti(true);
     }
   }, []);
@@ -341,7 +343,7 @@ const Index = () => {
           <MobileNav currentView={currentView} onViewChange={setCurrentView} />
 
           {/* Confetti overlay */}
-          <Confetti trigger={showConfetti} onComplete={() => setShowConfetti(false)} />
+          <Confetti trigger={showConfetti} intensity={confettiIntensity} onComplete={() => setShowConfetti(false)} />
 
           {/* Modals */}
           <HostGameModal

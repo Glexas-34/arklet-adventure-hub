@@ -123,6 +123,19 @@ export function useSound() {
     playNoise(0.6, 0.08);
   }, []);
 
+  const playMysticalReveal = useCallback(() => {
+    // Extended ascending arpeggio: C5 -> E5 -> G5 -> C6 -> E6
+    playTone(523, 0.15, "sine", 0.3);
+    playTone(659, 0.15, "sine", 0.3, 0.1);
+    playTone(784, 0.15, "sine", 0.3, 0.2);
+    playTone(1047, 0.2, "sine", 0.35, 0.3);
+    playTone(1319, 0.3, "sine", 0.35, 0.42);
+    // Wide sweep for grandeur
+    playSweep(2000, 8000, 0.8, "sine", 0.1);
+    // Sparkle noise
+    playNoise(0.8, 0.1);
+  }, []);
+
   const playGameStart = useCallback(() => {
     playTone(523, 0.1, "square", 0.15);
     playTone(659, 0.1, "square", 0.15, 0.1);
@@ -167,6 +180,7 @@ export function useSound() {
     playReveal,
     playRareReveal,
     playEpicReveal,
+    playMysticalReveal,
     playGameStart,
     playGameWin,
     playGameLose,
