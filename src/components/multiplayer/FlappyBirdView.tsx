@@ -52,6 +52,7 @@ export function FlappyBirdView({ timeRemaining, onItemObtained, onScoreChange }:
   const committedRef = useRef(false);
   const collectedRef = useRef<CollectedItem[]>([]);
   const animRef = useRef<number>(0);
+  const initializedRef = useRef(false);
 
   const stateRef = useRef({
     birdY: CANVAS_H / 2,
@@ -282,19 +283,26 @@ export function FlappyBirdView({ timeRemaining, onItemObtained, onScoreChange }:
     animRef.current = requestAnimationFrame(gameLoop);
   }, [addCollectedItem, respawnBird, spawnPipe]);
 
+  // Stop game loop when time runs out
   useEffect(() => {
-    if (!started) return;
     if (timeRemaining === 0) {
       cancelAnimationFrame(animRef.current);
-      return;
     }
+  }, [timeRemaining]);
 
-    // Reset state for fresh start
-    stateRef.current.birdY = CANVAS_H / 2;
-    stateRef.current.birdVY = 0;
-    stateRef.current.pipes = [];
-    stateRef.current.drops = [];
-    stateRef.current.frameCount = 0;
+  // Start game loop and attach input handlers (runs once when started)
+  useEffect(() => {
+    if (!started || timeRemaining === 0) return;
+
+    // Only initialize state once
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      stateRef.current.birdY = CANVAS_H / 2;
+      stateRef.current.birdVY = 0;
+      stateRef.current.pipes = [];
+      stateRef.current.drops = [];
+      stateRef.current.frameCount = 0;
+    }
 
     animRef.current = requestAnimationFrame(gameLoop);
 
@@ -323,7 +331,7 @@ export function FlappyBirdView({ timeRemaining, onItemObtained, onScoreChange }:
       canvas?.removeEventListener("click", handleClick);
       canvas?.removeEventListener("touchstart", handleTouch);
     };
-  }, [started, timeRemaining, gameLoop, flap]);
+  }, [started, gameLoop, flap]);
 
   if (!started) {
     return (
