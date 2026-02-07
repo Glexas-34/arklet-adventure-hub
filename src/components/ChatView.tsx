@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, Send } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
+import { AdminPanel } from "@/components/AdminPanel";
 
 interface ChatViewProps {
   nickname: string | null;
@@ -82,6 +83,8 @@ export function ChatView({ nickname }: ChatViewProps) {
         {sendError && (
           <p className="text-red-400 text-sm mb-3 text-center">{sendError}</p>
         )}
+
+        <AdminPanel nickname={nickname} />
 
         {/* Messages (newest first) */}
         <div className="rounded-xl bg-black/20 border border-white/5 p-4 space-y-3">

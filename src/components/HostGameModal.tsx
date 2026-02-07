@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { X, Users, Play, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -13,17 +12,29 @@ import {
 } from "@/components/ui/select";
 import { Rarity, rarityOrder, rarityInfo } from "@/data/gameData";
 import { GamePlayer, GameMode } from "@/hooks/useMultiplayerGame";
+import {
+  ClassicIcon,
+  StealAndGetIcon,
+  BlockBusterIcon,
+  FishingIcon,
+  PlatformRunIcon,
+  FlappyBirdIcon,
+  GameModeCard,
+} from "@/components/GameModeIcons";
 
-const gameModes: { id: GameMode; label: string; emoji: string; description: string }[] = [
-  { id: "classic", label: "Classic Opening", emoji: "🎯", description: "Race to a target rarity" },
-  { id: "steal_and_get", label: "Steal & Get", emoji: "🎁", description: "Open mystery boxes, steal items" },
-  { id: "block_buster", label: "Block Buster", emoji: "🧱", description: "Breakout game with item drops" },
-  { id: "fishing", label: "Fishing Reeling", emoji: "🎣", description: "Cast & reel to catch items" },
+const gameModes: { id: GameMode; label: string; description: string; gradient: string; icon: React.ReactNode }[] = [
+  { id: "classic", label: "Classic Opening", description: "Race to a target rarity", gradient: "from-red-500 to-orange-500", icon: <ClassicIcon size={56} /> },
+  { id: "steal_and_get", label: "Steal & Get", description: "Mystery boxes & steal items", gradient: "from-purple-500 to-indigo-500", icon: <StealAndGetIcon size={56} /> },
+  { id: "block_buster", label: "Block Buster", description: "Breakout game with drops", gradient: "from-cyan-500 to-blue-500", icon: <BlockBusterIcon size={56} /> },
+  { id: "fishing", label: "Fishing Reeling", description: "Cast & reel to catch items", gradient: "from-blue-500 to-teal-500", icon: <FishingIcon size={56} /> },
+  { id: "platform_run", label: "Platform Run", description: "Jump & collect items", gradient: "from-green-500 to-emerald-500", icon: <PlatformRunIcon size={56} /> },
+  { id: "flappy_bird", label: "Flappy Bird", description: "Flap & collect items", gradient: "from-sky-400 to-blue-500", icon: <FlappyBirdIcon size={56} /> },
 ];
 
 interface HostGameModalProps {
   isOpen: boolean;
   onClose: () => void;
+  nickname: string | null;
   onCreateRoom: (nickname: string, targetRarity: Rarity, timeLimit: number, gameMode: GameMode) => Promise<{ success: boolean; pinCode?: string; error?: string }>;
   onStartGame: () => void;
   pinCode: string | null;
@@ -34,15 +45,15 @@ interface HostGameModalProps {
 export function HostGameModal({
   isOpen,
   onClose,
+  nickname,
   onCreateRoom,
   onStartGame,
   pinCode,
   players,
   error,
 }: HostGameModalProps) {
-  const [nickname, setNickname] = useState("");
   const [targetRarity, setTargetRarity] = useState<Rarity>("Rare");
-  const [timeLimit, setTimeLimit] = useState(10);
+  const [timeLimit, setTimeLimit] = useState(2);
   const [gameMode, setGameMode] = useState<GameMode>("classic");
   const [isCreating, setIsCreating] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -50,9 +61,9 @@ export function HostGameModal({
   if (!isOpen) return null;
 
   const handleCreate = async () => {
-    if (!nickname.trim()) return;
+    if (!nickname) return;
     setIsCreating(true);
-    await onCreateRoom(nickname.trim(), targetRarity, timeLimit, gameMode);
+    await onCreateRoom(nickname, targetRarity, timeLimit, gameMode);
     setIsCreating(false);
   };
 
@@ -64,7 +75,7 @@ export function HostGameModal({
     }
   };
 
-  const selectableRarities = rarityOrder;
+  const selectableRarities = rarityOrder.filter((r) => r !== "Exotic");
   const selectedMode = gameModes.find((m) => m.id === gameMode)!;
 
   return (
@@ -92,36 +103,20 @@ export function HostGameModal({
 
         {!pinCode ? (
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="nickname">Your Nickname (Optional)</Label>
-              <Input
-                id="nickname"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="Enter your nickname"
-                className="mt-1"
-              />
-            </div>
-
             {/* Gamemode Selector */}
             <div>
               <Label>Gamemode</Label>
-              <div className="grid grid-cols-2 gap-2 mt-1">
+              <div className="grid grid-cols-2 gap-3 mt-2">
                 {gameModes.map((mode) => (
-                  <motion.button
+                  <GameModeCard
                     key={mode.id}
-                    whileTap={{ scale: 0.95 }}
+                    icon={mode.icon}
+                    label={mode.label}
+                    description={mode.description}
+                    selected={gameMode === mode.id}
+                    gradient={mode.gradient}
                     onClick={() => setGameMode(mode.id)}
-                    className={`p-3 rounded-xl border-2 text-left transition-colors ${
-                      gameMode === mode.id
-                        ? "border-primary bg-primary/20"
-                        : "border-white/10 bg-black/20 hover:border-white/30"
-                    }`}
-                  >
-                    <div className="text-lg">{mode.emoji}</div>
-                    <div className="text-sm font-bold">{mode.label}</div>
-                    <div className="text-xs text-muted-foreground">{mode.description}</div>
-                  </motion.button>
+                  />
                 ))}
               </div>
             </div>
@@ -168,7 +163,7 @@ export function HostGameModal({
 
             <Button
               onClick={handleCreate}
-              disabled={!nickname.trim() || isCreating}
+              disabled={!nickname || isCreating}
               className="w-full gradient-button"
             >
               {isCreating ? "Creating..." : "Create Game"}
@@ -209,9 +204,12 @@ export function HostGameModal({
             </div>
 
             <div className="text-center text-sm text-muted-foreground">
-              <p>Mode: <span className="font-bold text-primary">{selectedMode.emoji} {selectedMode.label}</span></p>
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-8 h-8 flex items-center justify-center">{selectedMode.icon}</div>
+                <span className="font-bold text-primary">{selectedMode.label}</span>
+              </div>
               {gameMode === "classic" && (
-                <p>Target: <span className="font-bold" style={{ color: rarityInfo[targetRarity]?.color }}>{targetRarity}</span> or higher</p>
+                <p className="mt-1">Target: <span className="font-bold" style={{ color: rarityInfo[targetRarity]?.color }}>{targetRarity}</span> or higher</p>
               )}
             </div>
 

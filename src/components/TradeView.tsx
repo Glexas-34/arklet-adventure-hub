@@ -174,12 +174,93 @@
            </Button>
          </div>
        </div>
- 
+
+       {/* Trade Offers - Sticky at top */}
+       <div className="sticky top-0 z-10 border-b border-foreground/10 p-4 bg-black/80 backdrop-blur-sm">
+         <div className="grid grid-cols-2 gap-4">
+           {/* Your Offer */}
+           <div>
+             <h4 className="font-bold text-foreground mb-2 flex items-center gap-2 text-sm">
+               Your Offer
+               {tradeAccepted && <Check className="w-4 h-4 text-green-500" />}
+             </h4>
+             <div className="min-h-[60px] bg-black/20 rounded-lg p-2 flex flex-wrap gap-1">
+               {myOffers.length === 0 ? (
+                 <p className="text-muted-foreground text-xs w-full text-center py-3">Click items below</p>
+               ) : (
+                 myOffers.map((offer) => (
+                   <motion.button
+                     key={offer.id}
+                     initial={{ scale: 0 }}
+                     animate={{ scale: 1 }}
+                     whileHover={{ scale: 1.05 }}
+                     onClick={() => onRemoveItem(offer.item_name)}
+                     className={`${rarityColors[offer.item_rarity as keyof typeof rarityColors]}
+                       bg-black/40 rounded-lg px-2 py-0.5 text-xs font-medium flex items-center gap-1`}
+                   >
+                     {offer.item_name}
+                     <span className="bg-black/40 rounded px-1">×{offer.quantity}</span>
+                   </motion.button>
+                 ))
+               )}
+             </div>
+           </div>
+
+           {/* Their Offer */}
+           <div>
+             <h4 className="font-bold text-foreground mb-2 flex items-center gap-2 text-sm">
+               {partnerNickname}'s Offer
+               {partnerAccepted && <Check className="w-4 h-4 text-green-500" />}
+             </h4>
+             <div className="min-h-[60px] bg-black/20 rounded-lg p-2 flex flex-wrap gap-1">
+               {theirOffers.length === 0 ? (
+                 <p className="text-muted-foreground text-xs w-full text-center py-3">Waiting for items...</p>
+               ) : (
+                 theirOffers.map((offer) => (
+                   <motion.div
+                     key={offer.id}
+                     initial={{ scale: 0 }}
+                     animate={{ scale: 1 }}
+                     className={`${rarityColors[offer.item_rarity as keyof typeof rarityColors]}
+                       bg-black/40 rounded-lg px-2 py-0.5 text-xs font-medium flex items-center gap-1`}
+                   >
+                     {offer.item_name}
+                     <span className="bg-black/40 rounded px-1">×{offer.quantity}</span>
+                   </motion.div>
+                 ))
+               )}
+             </div>
+           </div>
+         </div>
+
+         {/* Accept/Decline Buttons */}
+         <div className="flex gap-3 justify-center mt-3">
+           <Button
+             onClick={onAcceptTrade}
+             disabled={tradeAccepted}
+             size="sm"
+             className="bg-green-600 hover:bg-green-500 text-white px-6"
+           >
+             <Check className="w-4 h-4 mr-1" />
+             {tradeAccepted ? "Accepted" : "Accept"}
+           </Button>
+           <Button
+             onClick={onDeclineTrade}
+             variant="destructive"
+             size="sm"
+             className="px-6"
+           >
+             <X className="w-4 h-4 mr-1" />
+             Decline
+           </Button>
+         </div>
+       </div>
+
        {/* Inventory Grid */}
        <div className="flex-1 overflow-y-auto p-4">
          <h3 className="text-lg font-bold mb-3 text-foreground">Your Inventory</h3>
          <p className="text-sm text-muted-foreground mb-4">Click items to add to your offer</p>
-         
+
          {inventoryItems.length === 0 ? (
            <p className="text-muted-foreground text-center py-8">No items to trade</p>
          ) : (
@@ -188,7 +269,7 @@
                const available = getAvailableQuantity(item.name);
                const colorClass = rarityColors[item.rarity];
                const glowClass = rarityGlowColors[item.rarity];
- 
+
                return (
                  <motion.button
                    key={item.name}
@@ -212,85 +293,6 @@
              })}
            </div>
          )}
-       </div>
- 
-       {/* Trade Bar */}
-       <div className="border-t border-foreground/10 p-4 bg-black/30">
-         <div className="grid grid-cols-2 gap-4">
-           {/* Your Offer */}
-           <div>
-             <h4 className="font-bold text-foreground mb-2 flex items-center gap-2">
-               Your Offer
-               {tradeAccepted && <Check className="w-4 h-4 text-green-500" />}
-             </h4>
-             <div className="min-h-[80px] bg-black/20 rounded-lg p-2 flex flex-wrap gap-2">
-               {myOffers.length === 0 ? (
-                 <p className="text-muted-foreground text-sm w-full text-center py-4">Drag items here</p>
-               ) : (
-                 myOffers.map((offer) => (
-                   <motion.button
-                     key={offer.id}
-                     initial={{ scale: 0 }}
-                     animate={{ scale: 1 }}
-                     whileHover={{ scale: 1.05 }}
-                     onClick={() => onRemoveItem(offer.item_name)}
-                     className={`${rarityColors[offer.item_rarity as keyof typeof rarityColors]} 
-                       bg-black/40 rounded-lg px-2 py-1 text-sm font-medium flex items-center gap-1`}
-                   >
-                     {offer.item_name}
-                     <span className="bg-black/40 rounded px-1">×{offer.quantity}</span>
-                   </motion.button>
-                 ))
-               )}
-             </div>
-           </div>
- 
-           {/* Their Offer */}
-           <div>
-             <h4 className="font-bold text-foreground mb-2 flex items-center gap-2">
-               {partnerNickname}'s Offer
-               {partnerAccepted && <Check className="w-4 h-4 text-green-500" />}
-             </h4>
-             <div className="min-h-[80px] bg-black/20 rounded-lg p-2 flex flex-wrap gap-2">
-               {theirOffers.length === 0 ? (
-                 <p className="text-muted-foreground text-sm w-full text-center py-4">Waiting for items...</p>
-               ) : (
-                 theirOffers.map((offer) => (
-                   <motion.div
-                     key={offer.id}
-                     initial={{ scale: 0 }}
-                     animate={{ scale: 1 }}
-                     className={`${rarityColors[offer.item_rarity as keyof typeof rarityColors]} 
-                       bg-black/40 rounded-lg px-2 py-1 text-sm font-medium flex items-center gap-1`}
-                   >
-                     {offer.item_name}
-                     <span className="bg-black/40 rounded px-1">×{offer.quantity}</span>
-                   </motion.div>
-                 ))
-               )}
-             </div>
-           </div>
-         </div>
- 
-         {/* Accept/Decline Buttons */}
-         <div className="flex gap-3 justify-center mt-4">
-           <Button
-             onClick={onAcceptTrade}
-             disabled={tradeAccepted}
-             className="bg-green-600 hover:bg-green-500 text-white px-8"
-           >
-             <Check className="w-4 h-4 mr-2" />
-             {tradeAccepted ? "Accepted" : "Accept"}
-           </Button>
-           <Button
-             onClick={onDeclineTrade}
-             variant="destructive"
-             className="px-8"
-           >
-             <X className="w-4 h-4 mr-2" />
-             Decline
-           </Button>
-         </div>
        </div>
      </div>
    );

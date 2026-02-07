@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_gifts: {
+        Row: {
+          id: string
+          recipient_nickname: string
+          item_name: string
+          rarity: string
+          given_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          recipient_nickname: string
+          item_name: string
+          rarity: string
+          given_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          recipient_nickname?: string
+          item_name?: string
+          rarity?: string
+          given_by?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       game_players: {
         Row: {
           created_at: string
@@ -127,6 +154,27 @@ export type Database = {
           updated_at?: string
           user_number?: number | null
           wins?: number
+        }
+        Relationships: []
+      }
+      banned_users: {
+        Row: {
+          id: string
+          nickname: string
+          banned_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          nickname: string
+          banned_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          nickname?: string
+          banned_by?: string
+          created_at?: string
         }
         Relationships: []
       }

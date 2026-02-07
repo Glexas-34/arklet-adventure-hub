@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Rarity, rarityOrder } from "@/data/gameData";
 
-export type GameMode = "classic" | "steal_and_get" | "block_buster" | "fishing";
+export type GameMode = "classic" | "steal_and_get" | "block_buster" | "fishing" | "platform_run" | "flappy_bird";
+
+const VALID_MODES: string[] = ["classic", "steal_and_get", "block_buster", "fishing", "platform_run", "flappy_bird"];
 
 export interface GameRoom {
   id: string;
@@ -31,6 +33,44 @@ function generatePinCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+/**
+ * Normalizes a raw DB row into a GameRoom.
+ * Handles two scenarios:
+ *   1. game_mode column EXISTS in DB → use it directly
+ *   2. game_mode column MISSING → parse from target_rarity (e.g. "steal_and_get:Rare")
+ */
+function normalizeRoom(raw: Record<string, any>): GameRoom {
+  let gameMode: GameMode = "classic";
+  let targetRarity: string = raw.target_rarity ?? "Rare";
+
+  // If DB has game_mode column and it's a valid mode, use it
+  if (raw.game_mode && VALID_MODES.includes(raw.game_mode)) {
+    gameMode = raw.game_mode as GameMode;
+  } else if (targetRarity.includes(":")) {
+    // Fallback: parse game mode encoded in target_rarity ("steal_and_get:Rare")
+    const colonIdx = targetRarity.indexOf(":");
+    const parsedMode = targetRarity.substring(0, colonIdx);
+    if (VALID_MODES.includes(parsedMode)) {
+      gameMode = parsedMode as GameMode;
+      targetRarity = targetRarity.substring(colonIdx + 1);
+    }
+  }
+
+  return {
+    id: raw.id,
+    pin_code: raw.pin_code,
+    host_nickname: raw.host_nickname,
+    target_rarity: targetRarity as Rarity,
+    game_mode: gameMode,
+    time_limit_minutes: raw.time_limit_minutes,
+    status: raw.status,
+    winner_nickname: raw.winner_nickname ?? null,
+    winning_item: raw.winning_item ?? null,
+    started_at: raw.started_at ?? null,
+    ends_at: raw.ends_at ?? null,
+  };
+}
+
 export function useMultiplayerGame() {
   const [currentRoom, setCurrentRoom] = useState<GameRoom | null>(null);
   const [players, setPlayers] = useState<GamePlayer[]>([]);
@@ -50,8 +90,10 @@ export function useMultiplayerGame() {
     const pinCode = generatePinCode();
 
     try {
-      // Create room
-      const { data: room, error: roomError } = await supabase
+      let room: Record<string, any> | null = null;
+
+      // Attempt 1: try with game_mode column (works if migration was applied)
+      const { data: d1, error: e1 } = await supabase
         .from("game_rooms")
         .insert({
           pin_code: pinCode,
@@ -59,17 +101,42 @@ export function useMultiplayerGame() {
           target_rarity: targetRarity,
           time_limit_minutes: timeLimitMinutes,
           game_mode: gameMode,
-        })
+        } as any)
         .select()
         .single();
 
-      if (roomError) throw roomError;
+      if (e1 && (e1.code === "42703" || e1.message?.includes("game_mode"))) {
+        // Attempt 2: game_mode column doesn't exist — encode mode into target_rarity
+        const encodedRarity = gameMode === "classic"
+          ? targetRarity
+          : `${gameMode}:${targetRarity}`;
+
+        const { data: d2, error: e2 } = await supabase
+          .from("game_rooms")
+          .insert({
+            pin_code: pinCode,
+            host_nickname: hostNickname,
+            target_rarity: encodedRarity,
+            time_limit_minutes: timeLimitMinutes,
+          })
+          .select()
+          .single();
+
+        if (e2) throw e2;
+        room = d2;
+      } else if (e1) {
+        throw e1;
+      } else {
+        room = d1;
+      }
+
+      const normalizedRoom = normalizeRoom(room!);
 
       // Add host as player
       const { data: player, error: playerError } = await supabase
         .from("game_players")
         .insert({
-          room_id: room.id,
+          room_id: normalizedRoom.id,
           nickname: hostNickname,
           is_host: true,
         })
@@ -78,7 +145,7 @@ export function useMultiplayerGame() {
 
       if (playerError) throw playerError;
 
-      setCurrentRoom(room as GameRoom);
+      setCurrentRoom(normalizedRoom);
       setMyPlayer(player as GamePlayer);
       setIsHost(true);
       setPlayers([player as GamePlayer]);
@@ -105,11 +172,13 @@ export function useMultiplayerGame() {
 
       if (roomError) throw new Error("Room not found or game already started");
 
+      const normalizedRoom = normalizeRoom(room);
+
       // Check if nickname is taken
       const { data: existingPlayer } = await supabase
         .from("game_players")
         .select()
-        .eq("room_id", room.id)
+        .eq("room_id", normalizedRoom.id)
         .eq("nickname", nickname)
         .single();
 
@@ -119,7 +188,7 @@ export function useMultiplayerGame() {
       const { data: player, error: playerError } = await supabase
         .from("game_players")
         .insert({
-          room_id: room.id,
+          room_id: normalizedRoom.id,
           nickname: nickname,
           is_host: false,
         })
@@ -128,7 +197,7 @@ export function useMultiplayerGame() {
 
       if (playerError) throw playerError;
 
-      setCurrentRoom(room as GameRoom);
+      setCurrentRoom(normalizedRoom);
       setMyPlayer(player as GamePlayer);
       setIsHost(false);
 
@@ -176,8 +245,8 @@ export function useMultiplayerGame() {
         })
         .eq("id", myPlayer.id);
 
-      // Only check for winner in classic mode
-      if (currentRoom.game_mode === "classic") {
+      // Only check for winner in classic mode — Exotic rarity never counts
+      if (currentRoom.game_mode === "classic" && rarity !== "Exotic") {
         const targetIndex = rarityOrder.indexOf(currentRoom.target_rarity);
         const obtainedIndex = rarityOrder.indexOf(rarity);
 
@@ -195,6 +264,22 @@ export function useMultiplayerGame() {
       }
     } catch (err: any) {
       console.error("Error reporting item:", err);
+    }
+  }, [currentRoom, myPlayer]);
+
+  // Report score for non-classic modes (updates current_item to count display, current_rarity to numeric string for sorting)
+  const reportScore = useCallback(async (itemCount: number) => {
+    if (!currentRoom || !myPlayer || currentRoom.status !== "playing") return;
+    try {
+      await supabase
+        .from("game_players")
+        .update({
+          current_item: `${itemCount} items`,
+          current_rarity: String(itemCount),
+        })
+        .eq("id", myPlayer.id);
+    } catch (err: any) {
+      console.error("Error reporting score:", err);
     }
   }, [currentRoom, myPlayer]);
 
@@ -244,7 +329,7 @@ export function useMultiplayerGame() {
         },
         (payload) => {
           if (payload.eventType === "UPDATE") {
-            setCurrentRoom(payload.new as GameRoom);
+            setCurrentRoom(normalizeRoom(payload.new as Record<string, any>));
           }
         }
       )
@@ -320,6 +405,7 @@ export function useMultiplayerGame() {
     joinRoom,
     startGame,
     reportItem,
+    reportScore,
     leaveRoom,
     endGame,
   };

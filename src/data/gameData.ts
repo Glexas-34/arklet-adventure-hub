@@ -1,12 +1,13 @@
-export type Rarity = 
-  | "Common" 
-  | "Uncommon" 
-  | "Rare" 
-  | "Legendary" 
-  | "Mythic" 
-  | "Secret" 
-  | "Ultra Secret" 
-  | "Mystical";
+export type Rarity =
+  | "Common"
+  | "Uncommon"
+  | "Rare"
+  | "Legendary"
+  | "Mythic"
+  | "Secret"
+  | "Ultra Secret"
+  | "Mystical"
+  | "Exotic";
 
 export interface BlookItem {
   name: string;
@@ -29,6 +30,7 @@ export const rarityInfo: Record<Rarity, { color: string; show: boolean }> = {
   Secret: { color: "#9c27b0", show: true },
   "Ultra Secret": { color: "#ff1744", show: false },
   Mystical: { color: "#00e5ff", show: false },
+  Exotic: { color: "#ff66b2", show: false },
 };
 
 export const rarityColors: Record<Rarity, string> = {
@@ -40,6 +42,7 @@ export const rarityColors: Record<Rarity, string> = {
   Secret: "rarity-secret",
   "Ultra Secret": "rarity-ultra-secret",
   Mystical: "rarity-mystical",
+  Exotic: "rarity-exotic",
 };
 
 export const rarityBgColors: Record<Rarity, string> = {
@@ -51,6 +54,7 @@ export const rarityBgColors: Record<Rarity, string> = {
   Secret: "bg-rarity-secret",
   "Ultra Secret": "bg-rarity-ultra-secret",
   Mystical: "bg-rarity-mystical",
+  Exotic: "bg-rarity-exotic",
 };
 
 export const rarityGlowColors: Record<Rarity, string> = {
@@ -62,6 +66,7 @@ export const rarityGlowColors: Record<Rarity, string> = {
   Secret: "glow-secret",
   "Ultra Secret": "glow-ultra-secret",
   Mystical: "glow-mystical",
+  Exotic: "glow-exotic",
 };
 
 export const rarityOrder: Rarity[] = [
@@ -73,10 +78,45 @@ export const rarityOrder: Rarity[] = [
   "Secret",
   "Ultra Secret",
   "Mystical",
+  "Exotic",
 ];
 
 // Pack data: [name, rarity, chance%]
 export const packs: Record<string, [string, Rarity, number][]> = {
+  "Wise School Pack": [
+    ["Atias", "Common", 4.98],
+    ["Aspen", "Common", 5.0],
+    ["Anvar", "Common", 5.0],
+    ["Azizzadeh", "Common", 5.0],
+    ["Jacobs", "Common", 5.0],
+    ["Koosed", "Common", 5.0],
+    ["Melamed", "Common", 5.0],
+    ["Michael", "Common", 5.0],
+    ["Mostadim", "Common", 5.0],
+    ["Omidvar", "Uncommon", 3.75],
+    ["Pitson", "Uncommon", 3.75],
+    ["Pouldar", "Uncommon", 3.75],
+    ["Rosenthal", "Uncommon", 3.75],
+    ["Siegel", "Uncommon", 3.75],
+    ["Hinkle", "Uncommon", 3.75],
+    ["Triphon", "Uncommon", 3.75],
+    ["Tropp", "Uncommon", 3.75],
+    ["Dayani", "Rare", 2.5],
+    ["Forozanpour", "Rare", 2.5],
+    ["Fuller", "Rare", 2.5],
+    ["Hakakha", "Rare", 2.5],
+    ["Kamrava", "Rare", 2.5],
+    ["Kashani", "Rare", 2.5],
+    ["Kramer", "Legendary", 2.105],
+    ["Levinson", "Legendary", 2.105],
+    ["Mahboubian", "Legendary", 2.105],
+    ["Rastegar", "Legendary", 2.105],
+    ["Sakhai", "Mythic", 0.5],
+    ["Yamini", "Mythic", 0.5],
+    ["Zarabi", "Secret", 0.5],
+    ["Kann", "Ultra Secret", 0.08],
+    ["Rahimzadeh", "Mystical", 0.02],
+  ],
   "Spooky Pack": [
     ["Ghost", "Common", 44.98],
     ["Zombie", "Uncommon", 30],
@@ -200,6 +240,7 @@ export const packs: Record<string, [string, Rarity, number][]> = {
 };
 
 export const packEmojis: Record<string, string> = {
+  "Wise School Pack": "🏫",
   "Spooky Pack": "👻",
   "Ocean Pack": "🌊",
   "Space Pack": "🚀",
@@ -2052,16 +2093,13 @@ packs["Harvest Pack"] = [
 packEmojis["Harvest Pack"] = "🌽";
 
 // Draw a random item with equal chance for each rarity (~12.5% each)
+const packRarities = rarityOrder.filter((r) => r !== "Exotic");
+
 export function drawRandomItem(): { name: string; rarity: Rarity } {
-  const rarity = rarityOrder[Math.floor(Math.random() * rarityOrder.length)];
-  // Collect all items of that rarity across all packs
-  const itemsOfRarity: string[] = [];
-  for (const packItems of Object.values(packs)) {
-    for (const [name, r] of packItems) {
-      if (r === rarity) itemsOfRarity.push(name);
-    }
-  }
-  const name = itemsOfRarity[Math.floor(Math.random() * itemsOfRarity.length)];
+  // Pick a random pack, then roll it using the same weighted chances as opening packs
+  const packNames = Object.keys(packs);
+  const packName = packNames[Math.floor(Math.random() * packNames.length)];
+  const [name, rarity] = rollPack(packName);
   return { name, rarity };
 }
 

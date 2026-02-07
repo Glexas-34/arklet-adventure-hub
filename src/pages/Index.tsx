@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GameHeader } from "@/components/GameHeader";
 import { Sidebar } from "@/components/Sidebar";
@@ -16,17 +16,25 @@ import { HostGameModal } from "@/components/HostGameModal";
 import { JoinGameModal } from "@/components/JoinGameModal";
 import { GameOverlay } from "@/components/GameOverlay";
 import { NicknameModal } from "@/components/NicknameModal";
+import { BannedScreen } from "@/components/BannedScreen";
+import { useBanCheck } from "@/hooks/useBanCheck";
 import { useInventory } from "@/hooks/useInventory";
 import { useMultiplayerGame, GameMode } from "@/hooks/useMultiplayerGame";
 import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useTrading } from "@/hooks/useTrading";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
+import { useAdminGifts } from "@/hooks/useAdminGifts";
 import { Rarity } from "@/data/gameData";
 import { trackPageView, trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { PRIVILEGED_USERS } from "@/hooks/useInventory";
 import { StealAndGetView } from "@/components/multiplayer/StealAndGetView";
 import { BlockBusterView } from "@/components/multiplayer/BlockBusterView";
 import { FishingReelingView } from "@/components/multiplayer/FishingReelingView";
+import { PlatformRunView } from "@/components/multiplayer/PlatformRunView";
+import { FlappyBirdView } from "@/components/multiplayer/FlappyBirdView";
 
 type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat";
 
@@ -51,6 +59,7 @@ const Index = () => {
     joinRoom,
     startGame,
     reportItem,
+    reportScore,
     leaveRoom,
   } = useMultiplayerGame();
   const {
@@ -84,6 +93,21 @@ const Index = () => {
   } = useTrading(nickname);
 
   const { isPlayerOnline } = useOnlinePresence(nickname);
+  const { isBanned } = useBanCheck(nickname);
+  const { adminItems } = useAdminGifts(nickname);
+
+  // Combined unique count: inventory items + admin-gifted items not already in inventory
+  const combinedUniqueCount = useCallback(() => {
+    const invCount = getUniqueCount();
+    const adminExtra = adminItems.filter((ai) => !inventory[ai.name]).length;
+    return invCount + adminExtra;
+  }, [getUniqueCount, adminItems, inventory]);
+
+  // Refs for toast callbacks (avoids stale closures in channel listener)
+  const joinRoomRef = useRef(joinRoom);
+  joinRoomRef.current = joinRoom;
+  const nicknameRef = useRef(nickname);
+  nicknameRef.current = nickname;
 
   const isInGame = currentRoom !== null && currentRoom.status === "playing";
   const isTrading = activeSession?.status === "trading";
@@ -170,13 +194,13 @@ const Index = () => {
     }
   }, [currentRoom?.status, currentRoom?.game_mode]);
 
-  // Sync unique count to profile when it changes (skip admin)
+  // Sync unique count to profile when it changes (skip admin users)
   useEffect(() => {
-    const uniqueCount = getUniqueCount();
+    const uniqueCount = combinedUniqueCount();
     if (nickname && !PRIVILEGED_USERS.includes(nickname) && uniqueCount > 0) {
       updateUniqueCount(uniqueCount);
     }
-  }, [getUniqueCount, nickname, updateUniqueCount]);
+  }, [combinedUniqueCount, nickname, updateUniqueCount]);
 
   // Increment wins when the player wins a game
   useEffect(() => {
@@ -184,6 +208,48 @@ const Index = () => {
       incrementWins();
     }
   }, [currentRoom?.status, nickname, currentRoom?.winner_nickname, incrementWins]);
+
+  // Notify when someone hosts a game
+  useEffect(() => {
+    const channel = supabase
+      .channel("game-notifications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "game_rooms" },
+        (payload) => {
+          const room = payload.new as { host_nickname: string; game_mode: string; pin_code: string };
+          // Don't notify yourself
+          if (room.host_nickname === nickname) return;
+          const modeLabel: Record<string, string> = {
+            classic: "Classic Opening",
+            steal_and_get: "Steal & Get",
+            block_buster: "Block Buster",
+            fishing: "Fishing Reeling",
+            platform_run: "Platform Run",
+            flappy_bird: "Flappy Bird",
+          };
+          const pin = room.pin_code;
+          toast({
+            title: "🎮 New Game Hosted!",
+            description: `${room.host_nickname} is hosting ${modeLabel[room.game_mode] || room.game_mode} — PIN: ${pin}`,
+            action: nicknameRef.current ? (
+              <ToastAction altText="Join game" onClick={() => {
+                if (nicknameRef.current) {
+                  joinRoomRef.current(pin, nicknameRef.current);
+                }
+              }}>
+                Join
+              </ToastAction>
+            ) : undefined,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [nickname]);
 
   const handleClearInventory = () => {
     if (confirm("Are you sure you want to clear your inventory?")) {
@@ -199,6 +265,12 @@ const Index = () => {
       reportItem(name, rarity);
     }
   };
+
+  const handleScoreChange = useCallback((count: number) => {
+    if (currentRoom?.status === "playing") {
+      reportScore(count);
+    }
+  }, [currentRoom?.status, reportScore]);
 
   const handleRareReveal = useCallback((rarity: Rarity) => {
     if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical"].includes(rarity)) {
@@ -259,7 +331,7 @@ const Index = () => {
               currentView={currentView}
               onViewChange={setCurrentView}
               totalItems={getTotalItems()}
-              uniqueItems={getUniqueCount()}
+              uniqueItems={combinedUniqueCount()}
               onClearInventory={handleClearInventory}
               onHostGame={() => setShowHostModal(true)}
               onJoinGame={() => setShowJoinModal(true)}
@@ -283,16 +355,31 @@ const Index = () => {
                   myPlayer={myPlayer}
                   timeRemaining={timeRemaining}
                   onItemObtained={handleItemObtained}
+                  onScoreChange={handleScoreChange}
                 />
               ) : isInGame && currentRoom?.game_mode === "block_buster" ? (
                 <BlockBusterView
                   timeRemaining={timeRemaining}
                   onItemObtained={handleItemObtained}
+                  onScoreChange={handleScoreChange}
                 />
               ) : isInGame && currentRoom?.game_mode === "fishing" ? (
                 <FishingReelingView
                   timeRemaining={timeRemaining}
                   onItemObtained={handleItemObtained}
+                  onScoreChange={handleScoreChange}
+                />
+              ) : isInGame && currentRoom?.game_mode === "platform_run" ? (
+                <PlatformRunView
+                  timeRemaining={timeRemaining}
+                  onItemObtained={handleItemObtained}
+                  onScoreChange={handleScoreChange}
+                />
+              ) : isInGame && currentRoom?.game_mode === "flappy_bird" ? (
+                <FlappyBirdView
+                  timeRemaining={timeRemaining}
+                  onItemObtained={handleItemObtained}
+                  onScoreChange={handleScoreChange}
                 />
               ) : (
                 <>
@@ -303,7 +390,7 @@ const Index = () => {
                     />
                   )}
                   {currentView === "inventory" && (
-                    <InventoryView inventory={inventory} />
+                    <InventoryView inventory={inventory} adminItems={adminItems} />
                   )}
                   {currentView === "index" && (
                     <IndexView inventory={inventory} />
@@ -354,6 +441,7 @@ const Index = () => {
                 setGamePinCode(null);
               }
             }}
+            nickname={nickname}
             onCreateRoom={handleCreateRoom}
             onStartGame={startGame}
             pinCode={gamePinCode}
@@ -364,12 +452,16 @@ const Index = () => {
           <JoinGameModal
             isOpen={showJoinModal}
             onClose={() => setShowJoinModal(false)}
+            nickname={nickname}
             onJoin={handleJoinRoom}
             error={error}
           />
 
           {/* Nickname Modal */}
           <NicknameModal isOpen={showNicknameModal} onSave={saveNickname} />
+
+          {/* Banned Screen */}
+          <BannedScreen isVisible={isBanned} />
 
           {/* Trade Request Modal */}
           <TradeRequestModal

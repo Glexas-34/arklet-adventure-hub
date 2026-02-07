@@ -3,26 +3,25 @@ import { motion } from "framer-motion";
 import { X, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface JoinGameModalProps {
   isOpen: boolean;
   onClose: () => void;
+  nickname: string | null;
   onJoin: (pinCode: string, nickname: string) => Promise<{ success: boolean; error?: string }>;
   error: string | null;
 }
 
-export function JoinGameModal({ isOpen, onClose, onJoin, error }: JoinGameModalProps) {
+export function JoinGameModal({ isOpen, onClose, nickname, onJoin, error }: JoinGameModalProps) {
   const [pinCode, setPinCode] = useState("");
-  const [nickname, setNickname] = useState("");
   const [isJoining, setIsJoining] = useState(false);
 
   if (!isOpen) return null;
 
   const handleJoin = async () => {
-    if (!pinCode.trim() || !nickname.trim()) return;
+    if (!pinCode.trim() || !nickname) return;
     setIsJoining(true);
-    const result = await onJoin(pinCode.trim(), nickname.trim());
+    const result = await onJoin(pinCode.trim(), nickname);
     setIsJoining(false);
     if (result.success) {
       onClose();
@@ -54,25 +53,15 @@ export function JoinGameModal({ isOpen, onClose, onJoin, error }: JoinGameModalP
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="pinCode">Pin Code</Label>
+            <label htmlFor="pinCode" className="text-sm font-medium">Pin Code</label>
             <Input
               id="pinCode"
               value={pinCode}
               onChange={(e) => setPinCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onKeyDown={(e) => { if (e.key === "Enter") handleJoin(); }}
               placeholder="Enter 6-digit PIN"
               className="mt-1 text-center text-2xl font-mono tracking-widest"
               maxLength={6}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="joinNickname">Nickname</Label>
-            <Input
-              id="joinNickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder="Enter your nickname"
-              className="mt-1"
             />
           </div>
 
@@ -82,7 +71,7 @@ export function JoinGameModal({ isOpen, onClose, onJoin, error }: JoinGameModalP
 
           <Button
             onClick={handleJoin}
-            disabled={pinCode.length !== 6 || !nickname.trim() || isJoining}
+            disabled={pinCode.length !== 6 || !nickname || isJoining}
             className="w-full gradient-button"
           >
             <LogIn size={18} className="mr-2" />

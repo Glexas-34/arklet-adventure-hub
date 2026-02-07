@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { drawStealOrItem, rarityInfo, Rarity } from "@/data/gameData";
 import { GamePlayer } from "@/hooks/useMultiplayerGame";
 import { supabase } from "@/integrations/supabase/client";
+import { StealAndGetIcon } from "@/components/GameModeIcons";
+import { useSound } from "@/hooks/useSound";
 
 interface CollectedItem {
   name: string;
@@ -15,6 +17,7 @@ interface StealAndGetViewProps {
   myPlayer: GamePlayer | null;
   timeRemaining: number | null;
   onItemObtained: (name: string, rarity: Rarity) => void;
+  onScoreChange?: (count: number) => void;
 }
 
 export function StealAndGetView({
@@ -23,7 +26,9 @@ export function StealAndGetView({
   myPlayer,
   timeRemaining,
   onItemObtained,
+  onScoreChange,
 }: StealAndGetViewProps) {
+  const { playCollect, playSteal, playStolenAlert } = useSound();
   const [collected, setCollected] = useState<CollectedItem[]>([]);
   const [revealing, setRevealing] = useState(false);
   const [revealedBox, setRevealedBox] = useState<number | null>(null);
@@ -71,6 +76,16 @@ export function StealAndGetView({
     }
   }, [timeRemaining, collected, onItemObtained]);
 
+  // Report score when collected changes
+  useEffect(() => {
+    onScoreChange?.(collected.length);
+  }, [collected.length, onScoreChange]);
+
+  // Play stolen alert sound
+  useEffect(() => {
+    if (stolenMessage) playStolenAlert();
+  }, [stolenMessage, playStolenAlert]);
+
   // Build list of other players' items from their current_item
   useEffect(() => {
     const items: { nickname: string; item: string; rarity: string }[] = [];
@@ -91,10 +106,12 @@ export function StealAndGetView({
     setLastResult(result);
 
     if (result.type === "item") {
+      playCollect();
       setCollected((prev) => [...prev, { name: result.name, rarity: result.rarity }]);
       onItemObtained(result.name, result.rarity);
     } else {
       // Steal mode
+      playSteal();
       setStealMode(true);
     }
 
@@ -108,6 +125,7 @@ export function StealAndGetView({
   }, [revealing, stealMode, timeRemaining, onItemObtained]);
 
   const handleSteal = useCallback(async (targetNickname: string, itemName: string, itemRarity: string) => {
+    playCollect();
     // Add the stolen item to our collection
     setCollected((prev) => [...prev, { name: itemName, rarity: itemRarity as Rarity }]);
 
@@ -154,7 +172,10 @@ export function StealAndGetView({
         )}
       </AnimatePresence>
 
-      <h2 className="text-2xl font-bold">🎁 Steal & Get</h2>
+      <div className="flex items-center gap-2">
+        <StealAndGetIcon size={36} />
+        <h2 className="text-2xl font-bold">Steal & Get</h2>
+      </div>
       <p className="text-muted-foreground text-sm">Click a mystery box to reveal an item!</p>
 
       {/* Steal mode overlay */}

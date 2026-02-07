@@ -83,6 +83,295 @@ function playNoise(duration: number, volume = 0.1) {
   source.stop(ctx.currentTime + duration + 0.05);
 }
 
+// ── Arcade Music Engine ──
+// A 64-bar chiptune loop (~68 seconds at 150 BPM) with 4 channels:
+// melody (square), harmony/arp (square), bass (triangle), drums (noise)
+
+let arcadeMusicInterval: ReturnType<typeof setInterval> | null = null;
+let arcadePlaying = false;
+
+// Note frequencies (C3-C6)
+const N: Record<string, number> = {
+  C3:131,D3:147,E3:165,F3:175,G3:196,A3:220,B3:247,
+  C4:262,D4:294,E4:330,F4:349,G4:392,A4:440,B4:494,
+  C5:523,D5:587,E5:659,F5:698,G5:784,A5:880,B5:988,
+  C6:1047,
+  _:0, // rest
+};
+
+// 0 = rest
+const MELODY: number[] = [
+  // Section A – Upbeat theme (16 bars, 32 eighth-notes)
+  N.E5, N.E5, N._, N.E5, N._, N.C5, N.E5, N._,
+  N.G5, N._, N._, N._, N.G4, N._, N._, N._,
+  N.C5, N._, N._, N.G4, N._, N._, N.E4, N._,
+  N._, N.A4, N._, N.B4, N._, N.A4+12, N.A4, N._,
+  N.G4, N.E5, N.G5, N.A5, N._, N.F5, N.G5, N._,
+  N.E5, N._, N.C5, N.D5, N.B4, N._, N._, N._,
+  N.C5, N._, N._, N.G4, N._, N._, N.E4, N._,
+  N._, N.A4, N._, N.B4, N._, N.A4+12, N.A4, N._,
+  // Section B – Higher energy (16 bars)
+  N.C5, N.C5, N._, N.C5, N._, N.C5, N.D5, N._,
+  N.E5, N.C5, N._, N.A4, N.G4, N._, N._, N._,
+  N.C5, N.C5, N._, N.C5, N._, N.C5, N.D5, N.E5,
+  N._, N._, N._, N._, N._, N._, N._, N._,
+  N.C5, N.C5, N._, N.C5, N._, N.C5, N.D5, N._,
+  N.E5, N.C5, N._, N.A4, N.G4, N._, N._, N._,
+  N.E5, N.E5, N._, N.E5, N._, N.E5, N.D5, N.C5,
+  N._, N._, N._, N._, N._, N._, N._, N._,
+  // Section C – Bridge / breakdown (16 bars)
+  N.G5, N.F5+12, N.F5, N.D5+12, N._, N.E5, N._, N._,
+  N.G4+12, N.A4, N.C5, N._, N.A4, N.C5, N.D5, N._,
+  N.G5, N.F5+12, N.F5, N.D5+12, N._, N.E5, N._, N._,
+  N.C6, N._, N.C6, N.C6, N._, N._, N._, N._,
+  N.G5, N.F5+12, N.F5, N.D5+12, N._, N.E5, N._, N._,
+  N.G4+12, N.A4, N.C5, N._, N.A4, N.C5, N.D5, N._,
+  N.D5+12, N._, N.D5, N._, N.C5, N._, N._, N._,
+  N._, N._, N._, N._, N._, N._, N._, N._,
+  // Section D – Finale reprise (16 bars)
+  N.E5, N.C5, N.D5, N.E5, N._, N.C5, N.A4, N._,
+  N.A4, N.B4, N.C5, N._, N._, N._, N._, N._,
+  N.D5, N.E5, N.F5, N._, N.E5, N.D5, N.C5, N._,
+  N.E5, N.D5, N.C5, N._, N._, N._, N._, N._,
+  N.E5, N.C5, N.D5, N.E5, N._, N.C5, N.A4, N._,
+  N.A4, N.B4, N.C5, N.D5, N.E5, N.G5, N.A5, N._,
+  N.G5, N._, N.E5, N._, N.C5, N._, N._, N._,
+  N._, N._, N._, N._, N._, N._, N._, N._,
+];
+
+const BASS: number[] = [
+  // Section A
+  N.C3, N._, N.C3, N._, N.C3, N._, N.G3, N._,
+  N.G3, N._, N.G3, N._, N.G3, N._, N._, N._,
+  N.C3, N._, N._, N.G3, N._, N._, N.E3, N._,
+  N.A3, N._, N.A3, N._, N.A3, N._, N.B3, N._,
+  N.E3, N._, N.E3, N._, N.A3, N._, N.A3, N._,
+  N.C4, N._, N.C4, N._, N.G3, N._, N.G3, N._,
+  N.C3, N._, N._, N.G3, N._, N._, N.E3, N._,
+  N.A3, N._, N.A3, N._, N.A3, N._, N.B3, N._,
+  // Section B
+  N.A3, N._, N.A3, N._, N.A3, N._, N.A3, N._,
+  N.G3, N._, N.G3, N._, N.G3, N._, N.G3, N._,
+  N.A3, N._, N.A3, N._, N.F3, N._, N.F3, N._,
+  N.G3, N._, N.G3, N._, N.C3, N._, N.C3, N._,
+  N.A3, N._, N.A3, N._, N.A3, N._, N.A3, N._,
+  N.G3, N._, N.G3, N._, N.G3, N._, N.G3, N._,
+  N.C4, N._, N.C4, N._, N.C4, N._, N.F3, N._,
+  N.G3, N._, N.G3, N._, N.C3, N._, N.C3, N._,
+  // Section C
+  N.E3, N._, N.E3, N._, N.D3, N._, N.D3, N._,
+  N.C3, N._, N.C3, N._, N.C3, N._, N.D3, N._,
+  N.E3, N._, N.E3, N._, N.D3, N._, N.D3, N._,
+  N.C3, N._, N.G3, N._, N.C3, N._, N._, N._,
+  N.E3, N._, N.E3, N._, N.D3, N._, N.D3, N._,
+  N.C3, N._, N.C3, N._, N.C3, N._, N.D3, N._,
+  N.G3, N._, N.G3, N._, N.C3, N._, N.C3, N._,
+  N.G3, N._, N.G3, N._, N.C3, N._, N._, N._,
+  // Section D
+  N.A3, N._, N.A3, N._, N.C4, N._, N.C4, N._,
+  N.F3, N._, N.F3, N._, N.G3, N._, N.G3, N._,
+  N.D3, N._, N.D3, N._, N.F3, N._, N.F3, N._,
+  N.C3, N._, N.G3, N._, N.C3, N._, N._, N._,
+  N.A3, N._, N.A3, N._, N.C4, N._, N.C4, N._,
+  N.F3, N._, N.F3, N._, N.G3, N._, N.G3, N._,
+  N.C3, N._, N.E3, N._, N.G3, N._, N.C4, N._,
+  N.G3, N._, N.E3, N._, N.C3, N._, N._, N._,
+];
+
+// Arpeggio chord tones (played as rapid 3-note arpeggio patterns)
+const ARP_CHORDS: number[][] = [
+  // Section A (8 measures × 2 steps each = 16)
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.G4,N.B4,N.D5],[N.G4,N.B4,N.D5],[N.G4,N.B4,N.D5],[N.G4,N.B4,N.D5],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.A3,N.C4,N.E4],[N.F4,N.A4,N.C5],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  // Section B
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.F3,N.A3,N.C4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  // Section C
+  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.D4,N.F4,N.A4],
+  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.D4,N.F4,N.A4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  // Section D
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+];
+
+// Drum pattern: 0=rest, 1=kick, 2=snare, 3=hihat, 4=kick+hihat
+const DRUM_PATTERN = [
+  4,3,3,3, 2,3,3,3, 4,3,4,3, 2,3,3,3,
+  4,3,3,3, 2,3,3,3, 4,3,4,3, 2,3,0,0,
+];
+
+function startArcadeMusic() {
+  if (arcadePlaying) return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  arcadePlaying = true;
+
+  const BPM = 150;
+  const eighthNote = (60 / BPM) / 2; // ~0.2s per eighth note
+  let step = 0;
+  const totalSteps = MELODY.length; // 256 steps = 64 bars of 4 eighth notes
+
+  function scheduleNote(
+    freq: number, duration: number, type: OscillatorType,
+    volume: number, startTime: number
+  ) {
+    if (freq <= 0 || !arcadePlaying) return;
+    const c = getCtx();
+    if (!c) return;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(volume, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 0.95);
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+  }
+
+  function scheduleDrum(type: number, startTime: number) {
+    if (!arcadePlaying) return;
+    const c = getCtx();
+    if (!c) return;
+
+    if (type === 1 || type === 4) {
+      // Kick — low sine thump
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(150, startTime);
+      osc.frequency.exponentialRampToValueAtTime(40, startTime + 0.08);
+      gain.gain.setValueAtTime(0.12, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.1);
+      osc.connect(gain);
+      gain.connect(c.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.12);
+    }
+    if (type === 2) {
+      // Snare — noise burst
+      const bufSz = Math.floor(c.sampleRate * 0.08);
+      const buf = c.createBuffer(1, bufSz, c.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bufSz; i++) d[i] = Math.random() * 2 - 1;
+      const src = c.createBufferSource();
+      src.buffer = buf;
+      const gain = c.createGain();
+      const filt = c.createBiquadFilter();
+      filt.type = "highpass";
+      filt.frequency.value = 2000;
+      gain.gain.setValueAtTime(0.1, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.08);
+      src.connect(filt);
+      filt.connect(gain);
+      gain.connect(c.destination);
+      src.start(startTime);
+      src.stop(startTime + 0.1);
+    }
+    if (type === 3 || type === 4) {
+      // Hi-hat — short bright noise
+      const bufSz = Math.floor(c.sampleRate * 0.03);
+      const buf = c.createBuffer(1, bufSz, c.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bufSz; i++) d[i] = Math.random() * 2 - 1;
+      const src = c.createBufferSource();
+      src.buffer = buf;
+      const gain = c.createGain();
+      const filt = c.createBiquadFilter();
+      filt.type = "highpass";
+      filt.frequency.value = 6000;
+      gain.gain.setValueAtTime(0.05, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.03);
+      src.connect(filt);
+      filt.connect(gain);
+      gain.connect(c.destination);
+      src.start(startTime);
+      src.stop(startTime + 0.05);
+    }
+  }
+
+  // Schedule a batch of notes ahead of time (look-ahead scheduling for smooth playback)
+  const BATCH = 8; // schedule 8 steps at a time
+
+  function scheduleBatch() {
+    if (!arcadePlaying) return;
+    const c = getCtx();
+    if (!c) return;
+
+    for (let i = 0; i < BATCH; i++) {
+      const idx = step % totalSteps;
+      const t = c.currentTime + i * eighthNote;
+
+      // Melody (square wave)
+      const melFreq = MELODY[idx];
+      if (melFreq > 0) {
+        scheduleNote(melFreq, eighthNote * 0.85, "square", 0.06, t);
+      }
+
+      // Bass (triangle wave)
+      const bassFreq = BASS[idx % BASS.length];
+      if (bassFreq > 0) {
+        scheduleNote(bassFreq, eighthNote * 0.9, "triangle", 0.05, t);
+      }
+
+      // Arpeggio (every 2 steps, play a 3-note rapid arp)
+      const arpIdx = Math.floor(idx / 2) % ARP_CHORDS.length;
+      if (idx % 2 === 0) {
+        const chord = ARP_CHORDS[arpIdx];
+        if (chord) {
+          for (let n = 0; n < chord.length; n++) {
+            scheduleNote(chord[n], eighthNote * 0.3, "square", 0.025, t + n * eighthNote * 0.15);
+          }
+        }
+      }
+
+      // Drums
+      const drumType = DRUM_PATTERN[idx % DRUM_PATTERN.length];
+      if (drumType > 0) {
+        scheduleDrum(drumType, t);
+      }
+
+      step++;
+    }
+  }
+
+  scheduleBatch();
+  arcadeMusicInterval = setInterval(scheduleBatch, BATCH * eighthNote * 1000 * 0.9);
+}
+
+function stopArcadeMusic() {
+  arcadePlaying = false;
+  if (arcadeMusicInterval) {
+    clearInterval(arcadeMusicInterval);
+    arcadeMusicInterval = null;
+  }
+}
+
 export function useSound() {
   const lastHover = useRef(0);
 
@@ -173,6 +462,74 @@ export function useSound() {
     playNoise(0.3, 0.06);
   }, []);
 
+  // Block Buster: ball hits wall/paddle
+  const playBounce = useCallback(() => {
+    playTone(400, 0.03, "square", 0.15);
+  }, []);
+
+  // Block Buster: brick destroyed
+  const playBreak = useCallback(() => {
+    playSweep(300, 600, 0.1, "square", 0.2);
+  }, []);
+
+  // Block Buster: item caught / Steal & Get: item from box
+  const playCollect = useCallback(() => {
+    playTone(500, 0.08, "sine", 0.2);
+    playTone(900, 0.1, "sine", 0.2, 0.06);
+  }, []);
+
+  // Fishing: casting line
+  const playCast = useCallback(() => {
+    playSweep(800, 200, 0.3, "sine", 0.2);
+  }, []);
+
+  // Fishing: fish bites — 3 rapid high ticks
+  const playBite = useCallback(() => {
+    playTone(1200, 0.04, "square", 0.2);
+    playTone(1200, 0.04, "square", 0.2, 0.07);
+    playTone(1200, 0.04, "square", 0.2, 0.14);
+  }, []);
+
+  // Fishing: fish reeled in — C5->E5->G5 ascending arpeggio
+  const playCaught = useCallback(() => {
+    playTone(523, 0.1, "sine", 0.25);
+    playTone(659, 0.1, "sine", 0.25, 0.08);
+    playTone(784, 0.15, "sine", 0.3, 0.16);
+  }, []);
+
+  // Fishing: fish got away
+  const playMissed = useCallback(() => {
+    playSweep(400, 200, 0.2, "sine", 0.2);
+  }, []);
+
+  // Steal & Get: stealing from opponent
+  const playSteal = useCallback(() => {
+    playSweep(200, 500, 0.25, "sawtooth", 0.15);
+  }, []);
+
+  // Steal & Get: stolen FROM you — buzzy double beep
+  const playStolenAlert = useCallback(() => {
+    playTone(800, 0.15, "sawtooth", 0.2);
+    playTone(800, 0.15, "sawtooth", 0.2, 0.2);
+  }, []);
+
+  // Block Buster: ball lost
+  const playDeath = useCallback(() => {
+    playTone(150, 0.15, "sawtooth", 0.2);
+  }, []);
+
+  // All games: last 10 seconds warning tick
+  const playTimerWarning = useCallback(() => {
+    playTone(1000, 0.05, "square", 0.15);
+  }, []);
+
+  // All games: time's up
+  const playGameEnd = useCallback(() => {
+    playTone(600, 0.12, "square", 0.2);
+    playTone(400, 0.2, "square", 0.2, 0.1);
+    playNoise(0.15, 0.08);
+  }, []);
+
   return {
     playClick,
     playHover,
@@ -188,6 +545,20 @@ export function useSound() {
     playCorrect,
     playWrong,
     playConfetti,
+    playBounce,
+    playBreak,
+    playCollect,
+    playCast,
+    playBite,
+    playCaught,
+    playMissed,
+    playSteal,
+    playStolenAlert,
+    playDeath,
+    playTimerWarning,
+    playGameEnd,
+    startArcadeMusic,
+    stopArcadeMusic,
   };
 }
 

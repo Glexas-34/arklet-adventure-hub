@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { drawRandomItem, rarityInfo, Rarity } from "@/data/gameData";
+import { FishingIcon } from "@/components/GameModeIcons";
+import { useSound } from "@/hooks/useSound";
 
 interface CollectedItem {
   name: string;
@@ -12,12 +14,19 @@ type FishingState = "idle" | "casting" | "waiting" | "bite" | "reeling" | "caugh
 interface FishingReelingViewProps {
   timeRemaining: number | null;
   onItemObtained: (name: string, rarity: Rarity) => void;
+  onScoreChange?: (count: number) => void;
 }
 
-export function FishingReelingView({ timeRemaining, onItemObtained }: FishingReelingViewProps) {
+// Rarities with < 5% chance
+const RARE_RARITIES = new Set(["Mythic", "Secret", "Ultra Secret", "Mystical"]);
+
+export function FishingReelingView({ timeRemaining, onItemObtained, onScoreChange }: FishingReelingViewProps) {
+  const { playCast, playBite, playCaught, playMissed, playRareReveal, playEpicReveal, playMysticalReveal } = useSound();
   const [collected, setCollected] = useState<CollectedItem[]>([]);
   const [fishState, setFishState] = useState<FishingState>("idle");
   const [lastCatch, setLastCatch] = useState<CollectedItem | null>(null);
+  const [isRareCatch, setIsRareCatch] = useState(false);
+  const isRareCatchRef = useRef(false);
   const committedRef = useRef(false);
   const collectedRef = useRef<CollectedItem[]>([]);
   const biteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -33,6 +42,17 @@ export function FishingReelingView({ timeRemaining, onItemObtained }: FishingRee
       collectedRef.current.forEach((item) => onItemObtained(item.name, item.rarity));
     }
   }, [timeRemaining, onItemObtained]);
+
+  // Report score when collected changes
+  useEffect(() => {
+    onScoreChange?.(collected.length);
+  }, [collected.length, onScoreChange]);
+
+  // Play sounds on state changes
+  useEffect(() => {
+    if (fishState === "bite") playBite();
+    if (fishState === "missed") playMissed();
+  }, [fishState, playBite, playMissed]);
 
   // Clean up timers on unmount
   useEffect(() => {
@@ -91,23 +111,109 @@ export function FishingReelingView({ timeRemaining, onItemObtained }: FishingRee
       ctx.fillStyle = "#4e342e";
       ctx.fillRect(10, 120, 8, 40);
       ctx.fillRect(90, 120, 8, 40);
+      // Dock planks detail
+      ctx.strokeStyle = "#3e2723";
+      ctx.lineWidth = 1;
+      for (let px = 5; px < 115; px += 25) {
+        ctx.beginPath();
+        ctx.moveTo(px, 120);
+        ctx.lineTo(px, 139);
+        ctx.stroke();
+      }
 
-      // Player silhouette on dock
-      ctx.fillStyle = "#263238";
-      // Body
-      ctx.fillRect(50, 85, 20, 35);
+      // Fisherman animation based on state
+      const isReeling = fishState === "reeling";
+      const isCasting = fishState === "casting";
+      const isBiting = fishState === "bite";
+      const isCaught = fishState === "caught";
+
+      // Body bob when reeling
+      const bodyBob = isReeling ? Math.sin(frame * 0.3) * 2 : 0;
+      const leanBack = isReeling ? -3 : isCasting ? 2 : 0;
+
+      // Legs (on dock)
+      ctx.fillStyle = "#1a237e";
+      ctx.fillRect(52 + leanBack, 110, 7, 12);
+      ctx.fillRect(63 + leanBack, 110, 7, 12);
+
+      // Body (torso)
+      ctx.fillStyle = "#c62828";
+      ctx.save();
+      ctx.translate(60 + leanBack, 108 + bodyBob);
+      ctx.rotate(leanBack * 0.02);
+      ctx.fillRect(-12, -25, 24, 28);
+      ctx.restore();
+
       // Head
+      ctx.fillStyle = "#ffcc80";
       ctx.beginPath();
-      ctx.arc(60, 78, 12, 0, Math.PI * 2);
+      ctx.arc(60 + leanBack, 73 + bodyBob, 10, 0, Math.PI * 2);
       ctx.fill();
+      // Hat
+      ctx.fillStyle = "#5d4037";
+      ctx.beginPath();
+      ctx.ellipse(60 + leanBack, 66 + bodyBob, 14, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(52 + leanBack, 58 + bodyBob, 16, 10);
+
+      // Arms + Fishing rod (animated)
+      const rodTipX = isCasting ? 140 : isReeling ? 160 + Math.sin(frame * 0.4) * 15 : 180;
+      const rodTipY = isCasting ? 80 : isReeling ? 55 + Math.sin(frame * 0.4) * 8 : 60;
+
+      // Back arm (holding rod)
+      ctx.strokeStyle = "#ffcc80";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(68 + leanBack, 90 + bodyBob);
+      const elbowX = 80 + leanBack + (isReeling ? Math.sin(frame * 0.4) * 5 : 0);
+      const elbowY = 80 + bodyBob;
+      ctx.quadraticCurveTo(elbowX, elbowY, 75 + leanBack, 88 + bodyBob);
+      ctx.stroke();
+
+      // Front arm
+      ctx.beginPath();
+      ctx.moveTo(55 + leanBack, 90 + bodyBob);
+      ctx.quadraticCurveTo(48 + leanBack, 95 + bodyBob, 50 + leanBack, 100 + bodyBob);
+      ctx.stroke();
 
       // Fishing rod
       ctx.strokeStyle = "#8d6e63";
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(65, 95);
-      ctx.lineTo(180, 60);
+      ctx.moveTo(70 + leanBack, 88 + bodyBob);
+      ctx.quadraticCurveTo((70 + leanBack + rodTipX) / 2, rodTipY - 10 + bodyBob, rodTipX, rodTipY + bodyBob);
       ctx.stroke();
+      // Rod tip (guide)
+      ctx.fillStyle = "#bdbdbd";
+      ctx.beginPath();
+      ctx.arc(rodTipX, rodTipY + bodyBob, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Excitement animation when biting
+      if (isBiting) {
+        // Exclamation marks
+        ctx.fillStyle = "#ff1744";
+        ctx.font = "bold 16px Fredoka";
+        ctx.textAlign = "center";
+        const excY = 55 + Math.sin(frame * 0.5) * 3;
+        ctx.fillText("!", 45 + leanBack, excY);
+        ctx.fillText("!", 75 + leanBack, excY);
+      }
+
+      // Celebration when caught rare
+      if (isCaught && isRareCatchRef.current) {
+        // Sparkle particles around fisherman
+        for (let i = 0; i < 8; i++) {
+          const angle = (frame * 0.1 + i * Math.PI / 4);
+          const dist = 20 + Math.sin(frame * 0.2 + i) * 10;
+          const sx = 60 + Math.cos(angle) * dist;
+          const sy = 85 + Math.sin(angle) * dist;
+          ctx.fillStyle = ["#ffd700", "#ff1744", "#00e5ff", "#e91e63"][i % 4];
+          ctx.beginPath();
+          ctx.arc(sx, sy, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
 
       // Fishing line
       if (fishState !== "idle") {
@@ -168,6 +274,7 @@ export function FishingReelingView({ timeRemaining, onItemObtained }: FishingRee
 
   const handleCast = useCallback(() => {
     if (timeRemaining === 0) return;
+    playCast();
     setFishState("casting");
     setLastCatch(null);
 
@@ -192,16 +299,33 @@ export function FishingReelingView({ timeRemaining, onItemObtained }: FishingRee
 
     setFishState("reeling");
     const item = drawRandomItem();
+    const rare = RARE_RARITIES.has(item.rarity);
 
     setTimeout(() => {
       const newItem = { name: item.name, rarity: item.rarity };
       collectedRef.current = [...collectedRef.current, newItem];
       setCollected([...collectedRef.current]);
       setLastCatch(newItem);
+      setIsRareCatch(rare);
+      isRareCatchRef.current = rare;
       setFishState("caught");
-      setTimeout(() => setFishState("idle"), 2000);
+
+      if (rare) {
+        // Play extra exciting sound based on how rare
+        if (item.rarity === "Mystical") playMysticalReveal();
+        else if (item.rarity === "Ultra Secret") playEpicReveal();
+        else playRareReveal();
+      } else {
+        playCaught();
+      }
+
+      setTimeout(() => {
+        setFishState("idle");
+        setIsRareCatch(false);
+        isRareCatchRef.current = false;
+      }, rare ? 3000 : 2000);
     }, 800);
-  }, [fishState]);
+  }, [fishState, playCaught, playRareReveal, playEpicReveal, playMysticalReveal]);
 
   const handleClick = useCallback(() => {
     if (fishState === "idle") {
@@ -223,7 +347,10 @@ export function FishingReelingView({ timeRemaining, onItemObtained }: FishingRee
 
   return (
     <div className="h-full flex flex-col items-center justify-center p-4 gap-4">
-      <h2 className="text-2xl font-bold">🎣 Fishing Reeling</h2>
+      <div className="flex items-center gap-2">
+        <FishingIcon size={36} />
+        <h2 className="text-2xl font-bold">Fishing Reeling</h2>
+      </div>
 
       {/* Canvas scene */}
       <div className="relative w-full max-w-[400px]">
@@ -250,19 +377,61 @@ export function FishingReelingView({ timeRemaining, onItemObtained }: FishingRee
         {/* Caught item display */}
         <AnimatePresence>
           {fishState === "caught" && lastCatch && (
-            <motion.div
-              initial={{ scale: 0, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0 }}
-              className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 rounded-xl px-4 py-2 text-center"
-            >
-              <div className="text-lg font-bold" style={{ color: rarityInfo[lastCatch.rarity]?.color }}>
-                {lastCatch.name}
-              </div>
-              <div className="text-xs" style={{ color: rarityInfo[lastCatch.rarity]?.color }}>
-                {lastCatch.rarity}
-              </div>
-            </motion.div>
+            isRareCatch ? (
+              <motion.div
+                initial={{ scale: 0, rotate: -10 }}
+                animate={{ scale: [0, 1.3, 1], rotate: [-10, 5, 0] }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                {/* Full screen flash */}
+                <motion.div
+                  initial={{ opacity: 0.6 }}
+                  animate={{ opacity: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 rounded-2xl"
+                  style={{ backgroundColor: rarityInfo[lastCatch.rarity]?.color }}
+                />
+                {/* Rare catch card */}
+                <motion.div
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ repeat: Infinity, duration: 1 }}
+                  className="relative bg-black/90 rounded-2xl px-6 py-4 text-center border-2 shadow-2xl"
+                  style={{
+                    borderColor: rarityInfo[lastCatch.rarity]?.color,
+                    boxShadow: `0 0 30px ${rarityInfo[lastCatch.rarity]?.color}60, 0 0 60px ${rarityInfo[lastCatch.rarity]?.color}30`,
+                  }}
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ repeat: Infinity, duration: 0.8 }}
+                    className="text-2xl font-black"
+                    style={{ color: rarityInfo[lastCatch.rarity]?.color }}
+                  >
+                    {lastCatch.name}
+                  </motion.div>
+                  <div className="text-sm font-bold mt-1" style={{ color: rarityInfo[lastCatch.rarity]?.color }}>
+                    ★ {lastCatch.rarity} ★
+                  </div>
+                  <div className="text-xs text-white/60 mt-1">INCREDIBLE CATCH!</div>
+                </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ scale: 0, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0 }}
+                className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 rounded-xl px-4 py-2 text-center"
+              >
+                <div className="text-lg font-bold" style={{ color: rarityInfo[lastCatch.rarity]?.color }}>
+                  {lastCatch.name}
+                </div>
+                <div className="text-xs" style={{ color: rarityInfo[lastCatch.rarity]?.color }}>
+                  {lastCatch.rarity}
+                </div>
+              </motion.div>
+            )
           )}
         </AnimatePresence>
       </div>

@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { drawRandomItem, rarityInfo, Rarity } from "@/data/gameData";
+import { BlockBusterIcon } from "@/components/GameModeIcons";
+import { useSound } from "@/hooks/useSound";
 
 const CANVAS_W = 400;
 const CANVAS_H = 500;
-const PADDLE_W = 80;
+const PADDLE_W = 100;
 const PADDLE_H = 12;
 const BALL_R = 6;
 const BRICK_ROWS = 5;
@@ -13,7 +15,7 @@ const BRICK_W = CANVAS_W / BRICK_COLS - 4;
 const BRICK_H = 18;
 const BRICK_PAD = 2;
 const DROP_SIZE = 12;
-const DROP_SPEED = 2;
+const DROP_SPEED = 4;
 
 const BRICK_COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6"];
 
@@ -33,9 +35,13 @@ interface ItemDrop {
 interface BlockBusterViewProps {
   timeRemaining: number | null;
   onItemObtained: (name: string, rarity: Rarity) => void;
+  onScoreChange?: (count: number) => void;
 }
 
-export function BlockBusterView({ timeRemaining, onItemObtained }: BlockBusterViewProps) {
+export function BlockBusterView({ timeRemaining, onItemObtained, onScoreChange }: BlockBusterViewProps) {
+  const { playBounce, playBreak, playCollect, playGameStart, playDeath } = useSound();
+  const soundRef = useRef({ playBounce, playBreak, playCollect, playDeath });
+  soundRef.current = { playBounce, playBreak, playCollect, playDeath };
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [collected, setCollected] = useState<CollectedItem[]>([]);
   const [started, setStarted] = useState(false);
@@ -60,6 +66,11 @@ export function BlockBusterView({ timeRemaining, onItemObtained }: BlockBusterVi
       collectedRef.current.forEach((item) => onItemObtained(item.name, item.rarity));
     }
   }, [timeRemaining, onItemObtained]);
+
+  // Report score when collected changes
+  useEffect(() => {
+    onScoreChange?.(collected.length);
+  }, [collected.length, onScoreChange]);
 
   const initBricks = useCallback(() => {
     const bricks: { x: number; y: number; alive: boolean; color: string }[] = [];
@@ -102,8 +113,14 @@ export function BlockBusterView({ timeRemaining, onItemObtained }: BlockBusterVi
     s.ballY += s.ballDY;
 
     // Wall collisions
-    if (s.ballX <= BALL_R || s.ballX >= CANVAS_W - BALL_R) s.ballDX *= -1;
-    if (s.ballY <= BALL_R) s.ballDY *= -1;
+    if (s.ballX <= BALL_R || s.ballX >= CANVAS_W - BALL_R) {
+      s.ballDX *= -1;
+      soundRef.current.playBounce();
+    }
+    if (s.ballY <= BALL_R) {
+      s.ballDY *= -1;
+      soundRef.current.playBounce();
+    }
 
     // Paddle collision
     if (
@@ -115,6 +132,7 @@ export function BlockBusterView({ timeRemaining, onItemObtained }: BlockBusterVi
       s.ballDY = -Math.abs(s.ballDY);
       const hitPos = (s.ballX - s.paddleX) / PADDLE_W - 0.5;
       s.ballDX = hitPos * 6;
+      soundRef.current.playBounce();
     }
 
     // Ball lost — respawn ball (no lives, infinite play)
@@ -123,6 +141,7 @@ export function BlockBusterView({ timeRemaining, onItemObtained }: BlockBusterVi
       s.ballY = CANVAS_H - 40;
       s.ballDX = 3 * (Math.random() > 0.5 ? 1 : -1);
       s.ballDY = -3;
+      soundRef.current.playDeath();
     }
 
     // Brick collisions
@@ -137,6 +156,7 @@ export function BlockBusterView({ timeRemaining, onItemObtained }: BlockBusterVi
         brick.alive = false;
         s.destroyed++;
         s.ballDY *= -1;
+        soundRef.current.playBreak();
 
         // Spawn item drop
         const item = drawRandomItem();
@@ -161,14 +181,15 @@ export function BlockBusterView({ timeRemaining, onItemObtained }: BlockBusterVi
       const drop = s.drops[i];
       drop.y += DROP_SPEED;
 
-      // Check if caught by paddle
+      // Check if caught by paddle (generous hitbox)
       if (
-        drop.y >= CANVAS_H - PADDLE_H - 20 &&
-        drop.y <= CANVAS_H - 10 &&
-        drop.x >= s.paddleX &&
-        drop.x <= s.paddleX + PADDLE_W
+        drop.y >= CANVAS_H - PADDLE_H - 24 &&
+        drop.y <= CANVAS_H &&
+        drop.x >= s.paddleX - DROP_SIZE &&
+        drop.x <= s.paddleX + PADDLE_W + DROP_SIZE
       ) {
         addCollectedItem({ name: drop.name, rarity: drop.rarity });
+        soundRef.current.playCollect();
         s.drops.splice(i, 1);
         continue;
       }
@@ -275,14 +296,17 @@ export function BlockBusterView({ timeRemaining, onItemObtained }: BlockBusterVi
   if (!started) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-4 gap-4">
-        <h2 className="text-2xl font-bold">🧱 Block Buster</h2>
+        <div className="flex items-center gap-2">
+          <BlockBusterIcon size={36} />
+          <h2 className="text-2xl font-bold">Block Buster</h2>
+        </div>
         <p className="text-muted-foreground text-sm text-center">
           Break bricks to drop items! Catch them with your paddle to keep them.
         </p>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setStarted(true)}
+          onClick={() => { playGameStart(); setStarted(true); }}
           className="gradient-button text-primary-foreground font-bold px-8 py-4 rounded-xl text-xl"
         >
           Start!

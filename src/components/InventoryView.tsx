@@ -4,9 +4,10 @@ import { InventoryItem, packs, packEmojis, rarityOrder } from "@/data/gameData";
 
 interface InventoryViewProps {
   inventory: Record<string, InventoryItem>;
+  adminItems?: InventoryItem[];
 }
 
-export function InventoryView({ inventory }: InventoryViewProps) {
+export function InventoryView({ inventory, adminItems }: InventoryViewProps) {
   // Group inventory items by pack
   const groupedByPack: Record<string, InventoryItem[]> = {};
   
@@ -25,7 +26,8 @@ export function InventoryView({ inventory }: InventoryViewProps) {
     }
   });
 
-  const hasItems = Object.keys(groupedByPack).length > 0;
+  const hasAdminItems = adminItems && adminItems.length > 0;
+  const hasItems = Object.keys(groupedByPack).length > 0 || hasAdminItems;
 
   return (
     <div className="h-full overflow-y-auto p-4">
@@ -48,6 +50,30 @@ export function InventoryView({ inventory }: InventoryViewProps) {
         </motion.div>
       ) : (
         <div className="space-y-8">
+          {hasAdminItems && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-foreground">
+                <span>🛡️</span>
+                Admin Pack
+                <span className="text-sm font-normal text-muted-foreground">
+                  ({adminItems!.length} unique)
+                </span>
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {adminItems!.map((item, index) => (
+                  <InventoryItemCard
+                    key={`admin-${item.name}-${item.rarity}`}
+                    item={item}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
           {Object.entries(groupedByPack).map(([packName, items], packIndex) => {
             const emoji = packEmojis[packName] || "📦";
             
