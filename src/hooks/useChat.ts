@@ -60,9 +60,9 @@ export function useChat() {
     };
   }, []);
 
-  const sendMessage = useCallback(async (nickname: string, text: string) => {
+  const sendMessage = useCallback(async (nickname: string, text: string): Promise<boolean> => {
     const trimmed = text.trim();
-    if (!trimmed || !nickname) return;
+    if (!trimmed || !nickname) return false;
 
     try {
       const { data, error } = await supabase
@@ -80,8 +80,10 @@ export function useChat() {
           return [data as ChatMessage, ...prev.slice(0, 49)];
         });
       }
+      return true;
     } catch (error) {
       console.error("Error sending message:", error);
+      return false;
     }
   }, []);
 
