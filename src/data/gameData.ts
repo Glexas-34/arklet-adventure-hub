@@ -5036,7 +5036,7 @@ export function drawStealOrItem(): { type: "steal" } | { type: "item"; name: str
 
 // === Add Divine rarity (0.005%) to all existing packs ===
 const divineNames: Record<string, string> = {
-  "Wise School Pack": "The Omniscient",
+  "Wise School Pack": "Wildcats",
   "Spooky Pack": "Soul Reaper Supreme",
   "Ocean Pack": "Poseidon Ascended",
   "Space Pack": "Cosmic Singularity",
