@@ -84,8 +84,9 @@ function playNoise(duration: number, volume = 0.1) {
 }
 
 // ── Arcade Music Engine ──
-// A 64-bar chiptune loop (~68 seconds at 150 BPM) with 4 channels:
+// An original chiptune loop (~55s at 140 BPM) in A minor with 4 channels:
 // melody (square), harmony/arp (square), bass (triangle), drums (noise)
+// Style: adventure / dungeon-crawler — distinctly NOT Mario
 
 let arcadeMusicInterval: ReturnType<typeof setInterval> | null = null;
 let arcadePlaying = false;
@@ -99,129 +100,130 @@ const N: Record<string, number> = {
   _:0, // rest
 };
 
-// 0 = rest
+// Original melody — 256 eighth-notes (4 sections × 8 bars × 8 notes)
 const MELODY: number[] = [
-  // Section A – Upbeat theme (16 bars, 32 eighth-notes)
-  N.E5, N.E5, N._, N.E5, N._, N.C5, N.E5, N._,
-  N.G5, N._, N._, N._, N.G4, N._, N._, N._,
-  N.C5, N._, N._, N.G4, N._, N._, N.E4, N._,
-  N._, N.A4, N._, N.B4, N._, N.A4+12, N.A4, N._,
-  N.G4, N.E5, N.G5, N.A5, N._, N.F5, N.G5, N._,
-  N.E5, N._, N.C5, N.D5, N.B4, N._, N._, N._,
-  N.C5, N._, N._, N.G4, N._, N._, N.E4, N._,
-  N._, N.A4, N._, N.B4, N._, N.A4+12, N.A4, N._,
-  // Section B – Higher energy (16 bars)
-  N.C5, N.C5, N._, N.C5, N._, N.C5, N.D5, N._,
-  N.E5, N.C5, N._, N.A4, N.G4, N._, N._, N._,
-  N.C5, N.C5, N._, N.C5, N._, N.C5, N.D5, N.E5,
-  N._, N._, N._, N._, N._, N._, N._, N._,
-  N.C5, N.C5, N._, N.C5, N._, N.C5, N.D5, N._,
-  N.E5, N.C5, N._, N.A4, N.G4, N._, N._, N._,
-  N.E5, N.E5, N._, N.E5, N._, N.E5, N.D5, N.C5,
-  N._, N._, N._, N._, N._, N._, N._, N._,
-  // Section C – Bridge / breakdown (16 bars)
-  N.G5, N.F5+12, N.F5, N.D5+12, N._, N.E5, N._, N._,
-  N.G4+12, N.A4, N.C5, N._, N.A4, N.C5, N.D5, N._,
-  N.G5, N.F5+12, N.F5, N.D5+12, N._, N.E5, N._, N._,
-  N.C6, N._, N.C6, N.C6, N._, N._, N._, N._,
-  N.G5, N.F5+12, N.F5, N.D5+12, N._, N.E5, N._, N._,
-  N.G4+12, N.A4, N.C5, N._, N.A4, N.C5, N.D5, N._,
-  N.D5+12, N._, N.D5, N._, N.C5, N._, N._, N._,
-  N._, N._, N._, N._, N._, N._, N._, N._,
-  // Section D – Finale reprise (16 bars)
-  N.E5, N.C5, N.D5, N.E5, N._, N.C5, N.A4, N._,
-  N.A4, N.B4, N.C5, N._, N._, N._, N._, N._,
-  N.D5, N.E5, N.F5, N._, N.E5, N.D5, N.C5, N._,
-  N.E5, N.D5, N.C5, N._, N._, N._, N._, N._,
-  N.E5, N.C5, N.D5, N.E5, N._, N.C5, N.A4, N._,
-  N.A4, N.B4, N.C5, N.D5, N.E5, N.G5, N.A5, N._,
-  N.G5, N._, N.E5, N._, N.C5, N._, N._, N._,
-  N._, N._, N._, N._, N._, N._, N._, N._,
+  // Section A – Adventure theme (Am → Am → F → F → C → C → G → C)
+  N.A4, N._, N.E5, N._, N.D5, N._, N.C5, N.A4,
+  N.B4, N._, N.C5, N._, N.D5, N._, N.E5, N._,
+  N.F5, N._, N.E5, N._, N.D5, N._, N.C5, N._,
+  N.A4, N._, N._, N._, N._, N._, N._, N._,
+  N.G4, N._, N.C5, N._, N.E5, N._, N.G5, N._,
+  N.E5, N._, N.C5, N._, N.G4, N._, N._, N._,
+  N.D5, N._, N.B4, N._, N.G4, N._, N.A4, N.B4,
+  N.C5, N._, N._, N._, N._, N._, N._, N._,
+  // Section B – Rising energy (C → G → Am → Em → F → C → Dm → G)
+  N.C5, N.D5, N.E5, N._, N.G5, N._, N.E5, N._,
+  N.D5, N._, N.B4, N._, N.G4, N._, N._, N._,
+  N.A4, N.C5, N.E5, N._, N.A5, N._, N.E5, N._,
+  N.E5, N.D5, N.C5, N.B4, N._, N._, N._, N._,
+  N.F5, N._, N.E5, N._, N.D5, N._, N.C5, N._,
+  N.B4, N._, N.C5, N._, N.D5, N._, N.E5, N._,
+  N.A5, N.G5, N.E5, N.D5, N.C5, N._, N.B4, N._,
+  N.A4, N._, N._, N._, N._, N._, N._, N._,
+  // Section C – Darker bridge (Am → Dm → G → C → F → Dm → Em → Em)
+  N.A4, N._, N.E5, N._, N.A4, N._, N.D5, N._,
+  N.C5, N._, N.B4, N._, N.A4, N._, N._, N._,
+  N.G4, N._, N.D5, N._, N.G4, N._, N.C5, N._,
+  N.B4, N._, N.A4, N._, N.G4, N._, N._, N._,
+  N.A4, N._, N.E5, N._, N.A4, N._, N.D5, N._,
+  N.C5, N._, N.B4, N._, N.A4, N._, N.G4, N.A4,
+  N.B4, N._, N.D5, N._, N.E5, N._, N.G5, N._,
+  N.A5, N._, N._, N._, N._, N._, N._, N._,
+  // Section D – Finale (Am → F → C → G → Am → F → Em → Am)
+  N.A5, N._, N.G5, N.E5, N._, N.C5, N.E5, N._,
+  N.G5, N._, N.A5, N._, N.G5, N._, N.E5, N._,
+  N.D5, N._, N.E5, N._, N.A5, N._, N.G5, N.E5,
+  N.C5, N._, N.D5, N._, N.E5, N._, N._, N._,
+  N.A5, N._, N.G5, N.E5, N._, N.C5, N.E5, N._,
+  N.G5, N.A5, N.B5, N._, N.A5, N._, N.G5, N._,
+  N.E5, N._, N.C5, N._, N.A4, N._, N.E5, N._,
+  N.A4, N._, N._, N._, N._, N._, N._, N._,
 ];
 
 const BASS: number[] = [
-  // Section A
-  N.C3, N._, N.C3, N._, N.C3, N._, N.G3, N._,
-  N.G3, N._, N.G3, N._, N.G3, N._, N._, N._,
-  N.C3, N._, N._, N.G3, N._, N._, N.E3, N._,
-  N.A3, N._, N.A3, N._, N.A3, N._, N.B3, N._,
-  N.E3, N._, N.E3, N._, N.A3, N._, N.A3, N._,
-  N.C4, N._, N.C4, N._, N.G3, N._, N.G3, N._,
-  N.C3, N._, N._, N.G3, N._, N._, N.E3, N._,
-  N.A3, N._, N.A3, N._, N.A3, N._, N.B3, N._,
-  // Section B
-  N.A3, N._, N.A3, N._, N.A3, N._, N.A3, N._,
-  N.G3, N._, N.G3, N._, N.G3, N._, N.G3, N._,
-  N.A3, N._, N.A3, N._, N.F3, N._, N.F3, N._,
-  N.G3, N._, N.G3, N._, N.C3, N._, N.C3, N._,
-  N.A3, N._, N.A3, N._, N.A3, N._, N.A3, N._,
-  N.G3, N._, N.G3, N._, N.G3, N._, N.G3, N._,
-  N.C4, N._, N.C4, N._, N.C4, N._, N.F3, N._,
-  N.G3, N._, N.G3, N._, N.C3, N._, N.C3, N._,
-  // Section C
-  N.E3, N._, N.E3, N._, N.D3, N._, N.D3, N._,
-  N.C3, N._, N.C3, N._, N.C3, N._, N.D3, N._,
-  N.E3, N._, N.E3, N._, N.D3, N._, N.D3, N._,
+  // Section A – Am Am F F C C G C
+  N.A3, N._, N.A3, N._, N.E3, N._, N.A3, N._,
+  N.A3, N._, N.E3, N._, N.A3, N._, N.E3, N._,
+  N.F3, N._, N.F3, N._, N.C3, N._, N.F3, N._,
+  N.F3, N._, N.C3, N._, N.F3, N._, N._, N._,
+  N.C3, N._, N.C3, N._, N.G3, N._, N.C3, N._,
   N.C3, N._, N.G3, N._, N.C3, N._, N._, N._,
-  N.E3, N._, N.E3, N._, N.D3, N._, N.D3, N._,
-  N.C3, N._, N.C3, N._, N.C3, N._, N.D3, N._,
-  N.G3, N._, N.G3, N._, N.C3, N._, N.C3, N._,
-  N.G3, N._, N.G3, N._, N.C3, N._, N._, N._,
-  // Section D
-  N.A3, N._, N.A3, N._, N.C4, N._, N.C4, N._,
-  N.F3, N._, N.F3, N._, N.G3, N._, N.G3, N._,
-  N.D3, N._, N.D3, N._, N.F3, N._, N.F3, N._,
+  N.G3, N._, N.G3, N._, N.D3, N._, N.G3, N._,
   N.C3, N._, N.G3, N._, N.C3, N._, N._, N._,
-  N.A3, N._, N.A3, N._, N.C4, N._, N.C4, N._,
-  N.F3, N._, N.F3, N._, N.G3, N._, N.G3, N._,
-  N.C3, N._, N.E3, N._, N.G3, N._, N.C4, N._,
-  N.G3, N._, N.E3, N._, N.C3, N._, N._, N._,
+  // Section B – C G Am Em F C Dm G
+  N.C3, N._, N.C3, N._, N.G3, N._, N.C3, N._,
+  N.G3, N._, N.G3, N._, N.D3, N._, N._, N._,
+  N.A3, N._, N.A3, N._, N.E3, N._, N.A3, N._,
+  N.E3, N._, N.E3, N._, N.B3, N._, N._, N._,
+  N.F3, N._, N.F3, N._, N.C3, N._, N.F3, N._,
+  N.C3, N._, N.C3, N._, N.G3, N._, N.C3, N._,
+  N.D3, N._, N.D3, N._, N.A3, N._, N.D3, N._,
+  N.G3, N._, N.G3, N._, N.D3, N._, N._, N._,
+  // Section C – Am Dm G C F Dm Em Em
+  N.A3, N._, N.A3, N._, N.E3, N._, N.A3, N._,
+  N.D3, N._, N.D3, N._, N.A3, N._, N._, N._,
+  N.G3, N._, N.G3, N._, N.D3, N._, N.G3, N._,
+  N.C3, N._, N.C3, N._, N.G3, N._, N._, N._,
+  N.F3, N._, N.F3, N._, N.C3, N._, N.F3, N._,
+  N.D3, N._, N.D3, N._, N.A3, N._, N.D3, N._,
+  N.E3, N._, N.E3, N._, N.B3, N._, N.E3, N._,
+  N.E3, N._, N.E3, N._, N.B3, N._, N._, N._,
+  // Section D – Am F C G Am F Em Am
+  N.A3, N._, N.A3, N._, N.E3, N._, N.A3, N._,
+  N.F3, N._, N.F3, N._, N.C3, N._, N.F3, N._,
+  N.C3, N._, N.C3, N._, N.G3, N._, N.C3, N._,
+  N.G3, N._, N.G3, N._, N.D3, N._, N._, N._,
+  N.A3, N._, N.A3, N._, N.E3, N._, N.A3, N._,
+  N.F3, N._, N.F3, N._, N.C3, N._, N.F3, N._,
+  N.E3, N._, N.E3, N._, N.B3, N._, N.E3, N._,
+  N.A3, N._, N.A3, N._, N.E3, N._, N._, N._,
 ];
 
 // Arpeggio chord tones (played as rapid 3-note arpeggio patterns)
+// 128 entries: 32 per section (4 arp triggers per bar × 8 bars)
 const ARP_CHORDS: number[][] = [
-  // Section A (8 measures × 2 steps each = 16)
-  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  [N.G4,N.B4,N.D5],[N.G4,N.B4,N.D5],[N.G4,N.B4,N.D5],[N.G4,N.B4,N.D5],
-  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
-  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
-  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.A3,N.C4,N.E4],[N.F4,N.A4,N.C5],
-  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
-  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
-  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
-  // Section B
+  // Section A – Am Am F F C C G C
   [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
-  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
-  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
-  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
   [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
   [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
-  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.F3,N.A3,N.C4],
-  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  // Section C
-  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
-  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.D4,N.F4,N.A4],
-  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
   [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
-  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.D4,N.F4,N.A4],
-  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  // Section D
-  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
-  [N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
+  // Section B – C G Am Em F C Dm G
   [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
   [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
-  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  // Section C – Am Dm G C F Dm Em Em
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
+  [N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],[N.D4,N.F4,N.A4],
+  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],
+  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],
+  // Section D – Am F C G Am F Em Am
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
+  [N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],[N.C4,N.E4,N.G4],
+  [N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],[N.G3,N.B3,N.D4],
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
+  [N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],[N.F3,N.A3,N.C4],
+  [N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],[N.E4,N.G4,N.B4],
+  [N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],[N.A3,N.C4,N.E4],
 ];
 
 // Drum pattern: 0=rest, 1=kick, 2=snare, 3=hihat, 4=kick+hihat
 const DRUM_PATTERN = [
-  4,3,3,3, 2,3,3,3, 4,3,4,3, 2,3,3,3,
-  4,3,3,3, 2,3,3,3, 4,3,4,3, 2,3,0,0,
+  4,3,3,3, 2,3,4,3, 1,3,3,3, 2,3,3,0,
+  4,3,4,3, 2,3,3,3, 4,3,3,3, 2,0,0,0,
 ];
 
 function startArcadeMusic() {
@@ -230,10 +232,10 @@ function startArcadeMusic() {
   if (!ctx) return;
   arcadePlaying = true;
 
-  const BPM = 150;
-  const eighthNote = (60 / BPM) / 2; // ~0.2s per eighth note
+  const BPM = 140;
+  const eighthNote = (60 / BPM) / 2;
   let step = 0;
-  const totalSteps = MELODY.length; // 256 steps = 64 bars of 4 eighth notes
+  const totalSteps = MELODY.length; // 256 steps
 
   function scheduleNote(
     freq: number, duration: number, type: OscillatorType,
@@ -316,7 +318,7 @@ function startArcadeMusic() {
   }
 
   // Schedule a batch of notes ahead of time (look-ahead scheduling for smooth playback)
-  const BATCH = 8; // schedule 8 steps at a time
+  const BATCH = 8;
 
   function scheduleBatch() {
     if (!arcadePlaying) return;
