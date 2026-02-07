@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, Send } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,11 +12,6 @@ export function ChatView({ nickname }: ChatViewProps) {
   const { messages, sendMessage, isLoading } = useChat();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   const handleSend = async () => {
     if (!input.trim() || !nickname || isSending) return;
@@ -54,7 +49,32 @@ export function ChatView({ nickname }: ChatViewProps) {
         <p className="text-sm text-muted-foreground">Chat with other players</p>
       </div>
 
-      {/* Messages */}
+      {/* Input at the top */}
+      <div className="mb-3 flex gap-2">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSend();
+          }}
+          maxLength={200}
+          placeholder={nickname ? "Type a message..." : "Set a nickname first"}
+          disabled={!nickname}
+          className="flex-1 px-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-foreground text-sm outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground disabled:opacity-50"
+        />
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleSend}
+          disabled={!nickname || !input.trim() || isSending}
+          className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/80 text-primary-foreground font-bold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Send className="w-4 h-4" />
+        </motion.button>
+      </div>
+
+      {/* Messages (newest first) */}
       <ScrollArea className="flex-1 min-h-0 rounded-xl bg-black/20 border border-white/5">
         <div className="p-4 space-y-3">
           {messages.length === 0 ? (
@@ -68,7 +88,7 @@ export function ChatView({ nickname }: ChatViewProps) {
               return (
                 <motion.div
                   key={msg.id}
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
                 >
@@ -93,34 +113,8 @@ export function ChatView({ nickname }: ChatViewProps) {
               );
             })
           )}
-          <div ref={bottomRef} />
         </div>
       </ScrollArea>
-
-      {/* Input */}
-      <div className="mt-3 flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSend();
-          }}
-          maxLength={200}
-          placeholder={nickname ? "Type a message..." : "Set a nickname first"}
-          disabled={!nickname}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-black/40 border border-white/10 text-foreground text-sm outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground disabled:opacity-50"
-        />
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleSend}
-          disabled={!nickname || !input.trim() || isSending}
-          className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/80 text-primary-foreground font-bold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Send className="w-4 h-4" />
-        </motion.button>
-      </div>
     </div>
   );
 }

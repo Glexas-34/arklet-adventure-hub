@@ -18,7 +18,7 @@ export function useChat() {
       const { data, error } = await supabase
         .from("chat_messages")
         .select("id, sender_nickname, message, created_at")
-        .order("created_at", { ascending: true })
+        .order("created_at", { ascending: false })
         .limit(50);
 
       if (error) throw error;
@@ -47,7 +47,7 @@ export function useChat() {
         },
         (payload) => {
           const newMsg = payload.new as ChatMessage;
-          setMessages((prev) => [...prev.slice(-49), newMsg]);
+          setMessages((prev) => [newMsg, ...prev.slice(0, 49)]);
         }
       )
       .subscribe();
