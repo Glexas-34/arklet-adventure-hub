@@ -304,9 +304,33 @@ export function useMultiplayerGame() {
     if (!currentRoom || currentRoom.status === "finished") return;
 
     try {
+      // For non-classic modes, determine the winner by highest score before finishing
+      let winnerNickname: string | null = null;
+      if (currentRoom.game_mode !== "classic") {
+        const { data: finalPlayers } = await supabase
+          .from("game_players")
+          .select("nickname, current_rarity")
+          .eq("room_id", currentRoom.id);
+
+        if (finalPlayers && finalPlayers.length > 0) {
+          const sorted = [...finalPlayers].sort((a, b) => {
+            const aScore = a.current_rarity ? parseInt(a.current_rarity, 10) || 0 : 0;
+            const bScore = b.current_rarity ? parseInt(b.current_rarity, 10) || 0 : 0;
+            return bScore - aScore;
+          });
+          // Only set a winner if they have a score > 0
+          if (sorted[0].current_rarity && parseInt(sorted[0].current_rarity, 10) > 0) {
+            winnerNickname = sorted[0].nickname;
+          }
+        }
+      }
+
       await supabase
         .from("game_rooms")
-        .update({ status: "finished" })
+        .update({
+          status: "finished",
+          ...(winnerNickname ? { winner_nickname: winnerNickname } : {}),
+        })
         .eq("id", currentRoom.id);
     } catch (err: any) {
       console.error("Error ending game:", err);

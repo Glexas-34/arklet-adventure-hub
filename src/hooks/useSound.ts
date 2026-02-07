@@ -427,6 +427,57 @@ export function useSound() {
     playNoise(0.8, 0.1);
   }, []);
 
+  // Celestial: grand multi-octave fanfare with shimmering sweeps
+  const playCelestialReveal = useCallback(() => {
+    // Dramatic rising arpeggio: C4 → E4 → G4 → C5 → E5 → G5 → C6
+    playTone(262, 0.15, "sine", 0.3);
+    playTone(330, 0.15, "sine", 0.3, 0.08);
+    playTone(392, 0.15, "sine", 0.3, 0.16);
+    playTone(523, 0.18, "sine", 0.35, 0.24);
+    playTone(659, 0.18, "sine", 0.35, 0.34);
+    playTone(784, 0.2, "sine", 0.35, 0.44);
+    playTone(1047, 0.4, "sine", 0.4, 0.56);
+    // Second layer: harmonic thirds
+    playTone(330, 0.15, "triangle", 0.15, 0.08);
+    playTone(392, 0.15, "triangle", 0.15, 0.16);
+    playTone(523, 0.15, "triangle", 0.15, 0.24);
+    playTone(659, 0.18, "triangle", 0.15, 0.34);
+    playTone(784, 0.2, "triangle", 0.2, 0.44);
+    playTone(1047, 0.3, "triangle", 0.2, 0.56);
+    playTone(1319, 0.5, "triangle", 0.2, 0.7);
+    // Massive shimmer sweep
+    playSweep(1000, 12000, 1.2, "sine", 0.12);
+    playSweep(500, 8000, 1.0, "triangle", 0.06);
+    // Sparkle noise bursts
+    playNoise(0.3, 0.1);
+    setTimeout(() => playNoise(0.3, 0.08), 400);
+    setTimeout(() => playNoise(0.4, 0.1), 800);
+  }, []);
+
+  // Divine: whoosh impact → deep boom → ethereal choir-like ascending
+  const playDivineReveal = useCallback(() => {
+    // Whoosh: descending sweep (comet flying in)
+    playSweep(8000, 200, 0.4, "sawtooth", 0.15);
+    // Deep impact boom
+    playTone(60, 0.5, "sine", 0.4, 0.35);
+    playTone(80, 0.4, "triangle", 0.3, 0.35);
+    playNoise(0.3, 0.15);
+    // After impact: ethereal ascending reveal
+    playTone(262, 0.2, "sine", 0.25, 0.6);
+    playTone(330, 0.2, "sine", 0.25, 0.72);
+    playTone(392, 0.2, "sine", 0.3, 0.84);
+    playTone(523, 0.25, "sine", 0.3, 0.96);
+    playTone(659, 0.25, "sine", 0.35, 1.1);
+    playTone(784, 0.3, "sine", 0.35, 1.24);
+    playTone(1047, 0.5, "sine", 0.4, 1.4);
+    // Harmonic shimmer
+    playSweep(2000, 10000, 0.8, "sine", 0.1);
+    // Second impact ring
+    playTone(100, 0.3, "sine", 0.2, 0.4);
+    setTimeout(() => playNoise(0.4, 0.08), 600);
+    setTimeout(() => playSweep(3000, 8000, 0.6, "triangle", 0.08), 1000);
+  }, []);
+
   const playGameStart = useCallback(() => {
     playTone(523, 0.1, "square", 0.15);
     playTone(659, 0.1, "square", 0.15, 0.1);
@@ -540,6 +591,8 @@ export function useSound() {
     playRareReveal,
     playEpicReveal,
     playMysticalReveal,
+    playCelestialReveal,
+    playDivineReveal,
     playGameStart,
     playGameWin,
     playGameLose,

@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield } from "lucide-react";
 import { isAdminUser } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
-import { Rarity, rarityOrder } from "@/data/gameData";
+import { Rarity, rarityOrder, packs, BlookItem } from "@/data/gameData";
 
 interface AdminPanelProps {
   nickname: string | null;
+  onSimulatePull?: (item: BlookItem) => void;
 }
 
-export function AdminPanel({ nickname }: AdminPanelProps) {
+export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [command, setCommand] = useState("");
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -25,8 +26,71 @@ export function AdminPanel({ nickname }: AdminPanelProps) {
     const banMatch = trimmed.match(/^\/ban\s+(.+)$/i);
     const unbanMatch = trimmed.match(/^\/unban\s+(.+)$/i);
     const giveMatch = trimmed.match(/^\/give\s+(\S+)\s+(.+)$/i);
+    const pullMatch = trimmed.match(/^\/pull\s+(.+)$/i);
 
-    if (giveMatch) {
+    if (pullMatch) {
+      const rest = pullMatch[1];
+
+      // Build rarity map (case-insensitive)
+      const rarityMap: Record<string, Rarity> = {};
+      for (const r of rarityOrder) {
+        rarityMap[r.toLowerCase()] = r;
+      }
+
+      // Parse: rarity then pack name. Try two-word rarity first, then one-word.
+      const words = rest.split(/\s+/);
+      let matchedRarity: Rarity | undefined;
+      let packSearch: string | undefined;
+
+      if (words.length >= 3) {
+        const twoWord = `${words[0]} ${words[1]}`.toLowerCase();
+        if (rarityMap[twoWord]) {
+          matchedRarity = rarityMap[twoWord];
+          packSearch = words.slice(2).join(" ");
+        }
+      }
+      if (!matchedRarity && words.length >= 2) {
+        const oneWord = words[0].toLowerCase();
+        if (rarityMap[oneWord]) {
+          matchedRarity = rarityMap[oneWord];
+          packSearch = words.slice(1).join(" ");
+        }
+      }
+
+      if (!matchedRarity || !packSearch) {
+        setFeedback({ type: "error", text: "Format: /pull Rarity PackName" });
+        return;
+      }
+
+      // Find pack (case-insensitive partial match)
+      const packNames = Object.keys(packs);
+      const searchLower = packSearch.toLowerCase();
+      const foundPack = packNames.find((p) => p.toLowerCase() === searchLower)
+        || packNames.find((p) => p.toLowerCase().includes(searchLower));
+
+      if (!foundPack) {
+        setFeedback({ type: "error", text: `Pack "${packSearch}" not found. Available: ${packNames.join(", ")}` });
+        return;
+      }
+
+      // Find an item of that rarity in the pack
+      const packItems = packs[foundPack];
+      const matchingItems = packItems.filter(([, r]) => r === matchedRarity);
+
+      if (matchingItems.length === 0) {
+        setFeedback({ type: "error", text: `No ${matchedRarity} items in ${foundPack}` });
+        return;
+      }
+
+      // Pick a random one from matching items
+      const picked = matchingItems[Math.floor(Math.random() * matchingItems.length)];
+      const simulatedItem: BlookItem = { name: picked[0], rarity: picked[1], chance: picked[2] };
+
+      setFeedback({ type: "success", text: `Simulating ${matchedRarity} pull from ${foundPack}: ${picked[0]}` });
+      setCommand("");
+      onSimulatePull?.(simulatedItem);
+      return;
+    } else if (giveMatch) {
       const recipient = giveMatch[1];
       const rest = giveMatch[2]; // "Exotic Cool Sword" or "Ultra Secret Cool Sword"
 
@@ -111,7 +175,7 @@ export function AdminPanel({ nickname }: AdminPanelProps) {
         setCommand("");
       }
     } else {
-      setFeedback({ type: "error", text: "Unknown command. Try /give User Rarity Item, /ban User, /unban User" });
+      setFeedback({ type: "error", text: "Unknown command. Try /give, /ban, /unban, /pull" });
     }
   };
 
@@ -144,7 +208,7 @@ export function AdminPanel({ nickname }: AdminPanelProps) {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleCommand();
                   }}
-                  placeholder="/give User Rarity Item"
+                  placeholder="/give | /pull | /ban | /unban"
                   className="flex-1 px-3 py-2 rounded-lg bg-black/40 border border-red-500/20 text-foreground text-sm outline-none focus:border-red-500/50 transition-colors placeholder:text-muted-foreground"
                 />
                 <motion.button

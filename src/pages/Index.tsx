@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GameHeader } from "@/components/GameHeader";
 import { Sidebar } from "@/components/Sidebar";
@@ -24,7 +24,9 @@ import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useTrading } from "@/hooks/useTrading";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { useAdminGifts } from "@/hooks/useAdminGifts";
-import { Rarity } from "@/data/gameData";
+import { Rarity, InventoryItem, BlookItem } from "@/data/gameData";
+import { ResultBar } from "@/components/ResultBar";
+import { useSound } from "@/hooks/useSound";
 import { trackPageView, trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -45,7 +47,9 @@ const Index = () => {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [gamePinCode, setGamePinCode] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [confettiIntensity, setConfettiIntensity] = useState<"normal" | "mystical">("normal");
+  const [confettiIntensity, setConfettiIntensity] = useState<"normal" | "mystical" | "celestial">("normal");
+  const [simulatedItem, setSimulatedItem] = useState<BlookItem | null>(null);
+  const [showSimulation, setShowSimulation] = useState(false);
 
   const { inventory, addItem, getTotalItems, getUniqueCount, clearInventory, updateItemCount, grantAllBlooks } = useInventory();
   const {
@@ -95,6 +99,7 @@ const Index = () => {
   const { onlinePlayers, isPlayerOnline } = useOnlinePresence(nickname);
   const { isBanned } = useBanCheck(nickname);
   const { adminItems } = useAdminGifts(nickname);
+  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal } = useSound();
 
   // Combined unique count: inventory items + admin-gifted items not already in inventory
   const combinedUniqueCount = useCallback(() => {
@@ -102,6 +107,24 @@ const Index = () => {
     const adminExtra = adminItems.filter((ai) => !inventory[ai.name]).length;
     return invCount + adminExtra;
   }, [getUniqueCount, adminItems, inventory]);
+
+  // Combined inventory for trading: admin-gifted items first, then regular inventory
+  const tradeInventory = useMemo(() => {
+    const combined: Record<string, InventoryItem> = {};
+    // Add admin items first so they appear at the top
+    for (const item of adminItems) {
+      combined[item.name] = { ...item };
+    }
+    // Merge regular inventory (add counts if overlap, append if new)
+    for (const [name, item] of Object.entries(inventory)) {
+      if (combined[name]) {
+        combined[name] = { ...combined[name], count: combined[name].count + item.count };
+      } else {
+        combined[name] = { ...item };
+      }
+    }
+    return combined;
+  }, [inventory, adminItems]);
 
   // Refs for toast callbacks (avoids stale closures in channel listener)
   const joinRoomRef = useRef(joinRoom);
@@ -264,8 +287,8 @@ const Index = () => {
   const handleItemObtained = (name: string, rarity: Rarity) => {
     addItem(name, rarity);
     trackEvent("item_obtained", { item_name: name, rarity });
-    // Report to multiplayer if in game
-    if (currentRoom?.status === "playing") {
+    // Report to multiplayer if in classic game (non-classic modes use reportScore for standings)
+    if (currentRoom?.status === "playing" && currentRoom?.game_mode === "classic") {
       reportItem(name, rarity);
     }
   };
@@ -277,11 +300,31 @@ const Index = () => {
   }, [currentRoom?.status, reportScore]);
 
   const handleRareReveal = useCallback((rarity: Rarity) => {
-    if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical"].includes(rarity)) {
-      setConfettiIntensity(rarity === "Mystical" ? "mystical" : "normal");
+    if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical", "Celestial", "Divine"].includes(rarity)) {
+      setConfettiIntensity(
+        rarity === "Celestial" || rarity === "Divine" ? "celestial"
+          : rarity === "Mystical" ? "mystical"
+          : "normal"
+      );
       setShowConfetti(true);
     }
   }, []);
+
+  // Admin /pull simulation — shows animation + sounds but no inventory change
+  const handleSimulatePull = useCallback((item: BlookItem) => {
+    setSimulatedItem(item);
+    setShowSimulation(true);
+
+    const rarity = item.rarity;
+    if (rarity === "Divine") playDivineReveal();
+    else if (rarity === "Celestial") playCelestialReveal();
+    else if (rarity === "Mystical") playMysticalReveal();
+    else if (rarity === "Ultra Secret") playEpicReveal();
+    else if (["Legendary", "Mythic", "Secret"].includes(rarity)) playRareReveal();
+    else playReveal();
+
+    handleRareReveal(rarity);
+  }, [handleRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal]);
 
   const handleCreateRoom = async (nickname: string, targetRarity: Rarity, timeLimit: number, gameMode: GameMode) => {
     const result = await createRoom(nickname, targetRarity, timeLimit, gameMode);
@@ -404,7 +447,7 @@ const Index = () => {
                   )}
                   {currentView === "trade" && (
                     <TradeView
-                      inventory={inventory}
+                      inventory={tradeInventory}
                       nickname={nickname}
                       partnerNickname={partnerNickname}
                       isTrading={isTrading}
@@ -424,7 +467,7 @@ const Index = () => {
                     />
                   )}
                   {currentView === "chat" && (
-                    <ChatView nickname={nickname} />
+                    <ChatView nickname={nickname} onSimulatePull={handleSimulatePull} />
                   )}
                 </>
               )}
@@ -442,6 +485,13 @@ const Index = () => {
 
           {/* Confetti overlay */}
           <Confetti trigger={showConfetti} intensity={confettiIntensity} onComplete={() => setShowConfetti(false)} />
+
+          {/* Simulated pull result (admin /pull command) */}
+          <ResultBar
+            item={simulatedItem}
+            isVisible={showSimulation}
+            onClose={() => setShowSimulation(false)}
+          />
 
           {/* Modals */}
           <HostGameModal

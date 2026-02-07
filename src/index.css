@@ -46,6 +46,8 @@
     --rarity-ultra-secret: 350 100% 55%;
     --rarity-mystical: 187 100% 45%;
     --rarity-exotic: 330 100% 65%;
+    --rarity-celestial: 45 100% 70%;
+    --rarity-divine: 270 100% 80%;
 
     /* Gradients */
     --gradient-header: linear-gradient(90deg, hsl(330 100% 50%), hsl(280 80% 55%), hsl(170 100% 50%));
@@ -105,6 +107,8 @@
   .rarity-ultra-secret { color: hsl(var(--rarity-ultra-secret)); }
   .rarity-mystical { color: hsl(var(--rarity-mystical)); }
   .rarity-exotic { color: hsl(var(--rarity-exotic)); }
+  .rarity-celestial { color: hsl(var(--rarity-celestial)); }
+  .rarity-divine { color: hsl(var(--rarity-divine)); }
 
   .bg-rarity-common { background-color: hsl(var(--rarity-common)); }
   .bg-rarity-uncommon { background-color: hsl(var(--rarity-uncommon)); }
@@ -115,6 +119,8 @@
   .bg-rarity-ultra-secret { background-color: hsl(var(--rarity-ultra-secret)); }
   .bg-rarity-mystical { background-color: hsl(var(--rarity-mystical)); }
   .bg-rarity-exotic { background-color: hsl(var(--rarity-exotic)); }
+  .bg-rarity-celestial { background-color: hsl(var(--rarity-celestial)); }
+  .bg-rarity-divine { background-color: hsl(var(--rarity-divine)); }
 
   .border-rarity-common { border-color: hsl(var(--rarity-common)); }
   .border-rarity-uncommon { border-color: hsl(var(--rarity-uncommon)); }
@@ -125,6 +131,8 @@
   .border-rarity-ultra-secret { border-color: hsl(var(--rarity-ultra-secret)); }
   .border-rarity-mystical { border-color: hsl(var(--rarity-mystical)); }
   .border-rarity-exotic { border-color: hsl(var(--rarity-exotic)); }
+  .border-rarity-celestial { border-color: hsl(var(--rarity-celestial)); }
+  .border-rarity-divine { border-color: hsl(var(--rarity-divine)); }
 
   .glow-common { box-shadow: 0 0 20px hsl(var(--rarity-common) / 0.5); }
   .glow-uncommon { box-shadow: 0 0 20px hsl(var(--rarity-uncommon) / 0.6); }
@@ -140,6 +148,24 @@
   .glow-exotic {
     box-shadow: 0 0 50px hsl(var(--rarity-exotic) / 0.9), 0 0 80px hsl(var(--rarity-exotic) / 0.5);
     animation: exotic-pulse 2s ease-in-out infinite;
+  }
+  .glow-celestial {
+    box-shadow: 0 0 60px hsl(var(--rarity-celestial) / 1), 0 0 100px hsl(var(--rarity-celestial) / 0.6), 0 0 140px hsl(45 100% 85% / 0.3);
+    animation: celestial-pulse 2.5s ease-in-out infinite;
+  }
+  .glow-divine {
+    box-shadow: 0 0 60px hsl(var(--rarity-divine) / 1), 0 0 100px hsl(var(--rarity-divine) / 0.6), 0 0 140px hsl(270 100% 90% / 0.4);
+    animation: divine-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes celestial-pulse {
+    0%, 100% { box-shadow: 0 0 60px hsl(var(--rarity-celestial) / 1), 0 0 100px hsl(var(--rarity-celestial) / 0.6), 0 0 140px hsl(45 100% 85% / 0.3); }
+    50% { box-shadow: 0 0 80px hsl(var(--rarity-celestial) / 1), 0 0 130px hsl(var(--rarity-celestial) / 0.8), 0 0 180px hsl(45 100% 90% / 0.5); }
+  }
+
+  @keyframes divine-pulse {
+    0%, 100% { box-shadow: 0 0 60px hsl(var(--rarity-divine) / 1), 0 0 100px hsl(var(--rarity-divine) / 0.6), 0 0 140px hsl(270 100% 90% / 0.4); }
+    50% { box-shadow: 0 0 80px hsl(var(--rarity-divine) / 1), 0 0 130px hsl(var(--rarity-divine) / 0.8), 0 0 180px hsl(270 100% 95% / 0.6); }
   }
 
   @keyframes exotic-pulse {

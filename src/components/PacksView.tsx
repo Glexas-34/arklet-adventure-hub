@@ -19,7 +19,7 @@ export function PacksView({ onItemObtained, onRareReveal }: PacksViewProps) {
   const [previewVisible, setPreviewVisible] = useState(true);
   const [resultItem, setResultItem] = useState<BlookItem | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal } = useSound();
+  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal } = useSound();
 
   // Toggle preview with Enter key
   useEffect(() => {
@@ -42,7 +42,13 @@ export function PacksView({ onItemObtained, onRareReveal }: PacksViewProps) {
     trackEvent("pack_opened", { pack_name: packName, item_name: name, rarity });
 
     // Play sound based on rarity
-    if (rarity === "Mystical") {
+    if (rarity === "Divine") {
+      playDivineReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Celestial") {
+      playCelestialReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Mystical") {
       playMysticalReveal();
       onRareReveal?.(rarity);
     } else if (rarity === "Ultra Secret") {
@@ -54,7 +60,7 @@ export function PacksView({ onItemObtained, onRareReveal }: PacksViewProps) {
     } else {
       playReveal();
     }
-  }, [onItemObtained, onRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal]);
+  }, [onItemObtained, onRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal]);
 
   const closeResult = () => {
     setShowResult(false);

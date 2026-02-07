@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import { MessageSquare, Send } from "lucide-react";
 import { useChat } from "@/hooks/useChat";
 import { AdminPanel } from "@/components/AdminPanel";
+import { BlookItem } from "@/data/gameData";
 
 interface ChatViewProps {
   nickname: string | null;
+  onSimulatePull?: (item: BlookItem) => void;
 }
 
-export function ChatView({ nickname }: ChatViewProps) {
+export function ChatView({ nickname, onSimulatePull }: ChatViewProps) {
   const { messages, sendMessage, isLoading } = useChat();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -84,7 +86,7 @@ export function ChatView({ nickname }: ChatViewProps) {
           <p className="text-red-400 text-sm mb-3 text-center">{sendError}</p>
         )}
 
-        <AdminPanel nickname={nickname} />
+        <AdminPanel nickname={nickname} onSimulatePull={onSimulatePull} />
 
         {/* Messages (newest first) */}
         <div className="rounded-xl bg-black/20 border border-white/5 p-4 space-y-3">

@@ -18,7 +18,7 @@ const COLORS = [
   "#76ff03", "#ff6d00", "#f50057", "#651fff",
 ];
 
-type ConfettiIntensity = "normal" | "mystical";
+type ConfettiIntensity = "normal" | "mystical" | "celestial";
 
 interface ConfettiProps {
   trigger: boolean;
@@ -29,22 +29,23 @@ interface ConfettiProps {
 export function Confetti({ trigger, intensity = "normal", onComplete }: ConfettiProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
 
-  const isMystical = intensity === "mystical";
-  const particleCount = isMystical ? 100 : 40;
-  const duration = isMystical ? 2200 : 1800;
-  const animDuration = isMystical ? "2.2s" : "1.6s";
+  const isCelestial = intensity === "celestial";
+  const isMystical = intensity === "mystical" || isCelestial;
+  const particleCount = isCelestial ? 150 : isMystical ? 100 : 40;
+  const duration = isCelestial ? 3000 : isMystical ? 2200 : 1800;
+  const animDuration = isCelestial ? "3s" : isMystical ? "2.2s" : "1.6s";
 
   useEffect(() => {
     if (!trigger) return;
 
     const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
-      x: 50 + (Math.random() - 0.5) * (isMystical ? 30 : 20),
-      y: 40 + (Math.random() - 0.5) * (isMystical ? 15 : 10),
+      x: 50 + (Math.random() - 0.5) * (isCelestial ? 60 : isMystical ? 30 : 20),
+      y: 40 + (Math.random() - 0.5) * (isCelestial ? 30 : isMystical ? 15 : 10),
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      size: isMystical ? 8 + Math.random() * 12 : 6 + Math.random() * 8,
+      size: isCelestial ? 10 + Math.random() * 14 : isMystical ? 8 + Math.random() * 12 : 6 + Math.random() * 8,
       angle: Math.random() * 360,
-      speed: 2 + Math.random() * (isMystical ? 6 : 4),
+      speed: 2 + Math.random() * (isCelestial ? 8 : isMystical ? 6 : 4),
       spin: (Math.random() - 0.5) * 10,
       opacity: 1,
     }));

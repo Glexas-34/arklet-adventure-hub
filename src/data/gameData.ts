@@ -7,7 +7,9 @@ export type Rarity =
   | "Secret"
   | "Ultra Secret"
   | "Mystical"
-  | "Exotic";
+  | "Exotic"
+  | "Celestial"
+  | "Divine";
 
 export interface BlookItem {
   name: string;
@@ -31,6 +33,8 @@ export const rarityInfo: Record<Rarity, { color: string; show: boolean }> = {
   "Ultra Secret": { color: "#ff1744", show: false },
   Mystical: { color: "#00e5ff", show: false },
   Exotic: { color: "#ff66b2", show: false },
+  Celestial: { color: "#ffd700", show: false },
+  Divine: { color: "#c8a2ff", show: false },
 };
 
 export const rarityColors: Record<Rarity, string> = {
@@ -43,6 +47,8 @@ export const rarityColors: Record<Rarity, string> = {
   "Ultra Secret": "rarity-ultra-secret",
   Mystical: "rarity-mystical",
   Exotic: "rarity-exotic",
+  Celestial: "rarity-celestial",
+  Divine: "rarity-divine",
 };
 
 export const rarityBgColors: Record<Rarity, string> = {
@@ -55,6 +61,8 @@ export const rarityBgColors: Record<Rarity, string> = {
   "Ultra Secret": "bg-rarity-ultra-secret",
   Mystical: "bg-rarity-mystical",
   Exotic: "bg-rarity-exotic",
+  Celestial: "bg-rarity-celestial",
+  Divine: "bg-rarity-divine",
 };
 
 export const rarityGlowColors: Record<Rarity, string> = {
@@ -67,6 +75,8 @@ export const rarityGlowColors: Record<Rarity, string> = {
   "Ultra Secret": "glow-ultra-secret",
   Mystical: "glow-mystical",
   Exotic: "glow-exotic",
+  Celestial: "glow-celestial",
+  Divine: "glow-divine",
 };
 
 export const rarityOrder: Rarity[] = [
@@ -79,6 +89,8 @@ export const rarityOrder: Rarity[] = [
   "Ultra Secret",
   "Mystical",
   "Exotic",
+  "Celestial",
+  "Divine",
 ];
 
 // Pack data: [name, rarity, chance%]
@@ -2091,6 +2103,2916 @@ packs["Harvest Pack"] = [
   ["Harvest Prime", "Mystical", 0.02],
 ];
 packEmojis["Harvest Pack"] = "🌽";
+
+
+// === Add Celestial rarity (0.01%) to all existing packs ===
+const celestialNames: Record<string, string> = {
+  "Wise School Pack": "The Enlightened One",
+  "Spooky Pack": "Eternal Phantom",
+  "Ocean Pack": "Abyssal Divinity",
+  "Space Pack": "Universe Architect",
+  "Fantasy Pack": "Eternal Mythos",
+  "Cyber Pack": "Omega Protocol",
+  "Jungle Pack": "Primordial Heart",
+  "Winter Pack": "Eternal Frost",
+  "Desert Pack": "Mirage Divinity",
+  "Volcano Pack": "Core of Creation",
+  "Candy Pack": "Sugar Divinity",
+  "Toy Pack": "Toy Singularity",
+  "Music Pack": "Eternal Symphony",
+  "Pirate Pack": "Pirate Divinity",
+  "Dino Pack": "Epoch Sovereign",
+  "Farm Pack": "Harvest Divinity",
+  "Sports Pack": "Immortal Champion",
+  "Medieval Pack": "Holy Grail",
+  "Aquarium Pack": "Aqua Divinity",
+  "Weather Pack": "Climate Divinity",
+  "Breakfast Pack": "Eternal Brunch",
+  "Garden Pack": "Eden's Heart",
+  "Safari Pack": "Serengeti Divinity",
+  "Bird Pack": "Sky Divinity",
+  "Cat Pack": "Eternal Feline",
+  "Dog Pack": "Eternal Hound",
+  "Reptile Pack": "Ancient Scales",
+  "Horse Pack": "Pegasus Divinity",
+  "Bear Pack": "Ursa Divinity",
+  "Wolf Pack": "Fenrir Ascended",
+  "Rabbit Pack": "Lunar Divinity",
+  "Snake Pack": "Ouroboros Ascended",
+  "Frog Pack": "Toad Divinity",
+  "Bat Pack": "Nocturnal Divinity",
+  "Whale Pack": "Leviathan Divinity",
+  "Coral Reef Pack": "Reef Divinity",
+  "Dragon Pack": "Dragon Divinity",
+  "Unicorn Pack": "Prismatic Divinity",
+  "Fairy Pack": "Fey Divinity",
+  "Wizard School Pack": "Arcane Divinity",
+  "Potion Pack": "Elixir Divinity",
+  "Crystal Pack": "Prismatic Core",
+  "Enchanted Pack": "Enchantment Eternal",
+  "Golem Pack": "Golem Divinity",
+  "Phoenix Pack": "Phoenix Ascended",
+  "Mermaid Pack": "Siren Divinity",
+  "Centaur Pack": "Centaur Divinity",
+  "Troll Pack": "Troll Ascended",
+  "Elemental Pack": "Elemental Divinity",
+  "Grimoire Pack": "Tome of Eternity",
+  "Rune Pack": "Rune Divinity",
+  "Pizza Pack": "Pizza Divinity",
+  "Sushi Pack": "Sushi Divinity",
+  "Fruit Pack": "Fruit Divinity",
+  "Cake Pack": "Cake Divinity",
+  "Bakery Pack": "Bakery Divinity",
+  "Cheese Pack": "Cheese Divinity",
+  "Ice Cream Pack": "Frozen Divinity",
+  "BBQ Pack": "BBQ Divinity",
+  "Taco Pack": "Taco Divinity",
+  "Cookie Pack": "Cookie Divinity",
+  "Smoothie Pack": "Smoothie Divinity",
+  "Pasta Pack": "Pasta Divinity",
+  "Ramen Pack": "Ramen Divinity",
+  "Chocolate Pack": "Chocolate Divinity",
+  "Donut Pack": "Donut Divinity",
+  "Robot Pack": "Robot Divinity",
+  "Lab Pack": "Eureka Divinity",
+  "Quantum Pack": "Quantum Divinity",
+  "AI Pack": "Sentient Divinity",
+  "Neon Pack": "Neon Divinity",
+  "Pixel Pack": "Pixel Divinity",
+  "Hologram Pack": "Hologram Divinity",
+  "Steampunk Pack": "Steampunk Divinity",
+  "Circuit Pack": "Circuit Divinity",
+  "Satellite Pack": "Orbital Divinity",
+  "Telescope Pack": "Cosmic Sight",
+  "Rocket Pack": "Launch Divinity",
+  "Biotech Pack": "Genesis Code",
+  "Laser Pack": "Laser Divinity",
+  "Gravity Pack": "Gravity Divinity",
+  "Ninja Pack": "Shadow Divinity",
+  "Samurai Pack": "Bushido Divinity",
+  "Cowboy Pack": "Frontier Divinity",
+  "Viking Pack": "Valhalla Divinity",
+  "Superhero Pack": "Hero Divinity",
+  "Villain Pack": "Villain Divinity",
+  "Spy Pack": "Espionage Divinity",
+  "Treasure Pack": "Infinite Fortune",
+  "Dungeon Pack": "Dungeon Divinity",
+  "Racing Pack": "Speed Divinity",
+  "Skateboard Pack": "Skate Divinity",
+  "Climbing Pack": "Summit Divinity",
+  "Wrestling Pack": "Wrestling Divinity",
+  "Archery Pack": "Arrow Divinity",
+  "Martial Arts Pack": "Martial Divinity",
+  "Moon Pack": "Lunar Ascended",
+  "Constellation Pack": "Starborn Divinity",
+  "Flame Pack": "Flame Divinity",
+  "Thunder Pack": "Thunder Divinity",
+  "Mountain Pack": "Mountain Divinity",
+  "Swamp Pack": "Swamp Divinity",
+  "Tundra Pack": "Tundra Divinity",
+  "Mushroom Pack": "Mycelium Divinity",
+  "Gem Pack": "Gem Divinity",
+  "Earthquake Pack": "Seismic Divinity",
+  "Aurora Pack": "Aurora Divinity",
+  "Sunset Pack": "Sunset Divinity",
+  "Bamboo Pack": "Bamboo Divinity",
+  "Island Pack": "Island Divinity",
+  "Cavern Pack": "Cavern Divinity",
+  "Circus Pack": "Circus Divinity",
+  "Carnival Pack": "Carnival Divinity",
+  "Castle Pack": "Castle Divinity",
+  "Library Pack": "Infinite Tome",
+  "Magic Show Pack": "Illusion Divinity",
+  "Museum Pack": "Relic Divinity",
+  "Haunted Pack": "Haunted Divinity",
+  "Camping Pack": "Wilderness Divinity",
+  "Beach Pack": "Beach Divinity",
+  "Balloon Pack": "Balloon Divinity",
+  "Party Pack": "Party Divinity",
+  "Arcade Game Pack": "Arcade Divinity",
+  "Cinema Pack": "Cinema Divinity",
+  "Art Pack": "Art Divinity",
+  "Photography Pack": "Photo Divinity",
+  "Egyptian Pack": "Pharaoh Divinity",
+  "Greek Pack": "Greek Divinity",
+  "Norse Pack": "Norse Divinity",
+  "Roman Pack": "Roman Divinity",
+  "Aztec Pack": "Aztec Divinity",
+  "Celtic Pack": "Celtic Divinity",
+  "Atlantis Pack": "Atlantis Divinity",
+  "Olympus Pack": "Olympus Divinity",
+  "Underworld Pack": "Death Divinity",
+  "Zodiac Pack": "Zodiac Divinity",
+  "Folklore Pack": "Folklore Divinity",
+  "Wuxia Pack": "Wuxia Divinity",
+  "Gladiator Pack": "Gladiator Divinity",
+  "Spartan Pack": "Spartan Divinity",
+  "Mythology Pack": "Mythology Divinity",
+  "Alchemy Pack": "Philosopher Stone",
+  "Dream Pack": "Dream Divinity",
+  "Nightmare Pack": "Nightmare Divinity",
+  "Clock Pack": "Temporal Divinity",
+  "Origami Pack": "Origami Divinity",
+  "Manga Pack": "Manga Divinity",
+  "Space Station Pack": "Station Divinity",
+  "Sailing Pack": "Sailing Divinity",
+  "Pottery Pack": "Pottery Divinity",
+  "Robotics Pack": "Mecha Divinity",
+  "Forest Pack": "Forest Divinity",
+  "Train Pack": "Train Divinity",
+  "Garden Gnome Pack": "Gnome Divinity",
+  "Deep Ocean Pack": "Abyss Divinity",
+  "Demon Pack": "Demon Ascended",
+  "Angel Pack": "Seraph Divinity",
+  "Titan Pack": "Titan Ascended",
+  "Ethereal Pack": "Ethereal Divinity",
+  "Pirate Cove Pack": "Cove Divinity",
+  "Wasteland Pack": "Wasteland Divinity",
+  "Carnival Food Pack": "Fair Divinity",
+  "Plague Pack": "Plague Divinity",
+  "Stealth Pack": "Phantom Divinity",
+  "Dimension Pack": "Dimension Divinity",
+  "Harvest Pack": "Harvest Divinity",
+};
+
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const cName = celestialNames[packName] || packName.replace(" Pack", "") + " Celestial";
+  // Reduce Common chance by 0.01 to make room for Celestial
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.01).toFixed(2)];
+  items.push([cName, "Celestial" as Rarity, 0.01]);
+});
+
+// === 210 New Packs ===
+packs["Penguin Pack"] = [
+  ["Baby Penguin", "Common", 45.39],
+  ["Rockhopper", "Uncommon", 30],
+  ["Emperor Penguin", "Rare", 15],
+  ["Penguin King", "Legendary", 8],
+  ["Ice Emperor", "Mythic", 1],
+  ["Frost Shade", "Secret", 0.5],
+  ["Penguin Sovereign", "Ultra Secret", 0.08],
+  ["Penguin Prime", "Mystical", 0.02],
+  ["Penguin Divinity", "Celestial", 0.01],
+];
+packEmojis["Penguin Pack"] = "🐧";
+
+packs["Owl Pack"] = [
+  ["Owlet", "Common", 45.39],
+  ["Barn Owl", "Uncommon", 30],
+  ["Snowy Owl", "Rare", 15],
+  ["Great Horned", "Legendary", 8],
+  ["Owl Titan", "Mythic", 1],
+  ["Night Watcher", "Secret", 0.5],
+  ["Wisdom Lord", "Ultra Secret", 0.08],
+  ["Owl Prime", "Mystical", 0.02],
+  ["Owl Divinity", "Celestial", 0.01],
+];
+packEmojis["Owl Pack"] = "🦉";
+
+packs["Butterfly Pack"] = [
+  ["Caterpillar", "Common", 45.39],
+  ["Monarch", "Uncommon", 30],
+  ["Swallowtail", "Rare", 15],
+  ["Blue Morpho", "Legendary", 8],
+  ["Chrysalis Titan", "Mythic", 1],
+  ["Wing Shade", "Secret", 0.5],
+  ["Flutter Lord", "Ultra Secret", 0.08],
+  ["Butterfly Prime", "Mystical", 0.02],
+  ["Butterfly Divinity", "Celestial", 0.01],
+];
+packEmojis["Butterfly Pack"] = "🦋";
+
+packs["Bee Pack"] = [
+  ["Worker Bee", "Common", 45.39],
+  ["Drone Bee", "Uncommon", 30],
+  ["Honey Guard", "Rare", 15],
+  ["Queen Bee", "Legendary", 8],
+  ["Hive Titan", "Mythic", 1],
+  ["Stinger Shade", "Secret", 0.5],
+  ["Apiary Lord", "Ultra Secret", 0.08],
+  ["Bee Prime", "Mystical", 0.02],
+  ["Bee Divinity", "Celestial", 0.01],
+];
+packEmojis["Bee Pack"] = "🐝";
+
+packs["Ant Pack"] = [
+  ["Worker Ant", "Common", 45.39],
+  ["Soldier Ant", "Uncommon", 30],
+  ["Fire Ant", "Rare", 15],
+  ["Ant Queen", "Legendary", 8],
+  ["Colony Titan", "Mythic", 1],
+  ["Swarm Shade", "Secret", 0.5],
+  ["Anthill Lord", "Ultra Secret", 0.08],
+  ["Ant Prime", "Mystical", 0.02],
+  ["Ant Divinity", "Celestial", 0.01],
+];
+packEmojis["Ant Pack"] = "🐜";
+
+packs["Spider Pack"] = [
+  ["Garden Spider", "Common", 45.39],
+  ["Tarantula", "Uncommon", 30],
+  ["Black Widow", "Rare", 15],
+  ["Spider Queen", "Legendary", 8],
+  ["Web Titan", "Mythic", 1],
+  ["Silk Shade", "Secret", 0.5],
+  ["Arachnid Lord", "Ultra Secret", 0.08],
+  ["Spider Prime", "Mystical", 0.02],
+  ["Spider Divinity", "Celestial", 0.01],
+];
+packEmojis["Spider Pack"] = "🕷️";
+
+packs["Beetle Pack"] = [
+  ["Ladybug", "Common", 45.39],
+  ["Stag Beetle", "Uncommon", 30],
+  ["Scarab", "Rare", 15],
+  ["Golden Beetle", "Legendary", 8],
+  ["Beetle Titan", "Mythic", 1],
+  ["Shell Shade", "Secret", 0.5],
+  ["Beetle Lord", "Ultra Secret", 0.08],
+  ["Beetle Prime", "Mystical", 0.02],
+  ["Beetle Divinity", "Celestial", 0.01],
+];
+packEmojis["Beetle Pack"] = "🪲";
+
+packs["Firefly Pack"] = [
+  ["Spark Bug", "Common", 45.39],
+  ["Glow Worm", "Uncommon", 30],
+  ["Lightning Bug", "Rare", 15],
+  ["Lantern Fly", "Legendary", 8],
+  ["Firefly Titan", "Mythic", 1],
+  ["Luminous Shade", "Secret", 0.5],
+  ["Firefly Lord", "Ultra Secret", 0.08],
+  ["Firefly Prime", "Mystical", 0.02],
+  ["Firefly Divinity", "Celestial", 0.01],
+];
+packEmojis["Firefly Pack"] = "💫";
+
+packs["Mantis Pack"] = [
+  ["Baby Mantis", "Common", 45.39],
+  ["Green Mantis", "Uncommon", 30],
+  ["Orchid Mantis", "Rare", 15],
+  ["Mantis King", "Legendary", 8],
+  ["Mantis Titan", "Mythic", 1],
+  ["Stealth Shade", "Secret", 0.5],
+  ["Mantis Lord", "Ultra Secret", 0.08],
+  ["Mantis Prime", "Mystical", 0.02],
+  ["Mantis Divinity", "Celestial", 0.01],
+];
+packEmojis["Mantis Pack"] = "🦗";
+
+packs["Panda Pack"] = [
+  ["Panda Cub", "Common", 45.39],
+  ["Red Panda", "Uncommon", 30],
+  ["Giant Panda", "Rare", 15],
+  ["Panda King", "Legendary", 8],
+  ["Bamboo Titan", "Mythic", 1],
+  ["Panda Shade", "Secret", 0.5],
+  ["Panda Lord", "Ultra Secret", 0.08],
+  ["Panda Prime", "Mystical", 0.02],
+  ["Panda Divinity", "Celestial", 0.01],
+];
+packEmojis["Panda Pack"] = "🐼";
+
+packs["Koala Pack"] = [
+  ["Joey", "Common", 45.39],
+  ["Grey Koala", "Uncommon", 30],
+  ["Drop Bear", "Rare", 15],
+  ["Eucalyptus King", "Legendary", 8],
+  ["Koala Titan", "Mythic", 1],
+  ["Koala Shade", "Secret", 0.5],
+  ["Koala Lord", "Ultra Secret", 0.08],
+  ["Koala Prime", "Mystical", 0.02],
+  ["Koala Divinity", "Celestial", 0.01],
+];
+packEmojis["Koala Pack"] = "🐨";
+
+packs["Hamster Pack"] = [
+  ["Tiny Hamster", "Common", 45.39],
+  ["Syrian Hamster", "Uncommon", 30],
+  ["Hamster Wheel", "Rare", 15],
+  ["Hamster King", "Legendary", 8],
+  ["Hamster Titan", "Mythic", 1],
+  ["Hamster Shade", "Secret", 0.5],
+  ["Hamster Lord", "Ultra Secret", 0.08],
+  ["Hamster Prime", "Mystical", 0.02],
+  ["Hamster Divinity", "Celestial", 0.01],
+];
+packEmojis["Hamster Pack"] = "🐹";
+
+packs["Hedgehog Pack"] = [
+  ["Baby Hedgehog", "Common", 45.39],
+  ["Spiny Friend", "Uncommon", 30],
+  ["Desert Hedgehog", "Rare", 15],
+  ["Hedgehog King", "Legendary", 8],
+  ["Quill Titan", "Mythic", 1],
+  ["Spike Shade", "Secret", 0.5],
+  ["Hedgehog Lord", "Ultra Secret", 0.08],
+  ["Hedgehog Prime", "Mystical", 0.02],
+  ["Hedgehog Divinity", "Celestial", 0.01],
+];
+packEmojis["Hedgehog Pack"] = "🦔";
+
+packs["Otter Pack"] = [
+  ["Pup Otter", "Common", 45.39],
+  ["Sea Otter", "Uncommon", 30],
+  ["River Otter", "Rare", 15],
+  ["Otter King", "Legendary", 8],
+  ["Otter Titan", "Mythic", 1],
+  ["Current Shade", "Secret", 0.5],
+  ["Otter Lord", "Ultra Secret", 0.08],
+  ["Otter Prime", "Mystical", 0.02],
+  ["Otter Divinity", "Celestial", 0.01],
+];
+packEmojis["Otter Pack"] = "🦦";
+
+packs["Seal Pack"] = [
+  ["Seal Pup", "Common", 45.39],
+  ["Harbor Seal", "Uncommon", 30],
+  ["Leopard Seal", "Rare", 15],
+  ["Elephant Seal", "Legendary", 8],
+  ["Seal Titan", "Mythic", 1],
+  ["Arctic Shade", "Secret", 0.5],
+  ["Seal Lord", "Ultra Secret", 0.08],
+  ["Seal Prime", "Mystical", 0.02],
+  ["Seal Divinity", "Celestial", 0.01],
+];
+packEmojis["Seal Pack"] = "🦭";
+
+packs["Parrot Pack"] = [
+  ["Budgie", "Common", 45.39],
+  ["Cockatiel", "Uncommon", 30],
+  ["Macaw", "Rare", 15],
+  ["Parrot King", "Legendary", 8],
+  ["Parrot Titan", "Mythic", 1],
+  ["Feather Shade", "Secret", 0.5],
+  ["Parrot Lord", "Ultra Secret", 0.08],
+  ["Parrot Prime", "Mystical", 0.02],
+  ["Parrot Divinity", "Celestial", 0.01],
+];
+packEmojis["Parrot Pack"] = "🦜";
+
+packs["Flamingo Pack"] = [
+  ["Pink Chick", "Common", 45.39],
+  ["Flamingo", "Uncommon", 30],
+  ["Scarlet Flamingo", "Rare", 15],
+  ["Flamingo King", "Legendary", 8],
+  ["Flamingo Titan", "Mythic", 1],
+  ["Wading Shade", "Secret", 0.5],
+  ["Flamingo Lord", "Ultra Secret", 0.08],
+  ["Flamingo Prime", "Mystical", 0.02],
+  ["Flamingo Divinity", "Celestial", 0.01],
+];
+packEmojis["Flamingo Pack"] = "🦩";
+
+packs["Peacock Pack"] = [
+  ["Peachick", "Common", 45.39],
+  ["Peacock", "Uncommon", 30],
+  ["White Peacock", "Rare", 15],
+  ["Peacock King", "Legendary", 8],
+  ["Plume Titan", "Mythic", 1],
+  ["Display Shade", "Secret", 0.5],
+  ["Peacock Lord", "Ultra Secret", 0.08],
+  ["Peacock Prime", "Mystical", 0.02],
+  ["Peacock Divinity", "Celestial", 0.01],
+];
+packEmojis["Peacock Pack"] = "🦚";
+
+packs["Sloth Pack"] = [
+  ["Baby Sloth", "Common", 45.39],
+  ["Two-Toed Sloth", "Uncommon", 30],
+  ["Three-Toed Sloth", "Rare", 15],
+  ["Sloth King", "Legendary", 8],
+  ["Sloth Titan", "Mythic", 1],
+  ["Lazy Shade", "Secret", 0.5],
+  ["Sloth Lord", "Ultra Secret", 0.08],
+  ["Sloth Prime", "Mystical", 0.02],
+  ["Sloth Divinity", "Celestial", 0.01],
+];
+packEmojis["Sloth Pack"] = "🦥";
+
+packs["Raccoon Pack"] = [
+  ["Baby Raccoon", "Common", 45.39],
+  ["Bandit", "Uncommon", 30],
+  ["Night Raccoon", "Rare", 15],
+  ["Raccoon King", "Legendary", 8],
+  ["Raccoon Titan", "Mythic", 1],
+  ["Mask Shade", "Secret", 0.5],
+  ["Raccoon Lord", "Ultra Secret", 0.08],
+  ["Raccoon Prime", "Mystical", 0.02],
+  ["Raccoon Divinity", "Celestial", 0.01],
+];
+packEmojis["Raccoon Pack"] = "🦝";
+
+packs["Gorilla Pack"] = [
+  ["Baby Gorilla", "Common", 45.39],
+  ["Mountain Gorilla", "Uncommon", 30],
+  ["Silverback", "Rare", 15],
+  ["Gorilla King", "Legendary", 8],
+  ["Gorilla Titan", "Mythic", 1],
+  ["Jungle Shade", "Secret", 0.5],
+  ["Gorilla Lord", "Ultra Secret", 0.08],
+  ["Gorilla Prime", "Mystical", 0.02],
+  ["Gorilla Divinity", "Celestial", 0.01],
+];
+packEmojis["Gorilla Pack"] = "🦍";
+
+packs["Kangaroo Pack"] = [
+  ["Joey Roo", "Common", 45.39],
+  ["Wallaby", "Uncommon", 30],
+  ["Red Kangaroo", "Rare", 15],
+  ["Kangaroo King", "Legendary", 8],
+  ["Outback Titan", "Mythic", 1],
+  ["Pouch Shade", "Secret", 0.5],
+  ["Kangaroo Lord", "Ultra Secret", 0.08],
+  ["Kangaroo Prime", "Mystical", 0.02],
+  ["Kangaroo Divinity", "Celestial", 0.01],
+];
+packEmojis["Kangaroo Pack"] = "🦘";
+
+packs["Camel Pack"] = [
+  ["Baby Camel", "Common", 45.39],
+  ["Dromedary", "Uncommon", 30],
+  ["Bactrian Camel", "Rare", 15],
+  ["Camel King", "Legendary", 8],
+  ["Desert Titan", "Mythic", 1],
+  ["Oasis Shade", "Secret", 0.5],
+  ["Camel Lord", "Ultra Secret", 0.08],
+  ["Camel Prime", "Mystical", 0.02],
+  ["Camel Divinity", "Celestial", 0.01],
+];
+packEmojis["Camel Pack"] = "🐪";
+
+packs["Octopus Pack"] = [
+  ["Baby Octopus", "Common", 45.39],
+  ["Blue Ring", "Uncommon", 30],
+  ["Giant Pacific", "Rare", 15],
+  ["Kraken Jr", "Legendary", 8],
+  ["Tentacle Titan", "Mythic", 1],
+  ["Ink Shade", "Secret", 0.5],
+  ["Octopus Lord", "Ultra Secret", 0.08],
+  ["Octopus Prime", "Mystical", 0.02],
+  ["Octopus Divinity", "Celestial", 0.01],
+];
+packEmojis["Octopus Pack"] = "🐙";
+
+packs["Pufferfish Pack"] = [
+  ["Baby Puffer", "Common", 45.39],
+  ["Porcupine Fish", "Uncommon", 30],
+  ["Box Fish", "Rare", 15],
+  ["Puffer King", "Legendary", 8],
+  ["Toxin Titan", "Mythic", 1],
+  ["Balloon Shade", "Secret", 0.5],
+  ["Puffer Lord", "Ultra Secret", 0.08],
+  ["Puffer Prime", "Mystical", 0.02],
+  ["Puffer Divinity", "Celestial", 0.01],
+];
+packEmojis["Pufferfish Pack"] = "🐡";
+
+packs["Narwhal Pack"] = [
+  ["Baby Narwhal", "Common", 45.39],
+  ["Arctic Narwhal", "Uncommon", 30],
+  ["Tusk Fighter", "Rare", 15],
+  ["Narwhal King", "Legendary", 8],
+  ["Horn Titan", "Mythic", 1],
+  ["Ice Shade", "Secret", 0.5],
+  ["Narwhal Lord", "Ultra Secret", 0.08],
+  ["Narwhal Prime", "Mystical", 0.02],
+  ["Narwhal Divinity", "Celestial", 0.01],
+];
+packEmojis["Narwhal Pack"] = "🐳";
+
+packs["Chameleon Pack"] = [
+  ["Baby Chameleon", "Common", 45.39],
+  ["Veiled Chameleon", "Uncommon", 30],
+  ["Panther Chameleon", "Rare", 15],
+  ["Chameleon King", "Legendary", 8],
+  ["Color Titan", "Mythic", 1],
+  ["Camo Shade", "Secret", 0.5],
+  ["Chameleon Lord", "Ultra Secret", 0.08],
+  ["Chameleon Prime", "Mystical", 0.02],
+  ["Chameleon Divinity", "Celestial", 0.01],
+];
+packEmojis["Chameleon Pack"] = "🦎";
+
+packs["Crow Pack"] = [
+  ["Fledgling", "Common", 45.39],
+  ["Jackdaw", "Uncommon", 30],
+  ["Raven", "Rare", 15],
+  ["Crow King", "Legendary", 8],
+  ["Murder Titan", "Mythic", 1],
+  ["Dark Wing Shade", "Secret", 0.5],
+  ["Corvid Lord", "Ultra Secret", 0.08],
+  ["Crow Prime", "Mystical", 0.02],
+  ["Crow Divinity", "Celestial", 0.01],
+];
+packEmojis["Crow Pack"] = "🐦‍⬛";
+
+packs["Jellyfish Pack"] = [
+  ["Moon Jelly", "Common", 45.39],
+  ["Lion's Mane", "Uncommon", 30],
+  ["Box Jelly", "Rare", 15],
+  ["Jellyfish King", "Legendary", 8],
+  ["Bloom Titan", "Mythic", 1],
+  ["Drift Shade", "Secret", 0.5],
+  ["Jellyfish Lord", "Ultra Secret", 0.08],
+  ["Jellyfish Prime", "Mystical", 0.02],
+  ["Jellyfish Divinity", "Celestial", 0.01],
+];
+packEmojis["Jellyfish Pack"] = "🪼";
+
+packs["Moose Pack"] = [
+  ["Moose Calf", "Common", 45.39],
+  ["Bull Moose", "Uncommon", 30],
+  ["Giant Moose", "Rare", 15],
+  ["Moose King", "Legendary", 8],
+  ["Antler Titan", "Mythic", 1],
+  ["Forest Shade", "Secret", 0.5],
+  ["Moose Lord", "Ultra Secret", 0.08],
+  ["Moose Prime", "Mystical", 0.02],
+  ["Moose Divinity", "Celestial", 0.01],
+];
+packEmojis["Moose Pack"] = "🫎";
+
+packs["Coffee Pack"] = [
+  ["Espresso Shot", "Common", 45.39],
+  ["Latte", "Uncommon", 30],
+  ["Cappuccino", "Rare", 15],
+  ["Barista King", "Legendary", 8],
+  ["Coffee Titan", "Mythic", 1],
+  ["Roast Shade", "Secret", 0.5],
+  ["Brew Lord", "Ultra Secret", 0.08],
+  ["Coffee Prime", "Mystical", 0.02],
+  ["Coffee Divinity", "Celestial", 0.01],
+];
+packEmojis["Coffee Pack"] = "☕";
+
+packs["Tea Pack"] = [
+  ["Green Tea", "Common", 45.39],
+  ["Oolong", "Uncommon", 30],
+  ["Matcha", "Rare", 15],
+  ["Tea Master", "Legendary", 8],
+  ["Chai Titan", "Mythic", 1],
+  ["Steep Shade", "Secret", 0.5],
+  ["Tea Lord", "Ultra Secret", 0.08],
+  ["Tea Prime", "Mystical", 0.02],
+  ["Tea Divinity", "Celestial", 0.01],
+];
+packEmojis["Tea Pack"] = "🍵";
+
+packs["Dim Sum Pack"] = [
+  ["Dumpling", "Common", 45.39],
+  ["Bao Bun", "Uncommon", 30],
+  ["Spring Roll", "Rare", 15],
+  ["Dim Sum King", "Legendary", 8],
+  ["Wonton Titan", "Mythic", 1],
+  ["Steam Shade", "Secret", 0.5],
+  ["Dim Sum Lord", "Ultra Secret", 0.08],
+  ["Dim Sum Prime", "Mystical", 0.02],
+  ["Dim Sum Divinity", "Celestial", 0.01],
+];
+packEmojis["Dim Sum Pack"] = "🥟";
+
+packs["Curry Pack"] = [
+  ["Mild Curry", "Common", 45.39],
+  ["Tikka Masala", "Uncommon", 30],
+  ["Vindaloo", "Rare", 15],
+  ["Curry King", "Legendary", 8],
+  ["Spice Titan", "Mythic", 1],
+  ["Saffron Shade", "Secret", 0.5],
+  ["Curry Lord", "Ultra Secret", 0.08],
+  ["Curry Prime", "Mystical", 0.02],
+  ["Curry Divinity", "Celestial", 0.01],
+];
+packEmojis["Curry Pack"] = "🍛";
+
+packs["Soup Pack"] = [
+  ["Broth", "Common", 45.39],
+  ["Tomato Soup", "Uncommon", 30],
+  ["Pho", "Rare", 15],
+  ["Soup King", "Legendary", 8],
+  ["Bisque Titan", "Mythic", 1],
+  ["Steam Ghost", "Secret", 0.5],
+  ["Soup Lord", "Ultra Secret", 0.08],
+  ["Soup Prime", "Mystical", 0.02],
+  ["Soup Divinity", "Celestial", 0.01],
+];
+packEmojis["Soup Pack"] = "🥣";
+
+packs["Sandwich Pack"] = [
+  ["PB&J", "Common", 45.39],
+  ["Club Sandwich", "Uncommon", 30],
+  ["Reuben", "Rare", 15],
+  ["Sandwich King", "Legendary", 8],
+  ["Sub Titan", "Mythic", 1],
+  ["Bread Shade", "Secret", 0.5],
+  ["Sandwich Lord", "Ultra Secret", 0.08],
+  ["Sandwich Prime", "Mystical", 0.02],
+  ["Sandwich Divinity", "Celestial", 0.01],
+];
+packEmojis["Sandwich Pack"] = "🥪";
+
+packs["Kebab Pack"] = [
+  ["Skewer", "Common", 45.39],
+  ["Shish Kebab", "Uncommon", 30],
+  ["Doner", "Rare", 15],
+  ["Kebab King", "Legendary", 8],
+  ["Grill Titan", "Mythic", 1],
+  ["Spice Shade", "Secret", 0.5],
+  ["Kebab Lord", "Ultra Secret", 0.08],
+  ["Kebab Prime", "Mystical", 0.02],
+  ["Kebab Divinity", "Celestial", 0.01],
+];
+packEmojis["Kebab Pack"] = "🥙";
+
+packs["Pie Pack"] = [
+  ["Mini Pie", "Common", 45.39],
+  ["Apple Pie", "Uncommon", 30],
+  ["Pecan Pie", "Rare", 15],
+  ["Pie King", "Legendary", 8],
+  ["Crust Titan", "Mythic", 1],
+  ["Filling Shade", "Secret", 0.5],
+  ["Pie Lord", "Ultra Secret", 0.08],
+  ["Pie Prime", "Mystical", 0.02],
+  ["Pie Divinity", "Celestial", 0.01],
+];
+packEmojis["Pie Pack"] = "🥧";
+
+packs["Pudding Pack"] = [
+  ["Flan", "Common", 45.39],
+  ["Rice Pudding", "Uncommon", 30],
+  ["Creme Brulee", "Rare", 15],
+  ["Pudding King", "Legendary", 8],
+  ["Custard Titan", "Mythic", 1],
+  ["Caramel Shade", "Secret", 0.5],
+  ["Pudding Lord", "Ultra Secret", 0.08],
+  ["Pudding Prime", "Mystical", 0.02],
+  ["Pudding Divinity", "Celestial", 0.01],
+];
+packEmojis["Pudding Pack"] = "🍮";
+
+packs["Milkshake Pack"] = [
+  ["Vanilla Shake", "Common", 45.39],
+  ["Chocolate Shake", "Uncommon", 30],
+  ["Strawberry Shake", "Rare", 15],
+  ["Shake King", "Legendary", 8],
+  ["Malt Titan", "Mythic", 1],
+  ["Whip Shade", "Secret", 0.5],
+  ["Milkshake Lord", "Ultra Secret", 0.08],
+  ["Milkshake Prime", "Mystical", 0.02],
+  ["Milkshake Divinity", "Celestial", 0.01],
+];
+packEmojis["Milkshake Pack"] = "🥛";
+
+packs["Popcorn Pack"] = [
+  ["Kernel", "Common", 45.39],
+  ["Buttered Popcorn", "Uncommon", 30],
+  ["Caramel Corn", "Rare", 15],
+  ["Popcorn King", "Legendary", 8],
+  ["Pop Titan", "Mythic", 1],
+  ["Cinema Shade", "Secret", 0.5],
+  ["Popcorn Lord", "Ultra Secret", 0.08],
+  ["Popcorn Prime", "Mystical", 0.02],
+  ["Popcorn Divinity", "Celestial", 0.01],
+];
+packEmojis["Popcorn Pack"] = "🍿";
+
+packs["Honey Pack"] = [
+  ["Pollen Grain", "Common", 45.39],
+  ["Honeycomb", "Uncommon", 30],
+  ["Royal Jelly", "Rare", 15],
+  ["Honey King", "Legendary", 8],
+  ["Nectar Titan", "Mythic", 1],
+  ["Amber Shade", "Secret", 0.5],
+  ["Honey Lord", "Ultra Secret", 0.08],
+  ["Honey Prime", "Mystical", 0.02],
+  ["Honey Divinity", "Celestial", 0.01],
+];
+packEmojis["Honey Pack"] = "🍯";
+
+packs["Cereal Pack"] = [
+  ["Cornflake", "Common", 45.39],
+  ["Granola", "Uncommon", 30],
+  ["Lucky Charm", "Rare", 15],
+  ["Cereal King", "Legendary", 8],
+  ["Breakfast Titan", "Mythic", 1],
+  ["Milk Shade", "Secret", 0.5],
+  ["Cereal Lord", "Ultra Secret", 0.08],
+  ["Cereal Prime", "Mystical", 0.02],
+  ["Cereal Divinity", "Celestial", 0.01],
+];
+packEmojis["Cereal Pack"] = "🥣";
+
+packs["Avocado Pack"] = [
+  ["Seed", "Common", 45.39],
+  ["Half Avocado", "Uncommon", 30],
+  ["Guacamole", "Rare", 15],
+  ["Avocado King", "Legendary", 8],
+  ["Green Titan", "Mythic", 1],
+  ["Toast Shade", "Secret", 0.5],
+  ["Avocado Lord", "Ultra Secret", 0.08],
+  ["Avocado Prime", "Mystical", 0.02],
+  ["Avocado Divinity", "Celestial", 0.01],
+];
+packEmojis["Avocado Pack"] = "🥑";
+
+packs["Coconut Pack"] = [
+  ["Coconut Shard", "Common", 45.39],
+  ["Young Coconut", "Uncommon", 30],
+  ["Coconut Cream", "Rare", 15],
+  ["Coconut King", "Legendary", 8],
+  ["Palm Titan", "Mythic", 1],
+  ["Tropical Shade", "Secret", 0.5],
+  ["Coconut Lord", "Ultra Secret", 0.08],
+  ["Coconut Prime", "Mystical", 0.02],
+  ["Coconut Divinity", "Celestial", 0.01],
+];
+packEmojis["Coconut Pack"] = "🥥";
+
+packs["Pepper Pack"] = [
+  ["Bell Pepper", "Common", 45.39],
+  ["Jalapeno", "Uncommon", 30],
+  ["Habanero", "Rare", 15],
+  ["Ghost Pepper", "Legendary", 8],
+  ["Reaper Titan", "Mythic", 1],
+  ["Capsaicin Shade", "Secret", 0.5],
+  ["Pepper Lord", "Ultra Secret", 0.08],
+  ["Pepper Prime", "Mystical", 0.02],
+  ["Pepper Divinity", "Celestial", 0.01],
+];
+packEmojis["Pepper Pack"] = "🌶️";
+
+packs["Steak Pack"] = [
+  ["Beef Patty", "Common", 45.39],
+  ["Sirloin", "Uncommon", 30],
+  ["Ribeye", "Rare", 15],
+  ["Wagyu King", "Legendary", 8],
+  ["Steak Titan", "Mythic", 1],
+  ["Grill Shade", "Secret", 0.5],
+  ["Steak Lord", "Ultra Secret", 0.08],
+  ["Steak Prime", "Mystical", 0.02],
+  ["Steak Divinity", "Celestial", 0.01],
+];
+packEmojis["Steak Pack"] = "🥩";
+
+packs["Waffle Pack"] = [
+  ["Mini Waffle", "Common", 45.39],
+  ["Belgian Waffle", "Uncommon", 30],
+  ["Waffle Stack", "Rare", 15],
+  ["Waffle King", "Legendary", 8],
+  ["Syrup Titan", "Mythic", 1],
+  ["Crispy Shade", "Secret", 0.5],
+  ["Waffle Lord", "Ultra Secret", 0.08],
+  ["Waffle Prime", "Mystical", 0.02],
+  ["Waffle Divinity", "Celestial", 0.01],
+];
+packEmojis["Waffle Pack"] = "🧇";
+
+packs["Grape Pack"] = [
+  ["Green Grape", "Common", 45.39],
+  ["Red Grape", "Uncommon", 30],
+  ["Wine Grape", "Rare", 15],
+  ["Grape King", "Legendary", 8],
+  ["Vineyard Titan", "Mythic", 1],
+  ["Vine Shade", "Secret", 0.5],
+  ["Grape Lord", "Ultra Secret", 0.08],
+  ["Grape Prime", "Mystical", 0.02],
+  ["Grape Divinity", "Celestial", 0.01],
+];
+packEmojis["Grape Pack"] = "🍇";
+
+packs["Lemon Pack"] = [
+  ["Lemon Slice", "Common", 45.39],
+  ["Lemonade", "Uncommon", 30],
+  ["Lemon Tart", "Rare", 15],
+  ["Lemon King", "Legendary", 8],
+  ["Citrus Titan", "Mythic", 1],
+  ["Zest Shade", "Secret", 0.5],
+  ["Lemon Lord", "Ultra Secret", 0.08],
+  ["Lemon Prime", "Mystical", 0.02],
+  ["Lemon Divinity", "Celestial", 0.01],
+];
+packEmojis["Lemon Pack"] = "🍋";
+
+packs["Melon Pack"] = [
+  ["Melon Slice", "Common", 45.39],
+  ["Honeydew", "Uncommon", 30],
+  ["Cantaloupe", "Rare", 15],
+  ["Watermelon King", "Legendary", 8],
+  ["Melon Titan", "Mythic", 1],
+  ["Rind Shade", "Secret", 0.5],
+  ["Melon Lord", "Ultra Secret", 0.08],
+  ["Melon Prime", "Mystical", 0.02],
+  ["Melon Divinity", "Celestial", 0.01],
+];
+packEmojis["Melon Pack"] = "🍈";
+
+packs["Pretzel Pack"] = [
+  ["Mini Pretzel", "Common", 45.39],
+  ["Soft Pretzel", "Uncommon", 30],
+  ["Pretzel Twist", "Rare", 15],
+  ["Pretzel King", "Legendary", 8],
+  ["Salt Titan", "Mythic", 1],
+  ["Knot Shade", "Secret", 0.5],
+  ["Pretzel Lord", "Ultra Secret", 0.08],
+  ["Pretzel Prime", "Mystical", 0.02],
+  ["Pretzel Divinity", "Celestial", 0.01],
+];
+packEmojis["Pretzel Pack"] = "🥨";
+
+packs["Burrito Pack"] = [
+  ["Bean Burrito", "Common", 45.39],
+  ["Chicken Wrap", "Uncommon", 30],
+  ["Mega Burrito", "Rare", 15],
+  ["Burrito King", "Legendary", 8],
+  ["Tortilla Titan", "Mythic", 1],
+  ["Salsa Shade", "Secret", 0.5],
+  ["Burrito Lord", "Ultra Secret", 0.08],
+  ["Burrito Prime", "Mystical", 0.02],
+  ["Burrito Divinity", "Celestial", 0.01],
+];
+packEmojis["Burrito Pack"] = "🌯";
+
+packs["Noodle Pack"] = [
+  ["Cup Noodle", "Common", 45.39],
+  ["Udon", "Uncommon", 30],
+  ["Lo Mein", "Rare", 15],
+  ["Noodle King", "Legendary", 8],
+  ["Broth Titan", "Mythic", 1],
+  ["Slurp Shade", "Secret", 0.5],
+  ["Noodle Lord", "Ultra Secret", 0.08],
+  ["Noodle Prime", "Mystical", 0.02],
+  ["Noodle Divinity", "Celestial", 0.01],
+];
+packEmojis["Noodle Pack"] = "🍜";
+
+packs["Pancake Pack"] = [
+  ["Silver Dollar", "Common", 45.39],
+  ["Stack", "Uncommon", 30],
+  ["Crepe", "Rare", 15],
+  ["Pancake King", "Legendary", 8],
+  ["Griddle Titan", "Mythic", 1],
+  ["Batter Shade", "Secret", 0.5],
+  ["Pancake Lord", "Ultra Secret", 0.08],
+  ["Pancake Prime", "Mystical", 0.02],
+  ["Pancake Divinity", "Celestial", 0.01],
+];
+packEmojis["Pancake Pack"] = "🥞";
+
+packs["Waterfall Pack"] = [
+  ["Stream", "Common", 45.39],
+  ["Cascade", "Uncommon", 30],
+  ["Cataract", "Rare", 15],
+  ["Niagara King", "Legendary", 8],
+  ["Falls Titan", "Mythic", 1],
+  ["Mist Shade", "Secret", 0.5],
+  ["Waterfall Lord", "Ultra Secret", 0.08],
+  ["Waterfall Prime", "Mystical", 0.02],
+  ["Waterfall Divinity", "Celestial", 0.01],
+];
+packEmojis["Waterfall Pack"] = "💧";
+
+packs["River Pack"] = [
+  ["Creek", "Common", 45.39],
+  ["Brook", "Uncommon", 30],
+  ["Rapids", "Rare", 15],
+  ["River King", "Legendary", 8],
+  ["Delta Titan", "Mythic", 1],
+  ["Current Shade", "Secret", 0.5],
+  ["River Lord", "Ultra Secret", 0.08],
+  ["River Prime", "Mystical", 0.02],
+  ["River Divinity", "Celestial", 0.01],
+];
+packEmojis["River Pack"] = "🏞️";
+
+packs["Lake Pack"] = [
+  ["Pond", "Common", 45.39],
+  ["Lagoon", "Uncommon", 30],
+  ["Great Lake", "Rare", 15],
+  ["Lake King", "Legendary", 8],
+  ["Depths Titan", "Mythic", 1],
+  ["Still Shade", "Secret", 0.5],
+  ["Lake Lord", "Ultra Secret", 0.08],
+  ["Lake Prime", "Mystical", 0.02],
+  ["Lake Divinity", "Celestial", 0.01],
+];
+packEmojis["Lake Pack"] = "🏞️";
+
+packs["Glacier Pack"] = [
+  ["Ice Shard", "Common", 45.39],
+  ["Crevasse", "Uncommon", 30],
+  ["Iceberg", "Rare", 15],
+  ["Glacier King", "Legendary", 8],
+  ["Permafrost Titan", "Mythic", 1],
+  ["Glacial Shade", "Secret", 0.5],
+  ["Glacier Lord", "Ultra Secret", 0.08],
+  ["Glacier Prime", "Mystical", 0.02],
+  ["Glacier Divinity", "Celestial", 0.01],
+];
+packEmojis["Glacier Pack"] = "🧊";
+
+packs["Prairie Pack"] = [
+  ["Grass Tuft", "Common", 45.39],
+  ["Prairie Dog", "Uncommon", 30],
+  ["Bison", "Rare", 15],
+  ["Prairie King", "Legendary", 8],
+  ["Steppe Titan", "Mythic", 1],
+  ["Wind Shade", "Secret", 0.5],
+  ["Prairie Lord", "Ultra Secret", 0.08],
+  ["Prairie Prime", "Mystical", 0.02],
+  ["Prairie Divinity", "Celestial", 0.01],
+];
+packEmojis["Prairie Pack"] = "🌾";
+
+packs["Canyon Pack"] = [
+  ["Rock Layer", "Common", 45.39],
+  ["Sandstone", "Uncommon", 30],
+  ["Arch", "Rare", 15],
+  ["Canyon King", "Legendary", 8],
+  ["Gorge Titan", "Mythic", 1],
+  ["Echo Shade", "Secret", 0.5],
+  ["Canyon Lord", "Ultra Secret", 0.08],
+  ["Canyon Prime", "Mystical", 0.02],
+  ["Canyon Divinity", "Celestial", 0.01],
+];
+packEmojis["Canyon Pack"] = "🏜️";
+
+packs["Rainforest Pack"] = [
+  ["Fern", "Common", 45.39],
+  ["Toucan", "Uncommon", 30],
+  ["Jaguar", "Rare", 15],
+  ["Canopy King", "Legendary", 8],
+  ["Rainforest Titan", "Mythic", 1],
+  ["Monsoon Shade", "Secret", 0.5],
+  ["Rainforest Lord", "Ultra Secret", 0.08],
+  ["Rainforest Prime", "Mystical", 0.02],
+  ["Rainforest Divinity", "Celestial", 0.01],
+];
+packEmojis["Rainforest Pack"] = "🌧️";
+
+packs["Oasis Pack"] = [
+  ["Palm Frond", "Common", 45.39],
+  ["Spring Water", "Uncommon", 30],
+  ["Mirage", "Rare", 15],
+  ["Oasis King", "Legendary", 8],
+  ["Oasis Titan", "Mythic", 1],
+  ["Desert Rose Shade", "Secret", 0.5],
+  ["Oasis Lord", "Ultra Secret", 0.08],
+  ["Oasis Prime", "Mystical", 0.02],
+  ["Oasis Divinity", "Celestial", 0.01],
+];
+packEmojis["Oasis Pack"] = "🏝️";
+
+packs["Coral Pack"] = [
+  ["Polyp", "Common", 45.39],
+  ["Fan Coral", "Uncommon", 30],
+  ["Brain Coral", "Rare", 15],
+  ["Coral King", "Legendary", 8],
+  ["Barrier Titan", "Mythic", 1],
+  ["Bleach Shade", "Secret", 0.5],
+  ["Coral Lord", "Ultra Secret", 0.08],
+  ["Coral Prime", "Mystical", 0.02],
+  ["Coral Divinity", "Celestial", 0.01],
+];
+packEmojis["Coral Pack"] = "🪸";
+
+packs["Mangrove Pack"] = [
+  ["Root", "Common", 45.39],
+  ["Mangrove Crab", "Uncommon", 30],
+  ["Mudskipper", "Rare", 15],
+  ["Mangrove King", "Legendary", 8],
+  ["Estuary Titan", "Mythic", 1],
+  ["Brackish Shade", "Secret", 0.5],
+  ["Mangrove Lord", "Ultra Secret", 0.08],
+  ["Mangrove Prime", "Mystical", 0.02],
+  ["Mangrove Divinity", "Celestial", 0.01],
+];
+packEmojis["Mangrove Pack"] = "🌿";
+
+packs["Tide Pool Pack"] = [
+  ["Sea Snail", "Common", 45.39],
+  ["Hermit Crab", "Uncommon", 30],
+  ["Sea Urchin", "Rare", 15],
+  ["Tide King", "Legendary", 8],
+  ["Pool Titan", "Mythic", 1],
+  ["Low Tide Shade", "Secret", 0.5],
+  ["Tidal Lord", "Ultra Secret", 0.08],
+  ["Tide Prime", "Mystical", 0.02],
+  ["Tide Pool Divinity", "Celestial", 0.01],
+];
+packEmojis["Tide Pool Pack"] = "🐚";
+
+packs["Fjord Pack"] = [
+  ["Cliff Face", "Common", 45.39],
+  ["Viking Ship", "Uncommon", 30],
+  ["Northern Light", "Rare", 15],
+  ["Fjord King", "Legendary", 8],
+  ["Nordic Titan", "Mythic", 1],
+  ["Fjord Shade", "Secret", 0.5],
+  ["Fjord Lord", "Ultra Secret", 0.08],
+  ["Fjord Prime", "Mystical", 0.02],
+  ["Fjord Divinity", "Celestial", 0.01],
+];
+packEmojis["Fjord Pack"] = "⛰️";
+
+packs["Marsh Pack"] = [
+  ["Cattail", "Common", 45.39],
+  ["Heron", "Uncommon", 30],
+  ["Gator", "Rare", 15],
+  ["Marsh King", "Legendary", 8],
+  ["Wetland Titan", "Mythic", 1],
+  ["Fog Shade", "Secret", 0.5],
+  ["Marsh Lord", "Ultra Secret", 0.08],
+  ["Marsh Prime", "Mystical", 0.02],
+  ["Marsh Divinity", "Celestial", 0.01],
+];
+packEmojis["Marsh Pack"] = "🌿";
+
+packs["Valley Pack"] = [
+  ["Meadow", "Common", 45.39],
+  ["Wildflower", "Uncommon", 30],
+  ["Valley Elk", "Rare", 15],
+  ["Valley King", "Legendary", 8],
+  ["Vale Titan", "Mythic", 1],
+  ["Mist Valley Shade", "Secret", 0.5],
+  ["Valley Lord", "Ultra Secret", 0.08],
+  ["Valley Prime", "Mystical", 0.02],
+  ["Valley Divinity", "Celestial", 0.01],
+];
+packEmojis["Valley Pack"] = "🌄";
+
+packs["Dune Pack"] = [
+  ["Sand Grain", "Common", 45.39],
+  ["Sand Dune", "Uncommon", 30],
+  ["Desert Fox", "Rare", 15],
+  ["Dune King", "Legendary", 8],
+  ["Sandstorm Titan", "Mythic", 1],
+  ["Mirage Shade", "Secret", 0.5],
+  ["Dune Lord", "Ultra Secret", 0.08],
+  ["Dune Prime", "Mystical", 0.02],
+  ["Dune Divinity", "Celestial", 0.01],
+];
+packEmojis["Dune Pack"] = "🏜️";
+
+packs["Savanna Pack"] = [
+  ["Grass Patch", "Common", 45.39],
+  ["Giraffe", "Uncommon", 30],
+  ["Wildebeest", "Rare", 15],
+  ["Savanna King", "Legendary", 8],
+  ["Migration Titan", "Mythic", 1],
+  ["Heat Shade", "Secret", 0.5],
+  ["Savanna Lord", "Ultra Secret", 0.08],
+  ["Savanna Prime", "Mystical", 0.02],
+  ["Savanna Divinity", "Celestial", 0.01],
+];
+packEmojis["Savanna Pack"] = "🦒";
+
+packs["Plateau Pack"] = [
+  ["Flat Rock", "Common", 45.39],
+  ["Mesa Bird", "Uncommon", 30],
+  ["Highland Goat", "Rare", 15],
+  ["Plateau King", "Legendary", 8],
+  ["Tableland Titan", "Mythic", 1],
+  ["Altitude Shade", "Secret", 0.5],
+  ["Plateau Lord", "Ultra Secret", 0.08],
+  ["Plateau Prime", "Mystical", 0.02],
+  ["Plateau Divinity", "Celestial", 0.01],
+];
+packEmojis["Plateau Pack"] = "🗻";
+
+packs["Volcano Island Pack"] = [
+  ["Pumice", "Common", 45.39],
+  ["Hot Spring", "Uncommon", 30],
+  ["Sulfur Vent", "Rare", 15],
+  ["Caldera King", "Legendary", 8],
+  ["Eruption Titan", "Mythic", 1],
+  ["Lava Shade", "Secret", 0.5],
+  ["Volcanic Lord", "Ultra Secret", 0.08],
+  ["Volcano Isle Prime", "Mystical", 0.02],
+  ["Volcano Island Divinity", "Celestial", 0.01],
+];
+packEmojis["Volcano Island Pack"] = "🌋";
+
+packs["Bayou Pack"] = [
+  ["Moss", "Common", 45.39],
+  ["Crawfish", "Uncommon", 30],
+  ["Bayou Gator", "Rare", 15],
+  ["Bayou King", "Legendary", 8],
+  ["Swamp Gas Titan", "Mythic", 1],
+  ["Voodoo Shade", "Secret", 0.5],
+  ["Bayou Lord", "Ultra Secret", 0.08],
+  ["Bayou Prime", "Mystical", 0.02],
+  ["Bayou Divinity", "Celestial", 0.01],
+];
+packEmojis["Bayou Pack"] = "🐊";
+
+packs["Steppe Pack"] = [
+  ["Wild Grass", "Common", 45.39],
+  ["Nomad", "Uncommon", 30],
+  ["Steppe Eagle", "Rare", 15],
+  ["Khan", "Legendary", 8],
+  ["Steppe Titan", "Mythic", 1],
+  ["Wind Shade", "Secret", 0.5],
+  ["Steppe Lord", "Ultra Secret", 0.08],
+  ["Steppe Prime", "Mystical", 0.02],
+  ["Steppe Divinity", "Celestial", 0.01],
+];
+packEmojis["Steppe Pack"] = "🐎";
+
+packs["Archipelago Pack"] = [
+  ["Sandy Shore", "Common", 45.39],
+  ["Coconut Palm", "Uncommon", 30],
+  ["Sea Turtle", "Rare", 15],
+  ["Island Chief", "Legendary", 8],
+  ["Archipelago Titan", "Mythic", 1],
+  ["Lagoon Shade", "Secret", 0.5],
+  ["Archipelago Lord", "Ultra Secret", 0.08],
+  ["Archipelago Prime", "Mystical", 0.02],
+  ["Archipelago Divinity", "Celestial", 0.01],
+];
+packEmojis["Archipelago Pack"] = "🏝️";
+
+packs["Geyser Pack"] = [
+  ["Hot Rock", "Common", 45.39],
+  ["Steam Vent", "Uncommon", 30],
+  ["Mud Pot", "Rare", 15],
+  ["Geyser King", "Legendary", 8],
+  ["Thermal Titan", "Mythic", 1],
+  ["Boiling Shade", "Secret", 0.5],
+  ["Geyser Lord", "Ultra Secret", 0.08],
+  ["Geyser Prime", "Mystical", 0.02],
+  ["Geyser Divinity", "Celestial", 0.01],
+];
+packEmojis["Geyser Pack"] = "♨️";
+
+packs["Tidal Wave Pack"] = [
+  ["Ripple", "Common", 45.39],
+  ["Swell", "Uncommon", 30],
+  ["Breaker", "Rare", 15],
+  ["Tsunami King", "Legendary", 8],
+  ["Wave Titan", "Mythic", 1],
+  ["Surge Shade", "Secret", 0.5],
+  ["Tidal Lord", "Ultra Secret", 0.08],
+  ["Tidal Prime", "Mystical", 0.02],
+  ["Tidal Wave Divinity", "Celestial", 0.01],
+];
+packEmojis["Tidal Wave Pack"] = "🌊";
+
+packs["Iceberg Pack"] = [
+  ["Ice Chip", "Common", 45.39],
+  ["Frost Cap", "Uncommon", 30],
+  ["Berg Fragment", "Rare", 15],
+  ["Iceberg King", "Legendary", 8],
+  ["Titanic Ice", "Mythic", 1],
+  ["Submerged Shade", "Secret", 0.5],
+  ["Iceberg Lord", "Ultra Secret", 0.08],
+  ["Iceberg Prime", "Mystical", 0.02],
+  ["Iceberg Divinity", "Celestial", 0.01],
+];
+packEmojis["Iceberg Pack"] = "🏔️";
+
+packs["Reef Pack"] = [
+  ["Clam", "Common", 45.39],
+  ["Parrotfish", "Uncommon", 30],
+  ["Moray Eel", "Rare", 15],
+  ["Reef King", "Legendary", 8],
+  ["Lagoon Titan", "Mythic", 1],
+  ["Coral Shade", "Secret", 0.5],
+  ["Reef Lord", "Ultra Secret", 0.08],
+  ["Reef Prime", "Mystical", 0.02],
+  ["Reef Divinity", "Celestial", 0.01],
+];
+packEmojis["Reef Pack"] = "🐠";
+
+packs["Swimming Pack"] = [
+  ["Kickboard", "Common", 45.39],
+  ["Freestyle", "Uncommon", 30],
+  ["Backstroke", "Rare", 15],
+  ["Swim King", "Legendary", 8],
+  ["Aqua Titan", "Mythic", 1],
+  ["Lane Shade", "Secret", 0.5],
+  ["Swim Lord", "Ultra Secret", 0.08],
+  ["Swimming Prime", "Mystical", 0.02],
+  ["Swimming Divinity", "Celestial", 0.01],
+];
+packEmojis["Swimming Pack"] = "🏊";
+
+packs["Tennis Pack"] = [
+  ["Tennis Ball", "Common", 45.39],
+  ["Racket", "Uncommon", 30],
+  ["Ace Shot", "Rare", 15],
+  ["Tennis King", "Legendary", 8],
+  ["Grand Slam", "Mythic", 1],
+  ["Court Shade", "Secret", 0.5],
+  ["Tennis Lord", "Ultra Secret", 0.08],
+  ["Tennis Prime", "Mystical", 0.02],
+  ["Tennis Divinity", "Celestial", 0.01],
+];
+packEmojis["Tennis Pack"] = "🎾";
+
+packs["Golf Pack"] = [
+  ["Golf Tee", "Common", 45.39],
+  ["Iron Club", "Uncommon", 30],
+  ["Birdie", "Rare", 15],
+  ["Golf King", "Legendary", 8],
+  ["Hole-in-One Titan", "Mythic", 1],
+  ["Green Shade", "Secret", 0.5],
+  ["Golf Lord", "Ultra Secret", 0.08],
+  ["Golf Prime", "Mystical", 0.02],
+  ["Golf Divinity", "Celestial", 0.01],
+];
+packEmojis["Golf Pack"] = "⛳";
+
+packs["Boxing Pack"] = [
+  ["Sparring Glove", "Common", 45.39],
+  ["Jab", "Uncommon", 30],
+  ["Uppercut", "Rare", 15],
+  ["Boxing King", "Legendary", 8],
+  ["Ring Titan", "Mythic", 1],
+  ["Corner Shade", "Secret", 0.5],
+  ["Boxing Lord", "Ultra Secret", 0.08],
+  ["Boxing Prime", "Mystical", 0.02],
+  ["Boxing Divinity", "Celestial", 0.01],
+];
+packEmojis["Boxing Pack"] = "🥊";
+
+packs["Fencing Pack"] = [
+  ["Foil", "Common", 45.39],
+  ["Epee", "Uncommon", 30],
+  ["Sabre", "Rare", 15],
+  ["Fencing King", "Legendary", 8],
+  ["Duel Titan", "Mythic", 1],
+  ["Parry Shade", "Secret", 0.5],
+  ["Fencing Lord", "Ultra Secret", 0.08],
+  ["Fencing Prime", "Mystical", 0.02],
+  ["Fencing Divinity", "Celestial", 0.01],
+];
+packEmojis["Fencing Pack"] = "🤺";
+
+packs["Surfing Pack"] = [
+  ["Foam Board", "Common", 45.39],
+  ["Longboard", "Uncommon", 30],
+  ["Barrel Ride", "Rare", 15],
+  ["Surf King", "Legendary", 8],
+  ["Wave Rider", "Mythic", 1],
+  ["Rip Shade", "Secret", 0.5],
+  ["Surfing Lord", "Ultra Secret", 0.08],
+  ["Surfing Prime", "Mystical", 0.02],
+  ["Surfing Divinity", "Celestial", 0.01],
+];
+packEmojis["Surfing Pack"] = "🏄";
+
+packs["Snowboard Pack"] = [
+  ["Bunny Slope", "Common", 45.39],
+  ["Halfpipe", "Uncommon", 30],
+  ["Black Diamond", "Rare", 15],
+  ["Snowboard King", "Legendary", 8],
+  ["Powder Titan", "Mythic", 1],
+  ["Blizzard Shade", "Secret", 0.5],
+  ["Snowboard Lord", "Ultra Secret", 0.08],
+  ["Snowboard Prime", "Mystical", 0.02],
+  ["Snowboard Divinity", "Celestial", 0.01],
+];
+packEmojis["Snowboard Pack"] = "🏂";
+
+packs["Skiing Pack"] = [
+  ["Ski Poles", "Common", 45.39],
+  ["Slalom", "Uncommon", 30],
+  ["Giant Slalom", "Rare", 15],
+  ["Ski King", "Legendary", 8],
+  ["Alpine Titan", "Mythic", 1],
+  ["Avalanche Shade", "Secret", 0.5],
+  ["Ski Lord", "Ultra Secret", 0.08],
+  ["Skiing Prime", "Mystical", 0.02],
+  ["Skiing Divinity", "Celestial", 0.01],
+];
+packEmojis["Skiing Pack"] = "⛷️";
+
+packs["Hockey Pack"] = [
+  ["Puck", "Common", 45.39],
+  ["Slapshot", "Uncommon", 30],
+  ["Power Play", "Rare", 15],
+  ["Hockey King", "Legendary", 8],
+  ["Ice Titan", "Mythic", 1],
+  ["Rink Shade", "Secret", 0.5],
+  ["Hockey Lord", "Ultra Secret", 0.08],
+  ["Hockey Prime", "Mystical", 0.02],
+  ["Hockey Divinity", "Celestial", 0.01],
+];
+packEmojis["Hockey Pack"] = "🏒";
+
+packs["Cricket Pack"] = [
+  ["Cricket Ball", "Common", 45.39],
+  ["Batsman", "Uncommon", 30],
+  ["Bowler", "Rare", 15],
+  ["Cricket King", "Legendary", 8],
+  ["Wicket Titan", "Mythic", 1],
+  ["Pitch Shade", "Secret", 0.5],
+  ["Cricket Lord", "Ultra Secret", 0.08],
+  ["Cricket Prime", "Mystical", 0.02],
+  ["Cricket Divinity", "Celestial", 0.01],
+];
+packEmojis["Cricket Pack"] = "🏏";
+
+packs["Rugby Pack"] = [
+  ["Rugby Ball", "Common", 45.39],
+  ["Scrum", "Uncommon", 30],
+  ["Try Scorer", "Rare", 15],
+  ["Rugby King", "Legendary", 8],
+  ["Pitch Titan", "Mythic", 1],
+  ["Tackle Shade", "Secret", 0.5],
+  ["Rugby Lord", "Ultra Secret", 0.08],
+  ["Rugby Prime", "Mystical", 0.02],
+  ["Rugby Divinity", "Celestial", 0.01],
+];
+packEmojis["Rugby Pack"] = "🏉";
+
+packs["Bowling Pack"] = [
+  ["Pin", "Common", 45.39],
+  ["Spare", "Uncommon", 30],
+  ["Strike", "Rare", 15],
+  ["Bowling King", "Legendary", 8],
+  ["Lane Titan", "Mythic", 1],
+  ["Gutter Shade", "Secret", 0.5],
+  ["Bowling Lord", "Ultra Secret", 0.08],
+  ["Bowling Prime", "Mystical", 0.02],
+  ["Bowling Divinity", "Celestial", 0.01],
+];
+packEmojis["Bowling Pack"] = "🎳";
+
+packs["Volleyball Pack"] = [
+  ["Beach Ball", "Common", 45.39],
+  ["Bump", "Uncommon", 30],
+  ["Spike", "Rare", 15],
+  ["Volleyball King", "Legendary", 8],
+  ["Net Titan", "Mythic", 1],
+  ["Sand Shade", "Secret", 0.5],
+  ["Volleyball Lord", "Ultra Secret", 0.08],
+  ["Volleyball Prime", "Mystical", 0.02],
+  ["Volleyball Divinity", "Celestial", 0.01],
+];
+packEmojis["Volleyball Pack"] = "🏐";
+
+packs["Gymnastics Pack"] = [
+  ["Mat", "Common", 45.39],
+  ["Balance Beam", "Uncommon", 30],
+  ["Vault", "Rare", 15],
+  ["Gymnastics King", "Legendary", 8],
+  ["Floor Titan", "Mythic", 1],
+  ["Flip Shade", "Secret", 0.5],
+  ["Gymnastics Lord", "Ultra Secret", 0.08],
+  ["Gymnastics Prime", "Mystical", 0.02],
+  ["Gymnastics Divinity", "Celestial", 0.01],
+];
+packEmojis["Gymnastics Pack"] = "🤸";
+
+packs["Diving Pack"] = [
+  ["Snorkel", "Common", 45.39],
+  ["Scuba Tank", "Uncommon", 30],
+  ["Deep Dive", "Rare", 15],
+  ["Diving King", "Legendary", 8],
+  ["Pressure Titan", "Mythic", 1],
+  ["Abyss Shade", "Secret", 0.5],
+  ["Diving Lord", "Ultra Secret", 0.08],
+  ["Diving Prime", "Mystical", 0.02],
+  ["Diving Divinity", "Celestial", 0.01],
+];
+packEmojis["Diving Pack"] = "🤿";
+
+packs["Cycling Pack"] = [
+  ["Training Wheels", "Common", 45.39],
+  ["Road Bike", "Uncommon", 30],
+  ["Mountain Bike", "Rare", 15],
+  ["Tour King", "Legendary", 8],
+  ["Pedal Titan", "Mythic", 1],
+  ["Chain Shade", "Secret", 0.5],
+  ["Cycling Lord", "Ultra Secret", 0.08],
+  ["Cycling Prime", "Mystical", 0.02],
+  ["Cycling Divinity", "Celestial", 0.01],
+];
+packEmojis["Cycling Pack"] = "🚴";
+
+packs["Marathon Pack"] = [
+  ["Sneaker", "Common", 45.39],
+  ["Relay Baton", "Uncommon", 30],
+  ["Finish Line", "Rare", 15],
+  ["Marathon King", "Legendary", 8],
+  ["Endurance Titan", "Mythic", 1],
+  ["Pace Shade", "Secret", 0.5],
+  ["Marathon Lord", "Ultra Secret", 0.08],
+  ["Marathon Prime", "Mystical", 0.02],
+  ["Marathon Divinity", "Celestial", 0.01],
+];
+packEmojis["Marathon Pack"] = "🏃";
+
+packs["Sailing Race Pack"] = [
+  ["Dinghy", "Common", 45.39],
+  ["Catamaran", "Uncommon", 30],
+  ["Yacht Racer", "Rare", 15],
+  ["Regatta King", "Legendary", 8],
+  ["Wind Titan", "Mythic", 1],
+  ["Calm Shade", "Secret", 0.5],
+  ["Sailing Race Lord", "Ultra Secret", 0.08],
+  ["Sailing Race Prime", "Mystical", 0.02],
+  ["Sailing Race Divinity", "Celestial", 0.01],
+];
+packEmojis["Sailing Race Pack"] = "⛵";
+
+packs["Figure Skating Pack"] = [
+  ["Ice Skate", "Common", 45.39],
+  ["Spin", "Uncommon", 30],
+  ["Triple Axel", "Rare", 15],
+  ["Skate King", "Legendary", 8],
+  ["Ice Dance Titan", "Mythic", 1],
+  ["Frost Shade", "Secret", 0.5],
+  ["Skate Lord", "Ultra Secret", 0.08],
+  ["Skating Prime", "Mystical", 0.02],
+  ["Figure Skating Divinity", "Celestial", 0.01],
+];
+packEmojis["Figure Skating Pack"] = "⛸️";
+
+packs["Karate Pack"] = [
+  ["Yellow Belt", "Common", 45.39],
+  ["Orange Belt", "Uncommon", 30],
+  ["Brown Belt", "Rare", 15],
+  ["Karate King", "Legendary", 8],
+  ["Dan Titan", "Mythic", 1],
+  ["Kata Shade", "Secret", 0.5],
+  ["Karate Lord", "Ultra Secret", 0.08],
+  ["Karate Prime", "Mystical", 0.02],
+  ["Karate Divinity", "Celestial", 0.01],
+];
+packEmojis["Karate Pack"] = "🥋";
+
+packs["Badminton Pack"] = [
+  ["Shuttlecock", "Common", 45.39],
+  ["Smash", "Uncommon", 30],
+  ["Drop Shot", "Rare", 15],
+  ["Badminton King", "Legendary", 8],
+  ["Rally Titan", "Mythic", 1],
+  ["Net Shade", "Secret", 0.5],
+  ["Badminton Lord", "Ultra Secret", 0.08],
+  ["Badminton Prime", "Mystical", 0.02],
+  ["Badminton Divinity", "Celestial", 0.01],
+];
+packEmojis["Badminton Pack"] = "🏸";
+
+packs["Polo Pack"] = [
+  ["Mallet", "Common", 45.39],
+  ["Chukka", "Uncommon", 30],
+  ["Polo Pony", "Rare", 15],
+  ["Polo King", "Legendary", 8],
+  ["Field Titan", "Mythic", 1],
+  ["Gallop Shade", "Secret", 0.5],
+  ["Polo Lord", "Ultra Secret", 0.08],
+  ["Polo Prime", "Mystical", 0.02],
+  ["Polo Divinity", "Celestial", 0.01],
+];
+packEmojis["Polo Pack"] = "🐎";
+
+packs["Table Tennis Pack"] = [
+  ["Paddle", "Common", 45.39],
+  ["Top Spin", "Uncommon", 30],
+  ["Slam", "Rare", 15],
+  ["Table Tennis King", "Legendary", 8],
+  ["Ping Pong Titan", "Mythic", 1],
+  ["Serve Shade", "Secret", 0.5],
+  ["Table Tennis Lord", "Ultra Secret", 0.08],
+  ["Table Tennis Prime", "Mystical", 0.02],
+  ["Table Tennis Divinity", "Celestial", 0.01],
+];
+packEmojis["Table Tennis Pack"] = "🏓";
+
+packs["Lacrosse Pack"] = [
+  ["Stick", "Common", 45.39],
+  ["Cradle", "Uncommon", 30],
+  ["Quick Shot", "Rare", 15],
+  ["Lacrosse King", "Legendary", 8],
+  ["Field Titan", "Mythic", 1],
+  ["Goal Shade", "Secret", 0.5],
+  ["Lacrosse Lord", "Ultra Secret", 0.08],
+  ["Lacrosse Prime", "Mystical", 0.02],
+  ["Lacrosse Divinity", "Celestial", 0.01],
+];
+packEmojis["Lacrosse Pack"] = "🥍";
+
+packs["Curling Pack"] = [
+  ["Curling Stone", "Common", 45.39],
+  ["Sweeper", "Uncommon", 30],
+  ["Slider", "Rare", 15],
+  ["Curling King", "Legendary", 8],
+  ["Ice Titan", "Mythic", 1],
+  ["House Shade", "Secret", 0.5],
+  ["Curling Lord", "Ultra Secret", 0.08],
+  ["Curling Prime", "Mystical", 0.02],
+  ["Curling Divinity", "Celestial", 0.01],
+];
+packEmojis["Curling Pack"] = "🥌";
+
+packs["Jazz Pack"] = [
+  ["Saxophone", "Common", 45.39],
+  ["Trumpet Solo", "Uncommon", 30],
+  ["Bass Walk", "Rare", 15],
+  ["Jazz King", "Legendary", 8],
+  ["Bebop Titan", "Mythic", 1],
+  ["Blue Note Shade", "Secret", 0.5],
+  ["Jazz Lord", "Ultra Secret", 0.08],
+  ["Jazz Prime", "Mystical", 0.02],
+  ["Jazz Divinity", "Celestial", 0.01],
+];
+packEmojis["Jazz Pack"] = "🎷";
+
+packs["Rock Pack"] = [
+  ["Power Chord", "Common", 45.39],
+  ["Distortion", "Uncommon", 30],
+  ["Shred", "Rare", 15],
+  ["Rock King", "Legendary", 8],
+  ["Metal Titan", "Mythic", 1],
+  ["Amplifier Shade", "Secret", 0.5],
+  ["Rock Lord", "Ultra Secret", 0.08],
+  ["Rock Prime", "Mystical", 0.02],
+  ["Rock Divinity", "Celestial", 0.01],
+];
+packEmojis["Rock Pack"] = "🎸";
+
+packs["Classical Pack"] = [
+  ["Violin Bow", "Common", 45.39],
+  ["Sonata", "Uncommon", 30],
+  ["Concerto", "Rare", 15],
+  ["Maestro", "Legendary", 8],
+  ["Symphony Titan", "Mythic", 1],
+  ["Adagio Shade", "Secret", 0.5],
+  ["Classical Lord", "Ultra Secret", 0.08],
+  ["Classical Prime", "Mystical", 0.02],
+  ["Classical Divinity", "Celestial", 0.01],
+];
+packEmojis["Classical Pack"] = "🎻";
+
+packs["Electronic Pack"] = [
+  ["Synth Pad", "Common", 45.39],
+  ["Bass Drop", "Uncommon", 30],
+  ["Dubstep", "Rare", 15],
+  ["DJ King", "Legendary", 8],
+  ["Waveform Titan", "Mythic", 1],
+  ["Frequency Shade", "Secret", 0.5],
+  ["Electronic Lord", "Ultra Secret", 0.08],
+  ["Electronic Prime", "Mystical", 0.02],
+  ["Electronic Divinity", "Celestial", 0.01],
+];
+packEmojis["Electronic Pack"] = "🎧";
+
+packs["Opera Pack"] = [
+  ["Overture", "Common", 45.39],
+  ["Aria", "Uncommon", 30],
+  ["Soprano", "Rare", 15],
+  ["Opera King", "Legendary", 8],
+  ["Crescendo Titan", "Mythic", 1],
+  ["Curtain Shade", "Secret", 0.5],
+  ["Opera Lord", "Ultra Secret", 0.08],
+  ["Opera Prime", "Mystical", 0.02],
+  ["Opera Divinity", "Celestial", 0.01],
+];
+packEmojis["Opera Pack"] = "🎭";
+
+packs["Drum Pack"] = [
+  ["Snare", "Common", 45.39],
+  ["Hi-Hat", "Uncommon", 30],
+  ["Double Bass", "Rare", 15],
+  ["Drum King", "Legendary", 8],
+  ["Rhythm Titan", "Mythic", 1],
+  ["Beat Shade", "Secret", 0.5],
+  ["Drum Lord", "Ultra Secret", 0.08],
+  ["Drum Prime", "Mystical", 0.02],
+  ["Drum Divinity", "Celestial", 0.01],
+];
+packEmojis["Drum Pack"] = "🥁";
+
+packs["Piano Pack"] = [
+  ["Key", "Common", 45.39],
+  ["Chord", "Uncommon", 30],
+  ["Grand Piano", "Rare", 15],
+  ["Pianist King", "Legendary", 8],
+  ["Steinway Titan", "Mythic", 1],
+  ["Pedal Shade", "Secret", 0.5],
+  ["Piano Lord", "Ultra Secret", 0.08],
+  ["Piano Prime", "Mystical", 0.02],
+  ["Piano Divinity", "Celestial", 0.01],
+];
+packEmojis["Piano Pack"] = "🎹";
+
+packs["Guitar Hero Pack"] = [
+  ["Open String", "Common", 45.39],
+  ["Barre Chord", "Uncommon", 30],
+  ["Whammy Bar", "Rare", 15],
+  ["Guitar King", "Legendary", 8],
+  ["Riff Titan", "Mythic", 1],
+  ["Fret Shade", "Secret", 0.5],
+  ["Guitar Lord", "Ultra Secret", 0.08],
+  ["Guitar Prime", "Mystical", 0.02],
+  ["Guitar Divinity", "Celestial", 0.01],
+];
+packEmojis["Guitar Hero Pack"] = "🎸";
+
+packs["Trumpet Pack"] = [
+  ["Mouthpiece", "Common", 45.39],
+  ["Bugle", "Uncommon", 30],
+  ["Cornet", "Rare", 15],
+  ["Trumpet King", "Legendary", 8],
+  ["Brass Titan", "Mythic", 1],
+  ["Fanfare Shade", "Secret", 0.5],
+  ["Trumpet Lord", "Ultra Secret", 0.08],
+  ["Trumpet Prime", "Mystical", 0.02],
+  ["Trumpet Divinity", "Celestial", 0.01],
+];
+packEmojis["Trumpet Pack"] = "🎺";
+
+packs["Harp Pack"] = [
+  ["String", "Common", 45.39],
+  ["Glissando", "Uncommon", 30],
+  ["Golden Harp", "Rare", 15],
+  ["Harp King", "Legendary", 8],
+  ["Ethereal Titan", "Mythic", 1],
+  ["Angel Shade", "Secret", 0.5],
+  ["Harp Lord", "Ultra Secret", 0.08],
+  ["Harp Prime", "Mystical", 0.02],
+  ["Harp Divinity", "Celestial", 0.01],
+];
+packEmojis["Harp Pack"] = "🪕";
+
+packs["Choir Pack"] = [
+  ["Alto", "Common", 45.39],
+  ["Tenor", "Uncommon", 30],
+  ["Baritone", "Rare", 15],
+  ["Choir King", "Legendary", 8],
+  ["Harmony Titan", "Mythic", 1],
+  ["Chant Shade", "Secret", 0.5],
+  ["Choir Lord", "Ultra Secret", 0.08],
+  ["Choir Prime", "Mystical", 0.02],
+  ["Choir Divinity", "Celestial", 0.01],
+];
+packEmojis["Choir Pack"] = "🎤";
+
+packs["Vinyl Pack"] = [
+  ["Single", "Common", 45.39],
+  ["EP", "Uncommon", 30],
+  ["LP", "Rare", 15],
+  ["Vinyl King", "Legendary", 8],
+  ["Platinum Titan", "Mythic", 1],
+  ["Groove Shade", "Secret", 0.5],
+  ["Vinyl Lord", "Ultra Secret", 0.08],
+  ["Vinyl Prime", "Mystical", 0.02],
+  ["Vinyl Divinity", "Celestial", 0.01],
+];
+packEmojis["Vinyl Pack"] = "📀";
+
+packs["Ukulele Pack"] = [
+  ["Strum", "Common", 45.39],
+  ["Fingerpick", "Uncommon", 30],
+  ["Island Song", "Rare", 15],
+  ["Ukulele King", "Legendary", 8],
+  ["Uke Titan", "Mythic", 1],
+  ["Melody Shade", "Secret", 0.5],
+  ["Ukulele Lord", "Ultra Secret", 0.08],
+  ["Ukulele Prime", "Mystical", 0.02],
+  ["Ukulele Divinity", "Celestial", 0.01],
+];
+packEmojis["Ukulele Pack"] = "🪈";
+
+packs["Karaoke Pack"] = [
+  ["Mic Stand", "Common", 45.39],
+  ["Duet", "Uncommon", 30],
+  ["Power Ballad", "Rare", 15],
+  ["Karaoke King", "Legendary", 8],
+  ["Stage Titan", "Mythic", 1],
+  ["Echo Shade", "Secret", 0.5],
+  ["Karaoke Lord", "Ultra Secret", 0.08],
+  ["Karaoke Prime", "Mystical", 0.02],
+  ["Karaoke Divinity", "Celestial", 0.01],
+];
+packEmojis["Karaoke Pack"] = "🎤";
+
+packs["Orchestra Pack"] = [
+  ["Music Stand", "Common", 45.39],
+  ["First Chair", "Uncommon", 30],
+  ["Conductor Baton", "Rare", 15],
+  ["Orchestra King", "Legendary", 8],
+  ["Philharmonic Titan", "Mythic", 1],
+  ["Encore Shade", "Secret", 0.5],
+  ["Orchestra Lord", "Ultra Secret", 0.08],
+  ["Orchestra Prime", "Mystical", 0.02],
+  ["Orchestra Divinity", "Celestial", 0.01],
+];
+packEmojis["Orchestra Pack"] = "🎼";
+
+packs["Bicycle Pack"] = [
+  ["Tricycle", "Common", 45.39],
+  ["BMX", "Uncommon", 30],
+  ["Tandem", "Rare", 15],
+  ["Bicycle King", "Legendary", 8],
+  ["Velocity Titan", "Mythic", 1],
+  ["Spoke Shade", "Secret", 0.5],
+  ["Bicycle Lord", "Ultra Secret", 0.08],
+  ["Bicycle Prime", "Mystical", 0.02],
+  ["Bicycle Divinity", "Celestial", 0.01],
+];
+packEmojis["Bicycle Pack"] = "🚲";
+
+packs["Motorcycle Pack"] = [
+  ["Moped", "Common", 45.39],
+  ["Chopper", "Uncommon", 30],
+  ["Superbike", "Rare", 15],
+  ["Biker King", "Legendary", 8],
+  ["Throttle Titan", "Mythic", 1],
+  ["Exhaust Shade", "Secret", 0.5],
+  ["Motorcycle Lord", "Ultra Secret", 0.08],
+  ["Motorcycle Prime", "Mystical", 0.02],
+  ["Motorcycle Divinity", "Celestial", 0.01],
+];
+packEmojis["Motorcycle Pack"] = "🏍️";
+
+packs["Truck Pack"] = [
+  ["Pickup", "Common", 45.39],
+  ["Semi", "Uncommon", 30],
+  ["Monster Truck", "Rare", 15],
+  ["Truck King", "Legendary", 8],
+  ["Freight Titan", "Mythic", 1],
+  ["Diesel Shade", "Secret", 0.5],
+  ["Truck Lord", "Ultra Secret", 0.08],
+  ["Truck Prime", "Mystical", 0.02],
+  ["Truck Divinity", "Celestial", 0.01],
+];
+packEmojis["Truck Pack"] = "🚛";
+
+packs["Airplane Pack"] = [
+  ["Paper Plane", "Common", 45.39],
+  ["Propeller", "Uncommon", 30],
+  ["Jet", "Rare", 15],
+  ["Pilot King", "Legendary", 8],
+  ["Mach Titan", "Mythic", 1],
+  ["Cloud Shade", "Secret", 0.5],
+  ["Airplane Lord", "Ultra Secret", 0.08],
+  ["Airplane Prime", "Mystical", 0.02],
+  ["Airplane Divinity", "Celestial", 0.01],
+];
+packEmojis["Airplane Pack"] = "✈️";
+
+packs["Helicopter Pack"] = [
+  ["Drone Copter", "Common", 45.39],
+  ["Chopper", "Uncommon", 30],
+  ["Apache", "Rare", 15],
+  ["Heli King", "Legendary", 8],
+  ["Rotor Titan", "Mythic", 1],
+  ["Hover Shade", "Secret", 0.5],
+  ["Helicopter Lord", "Ultra Secret", 0.08],
+  ["Helicopter Prime", "Mystical", 0.02],
+  ["Helicopter Divinity", "Celestial", 0.01],
+];
+packEmojis["Helicopter Pack"] = "🚁";
+
+packs["Submarine Pack"] = [
+  ["Periscope", "Common", 45.39],
+  ["Torpedo", "Uncommon", 30],
+  ["Nuclear Sub", "Rare", 15],
+  ["Admiral", "Legendary", 8],
+  ["Depth Titan", "Mythic", 1],
+  ["Sonar Shade", "Secret", 0.5],
+  ["Submarine Lord", "Ultra Secret", 0.08],
+  ["Submarine Prime", "Mystical", 0.02],
+  ["Submarine Divinity", "Celestial", 0.01],
+];
+packEmojis["Submarine Pack"] = "🚢";
+
+packs["Hot Air Pack"] = [
+  ["Basket", "Common", 45.39],
+  ["Burner", "Uncommon", 30],
+  ["Cloud Rider", "Rare", 15],
+  ["Balloon King", "Legendary", 8],
+  ["Altitude Titan", "Mythic", 1],
+  ["Sky Shade", "Secret", 0.5],
+  ["Hot Air Lord", "Ultra Secret", 0.08],
+  ["Hot Air Prime", "Mystical", 0.02],
+  ["Hot Air Divinity", "Celestial", 0.01],
+];
+packEmojis["Hot Air Pack"] = "🎈";
+
+packs["Scooter Pack"] = [
+  ["Kick Scooter", "Common", 45.39],
+  ["Vespa", "Uncommon", 30],
+  ["Electric Scooter", "Rare", 15],
+  ["Scooter King", "Legendary", 8],
+  ["Zip Titan", "Mythic", 1],
+  ["Street Shade", "Secret", 0.5],
+  ["Scooter Lord", "Ultra Secret", 0.08],
+  ["Scooter Prime", "Mystical", 0.02],
+  ["Scooter Divinity", "Celestial", 0.01],
+];
+packEmojis["Scooter Pack"] = "🛴";
+
+packs["Snowmobile Pack"] = [
+  ["Sled", "Common", 45.39],
+  ["Snow Runner", "Uncommon", 30],
+  ["Arctic Cat", "Rare", 15],
+  ["Snowmobile King", "Legendary", 8],
+  ["Blizzard Titan", "Mythic", 1],
+  ["Powder Shade", "Secret", 0.5],
+  ["Snowmobile Lord", "Ultra Secret", 0.08],
+  ["Snowmobile Prime", "Mystical", 0.02],
+  ["Snowmobile Divinity", "Celestial", 0.01],
+];
+packEmojis["Snowmobile Pack"] = "🛷";
+
+packs["Gondola Pack"] = [
+  ["Cable Car", "Common", 45.39],
+  ["Lift Chair", "Uncommon", 30],
+  ["Peak Tram", "Rare", 15],
+  ["Gondola King", "Legendary", 8],
+  ["Summit Titan", "Mythic", 1],
+  ["Fog Shade", "Secret", 0.5],
+  ["Gondola Lord", "Ultra Secret", 0.08],
+  ["Gondola Prime", "Mystical", 0.02],
+  ["Gondola Divinity", "Celestial", 0.01],
+];
+packEmojis["Gondola Pack"] = "🚡";
+
+packs["Spaceship Pack"] = [
+  ["Escape Pod", "Common", 45.39],
+  ["Star Fighter", "Uncommon", 30],
+  ["Cruiser", "Rare", 15],
+  ["Fleet Commander", "Legendary", 8],
+  ["Warp Titan", "Mythic", 1],
+  ["Nebula Shade", "Secret", 0.5],
+  ["Spaceship Lord", "Ultra Secret", 0.08],
+  ["Spaceship Prime", "Mystical", 0.02],
+  ["Spaceship Divinity", "Celestial", 0.01],
+];
+packEmojis["Spaceship Pack"] = "🛸";
+
+packs["Canoe Pack"] = [
+  ["Paddle", "Common", 45.39],
+  ["Birch Canoe", "Uncommon", 30],
+  ["War Canoe", "Rare", 15],
+  ["River King", "Legendary", 8],
+  ["Rapids Titan", "Mythic", 1],
+  ["Wake Shade", "Secret", 0.5],
+  ["Canoe Lord", "Ultra Secret", 0.08],
+  ["Canoe Prime", "Mystical", 0.02],
+  ["Canoe Divinity", "Celestial", 0.01],
+];
+packEmojis["Canoe Pack"] = "🛶";
+
+packs["Bus Pack"] = [
+  ["Mini Bus", "Common", 45.39],
+  ["Double Decker", "Uncommon", 30],
+  ["Tour Bus", "Rare", 15],
+  ["Bus King", "Legendary", 8],
+  ["Transit Titan", "Mythic", 1],
+  ["Route Shade", "Secret", 0.5],
+  ["Bus Lord", "Ultra Secret", 0.08],
+  ["Bus Prime", "Mystical", 0.02],
+  ["Bus Divinity", "Celestial", 0.01],
+];
+packEmojis["Bus Pack"] = "🚌";
+
+packs["Taxi Pack"] = [
+  ["Meter", "Common", 45.39],
+  ["Yellow Cab", "Uncommon", 30],
+  ["Limo", "Rare", 15],
+  ["Taxi King", "Legendary", 8],
+  ["Fare Titan", "Mythic", 1],
+  ["Dispatch Shade", "Secret", 0.5],
+  ["Taxi Lord", "Ultra Secret", 0.08],
+  ["Taxi Prime", "Mystical", 0.02],
+  ["Taxi Divinity", "Celestial", 0.01],
+];
+packEmojis["Taxi Pack"] = "🚕";
+
+packs["Ambulance Pack"] = [
+  ["First Aid", "Common", 45.39],
+  ["Stretcher", "Uncommon", 30],
+  ["Paramedic", "Rare", 15],
+  ["ER King", "Legendary", 8],
+  ["Rescue Titan", "Mythic", 1],
+  ["Siren Shade", "Secret", 0.5],
+  ["Ambulance Lord", "Ultra Secret", 0.08],
+  ["Ambulance Prime", "Mystical", 0.02],
+  ["Ambulance Divinity", "Celestial", 0.01],
+];
+packEmojis["Ambulance Pack"] = "🚑";
+
+packs["Fire Truck Pack"] = [
+  ["Hose", "Common", 45.39],
+  ["Ladder", "Uncommon", 30],
+  ["Dalmatian", "Rare", 15],
+  ["Fire Chief", "Legendary", 8],
+  ["Inferno Titan", "Mythic", 1],
+  ["Alarm Shade", "Secret", 0.5],
+  ["Fire Truck Lord", "Ultra Secret", 0.08],
+  ["Fire Truck Prime", "Mystical", 0.02],
+  ["Fire Truck Divinity", "Celestial", 0.01],
+];
+packEmojis["Fire Truck Pack"] = "🚒";
+
+packs["Tractor Pack"] = [
+  ["Plow", "Common", 45.39],
+  ["Combine", "Uncommon", 30],
+  ["Harvester", "Rare", 15],
+  ["Tractor King", "Legendary", 8],
+  ["Farm Titan", "Mythic", 1],
+  ["Field Shade", "Secret", 0.5],
+  ["Tractor Lord", "Ultra Secret", 0.08],
+  ["Tractor Prime", "Mystical", 0.02],
+  ["Tractor Divinity", "Celestial", 0.01],
+];
+packEmojis["Tractor Pack"] = "🚜";
+
+packs["Ferry Pack"] = [
+  ["Rowboat", "Common", 45.39],
+  ["Tugboat", "Uncommon", 30],
+  ["Car Ferry", "Rare", 15],
+  ["Ferry King", "Legendary", 8],
+  ["Harbor Titan", "Mythic", 1],
+  ["Wake Shade", "Secret", 0.5],
+  ["Ferry Lord", "Ultra Secret", 0.08],
+  ["Ferry Prime", "Mystical", 0.02],
+  ["Ferry Divinity", "Celestial", 0.01],
+];
+packEmojis["Ferry Pack"] = "⛴️";
+
+packs["Rickshaw Pack"] = [
+  ["Cart", "Common", 45.39],
+  ["Cycle Rickshaw", "Uncommon", 30],
+  ["Auto Rickshaw", "Rare", 15],
+  ["Rickshaw King", "Legendary", 8],
+  ["Street Titan", "Mythic", 1],
+  ["Jingle Shade", "Secret", 0.5],
+  ["Rickshaw Lord", "Ultra Secret", 0.08],
+  ["Rickshaw Prime", "Mystical", 0.02],
+  ["Rickshaw Divinity", "Celestial", 0.01],
+];
+packEmojis["Rickshaw Pack"] = "🛺";
+
+packs["Zeppelin Pack"] = [
+  ["Gas Cell", "Common", 45.39],
+  ["Rigid Airship", "Uncommon", 30],
+  ["War Blimp", "Rare", 15],
+  ["Zeppelin King", "Legendary", 8],
+  ["Airship Titan", "Mythic", 1],
+  ["Hydrogen Shade", "Secret", 0.5],
+  ["Zeppelin Lord", "Ultra Secret", 0.08],
+  ["Zeppelin Prime", "Mystical", 0.02],
+  ["Zeppelin Divinity", "Celestial", 0.01],
+];
+packEmojis["Zeppelin Pack"] = "🎈";
+
+packs["Chef Pack"] = [
+  ["Sous Chef", "Common", 45.39],
+  ["Pastry Chef", "Uncommon", 30],
+  ["Head Chef", "Rare", 15],
+  ["Chef King", "Legendary", 8],
+  ["Kitchen Titan", "Mythic", 1],
+  ["Recipe Shade", "Secret", 0.5],
+  ["Chef Lord", "Ultra Secret", 0.08],
+  ["Chef Prime", "Mystical", 0.02],
+  ["Chef Divinity", "Celestial", 0.01],
+];
+packEmojis["Chef Pack"] = "👨‍🍳";
+
+packs["Firefighter Pack"] = [
+  ["Cadet", "Common", 45.39],
+  ["Smoke Jumper", "Uncommon", 30],
+  ["Fire Captain", "Rare", 15],
+  ["Fire King", "Legendary", 8],
+  ["Blaze Titan", "Mythic", 1],
+  ["Ember Shade", "Secret", 0.5],
+  ["Firefighter Lord", "Ultra Secret", 0.08],
+  ["Firefighter Prime", "Mystical", 0.02],
+  ["Firefighter Divinity", "Celestial", 0.01],
+];
+packEmojis["Firefighter Pack"] = "👨‍🚒";
+
+packs["Doctor Pack"] = [
+  ["Intern", "Common", 45.39],
+  ["Surgeon", "Uncommon", 30],
+  ["Specialist", "Rare", 15],
+  ["Doctor King", "Legendary", 8],
+  ["Healer Titan", "Mythic", 1],
+  ["Scalpel Shade", "Secret", 0.5],
+  ["Doctor Lord", "Ultra Secret", 0.08],
+  ["Doctor Prime", "Mystical", 0.02],
+  ["Doctor Divinity", "Celestial", 0.01],
+];
+packEmojis["Doctor Pack"] = "👨‍⚕️";
+
+packs["Pilot Pack"] = [
+  ["Co-Pilot", "Common", 45.39],
+  ["Captain", "Uncommon", 30],
+  ["Test Pilot", "Rare", 15],
+  ["Ace Pilot", "Legendary", 8],
+  ["Flight Titan", "Mythic", 1],
+  ["Cockpit Shade", "Secret", 0.5],
+  ["Pilot Lord", "Ultra Secret", 0.08],
+  ["Pilot Prime", "Mystical", 0.02],
+  ["Pilot Divinity", "Celestial", 0.01],
+];
+packEmojis["Pilot Pack"] = "👨‍✈️";
+
+packs["Detective Pack"] = [
+  ["Magnifying Glass", "Common", 45.39],
+  ["Clue Finder", "Uncommon", 30],
+  ["Inspector", "Rare", 15],
+  ["Detective King", "Legendary", 8],
+  ["Mystery Titan", "Mythic", 1],
+  ["Alibi Shade", "Secret", 0.5],
+  ["Detective Lord", "Ultra Secret", 0.08],
+  ["Detective Prime", "Mystical", 0.02],
+  ["Detective Divinity", "Celestial", 0.01],
+];
+packEmojis["Detective Pack"] = "🕵️";
+
+packs["Mechanic Pack"] = [
+  ["Wrench", "Common", 45.39],
+  ["Socket Set", "Uncommon", 30],
+  ["Engine Swap", "Rare", 15],
+  ["Mechanic King", "Legendary", 8],
+  ["Gear Titan", "Mythic", 1],
+  ["Grease Shade", "Secret", 0.5],
+  ["Mechanic Lord", "Ultra Secret", 0.08],
+  ["Mechanic Prime", "Mystical", 0.02],
+  ["Mechanic Divinity", "Celestial", 0.01],
+];
+packEmojis["Mechanic Pack"] = "🔧";
+
+packs["Carpenter Pack"] = [
+  ["Sawdust", "Common", 45.39],
+  ["Chisel", "Uncommon", 30],
+  ["Dovetail", "Rare", 15],
+  ["Carpenter King", "Legendary", 8],
+  ["Timber Titan", "Mythic", 1],
+  ["Grain Shade", "Secret", 0.5],
+  ["Carpenter Lord", "Ultra Secret", 0.08],
+  ["Carpenter Prime", "Mystical", 0.02],
+  ["Carpenter Divinity", "Celestial", 0.01],
+];
+packEmojis["Carpenter Pack"] = "🪚";
+
+packs["Electrician Pack"] = [
+  ["Wire", "Common", 45.39],
+  ["Circuit Breaker", "Uncommon", 30],
+  ["Transformer", "Rare", 15],
+  ["Electrician King", "Legendary", 8],
+  ["Voltage Titan", "Mythic", 1],
+  ["Spark Shade", "Secret", 0.5],
+  ["Electrician Lord", "Ultra Secret", 0.08],
+  ["Electrician Prime", "Mystical", 0.02],
+  ["Electrician Divinity", "Celestial", 0.01],
+];
+packEmojis["Electrician Pack"] = "⚡";
+
+packs["Architect Pack"] = [
+  ["Blueprint", "Common", 45.39],
+  ["Scale Model", "Uncommon", 30],
+  ["Skyscraper", "Rare", 15],
+  ["Architect King", "Legendary", 8],
+  ["Design Titan", "Mythic", 1],
+  ["Draft Shade", "Secret", 0.5],
+  ["Architect Lord", "Ultra Secret", 0.08],
+  ["Architect Prime", "Mystical", 0.02],
+  ["Architect Divinity", "Celestial", 0.01],
+];
+packEmojis["Architect Pack"] = "📐";
+
+packs["Blacksmith Pack"] = [
+  ["Anvil", "Common", 45.39],
+  ["Iron Ingot", "Uncommon", 30],
+  ["Damascus Steel", "Rare", 15],
+  ["Blacksmith King", "Legendary", 8],
+  ["Forge Titan", "Mythic", 1],
+  ["Ember Shade", "Secret", 0.5],
+  ["Blacksmith Lord", "Ultra Secret", 0.08],
+  ["Blacksmith Prime", "Mystical", 0.02],
+  ["Blacksmith Divinity", "Celestial", 0.01],
+];
+packEmojis["Blacksmith Pack"] = "🔨";
+
+packs["Jeweler Pack"] = [
+  ["Raw Stone", "Common", 45.39],
+  ["Cut Gem", "Uncommon", 30],
+  ["Tiara", "Rare", 15],
+  ["Jeweler King", "Legendary", 8],
+  ["Facet Titan", "Mythic", 1],
+  ["Luster Shade", "Secret", 0.5],
+  ["Jeweler Lord", "Ultra Secret", 0.08],
+  ["Jeweler Prime", "Mystical", 0.02],
+  ["Jeweler Divinity", "Celestial", 0.01],
+];
+packEmojis["Jeweler Pack"] = "💍";
+
+packs["Tailor Pack"] = [
+  ["Thread", "Common", 45.39],
+  ["Needle", "Uncommon", 30],
+  ["Silk Robe", "Rare", 15],
+  ["Tailor King", "Legendary", 8],
+  ["Stitch Titan", "Mythic", 1],
+  ["Pattern Shade", "Secret", 0.5],
+  ["Tailor Lord", "Ultra Secret", 0.08],
+  ["Tailor Prime", "Mystical", 0.02],
+  ["Tailor Divinity", "Celestial", 0.01],
+];
+packEmojis["Tailor Pack"] = "🧵";
+
+packs["Astronaut Pack"] = [
+  ["Space Suit", "Common", 45.39],
+  ["EVA Walk", "Uncommon", 30],
+  ["Moon Step", "Rare", 15],
+  ["Commander", "Legendary", 8],
+  ["Space Titan", "Mythic", 1],
+  ["Zero-G Shade", "Secret", 0.5],
+  ["Astronaut Lord", "Ultra Secret", 0.08],
+  ["Astronaut Prime", "Mystical", 0.02],
+  ["Astronaut Divinity", "Celestial", 0.01],
+];
+packEmojis["Astronaut Pack"] = "👨‍🚀";
+
+packs["Marine Biologist Pack"] = [
+  ["Specimen Jar", "Common", 45.39],
+  ["Diving Belt", "Uncommon", 30],
+  ["Whale Tag", "Rare", 15],
+  ["Marine King", "Legendary", 8],
+  ["Ocean Titan", "Mythic", 1],
+  ["Depth Shade", "Secret", 0.5],
+  ["Marine Lord", "Ultra Secret", 0.08],
+  ["Marine Prime", "Mystical", 0.02],
+  ["Marine Divinity", "Celestial", 0.01],
+];
+packEmojis["Marine Biologist Pack"] = "🐋";
+
+packs["Archaeologist Pack"] = [
+  ["Brush", "Common", 45.39],
+  ["Pottery Shard", "Uncommon", 30],
+  ["Lost City", "Rare", 15],
+  ["Archaeo King", "Legendary", 8],
+  ["Dig Titan", "Mythic", 1],
+  ["Sand Shade", "Secret", 0.5],
+  ["Archaeologist Lord", "Ultra Secret", 0.08],
+  ["Archaeologist Prime", "Mystical", 0.02],
+  ["Archaeologist Divinity", "Celestial", 0.01],
+];
+packEmojis["Archaeologist Pack"] = "🏺";
+
+packs["Baker Pack"] = [
+  ["Rolling Pin", "Common", 45.39],
+  ["Dough Ball", "Uncommon", 30],
+  ["Sourdough", "Rare", 15],
+  ["Baker King", "Legendary", 8],
+  ["Oven Titan", "Mythic", 1],
+  ["Flour Shade", "Secret", 0.5],
+  ["Baker Lord", "Ultra Secret", 0.08],
+  ["Baker Prime", "Mystical", 0.02],
+  ["Baker Divinity", "Celestial", 0.01],
+];
+packEmojis["Baker Pack"] = "🧑‍🍳";
+
+packs["Farmer Pack"] = [
+  ["Pitchfork", "Common", 45.39],
+  ["Tractor Seat", "Uncommon", 30],
+  ["Golden Wheat", "Rare", 15],
+  ["Farmer King", "Legendary", 8],
+  ["Harvest Titan", "Mythic", 1],
+  ["Scarecrow Shade", "Secret", 0.5],
+  ["Farmer Lord", "Ultra Secret", 0.08],
+  ["Farmer Prime", "Mystical", 0.02],
+  ["Farmer Divinity", "Celestial", 0.01],
+];
+packEmojis["Farmer Pack"] = "👨‍🌾";
+
+packs["Barber Pack"] = [
+  ["Scissors", "Common", 45.39],
+  ["Straight Razor", "Uncommon", 30],
+  ["Hot Towel", "Rare", 15],
+  ["Barber King", "Legendary", 8],
+  ["Style Titan", "Mythic", 1],
+  ["Trim Shade", "Secret", 0.5],
+  ["Barber Lord", "Ultra Secret", 0.08],
+  ["Barber Prime", "Mystical", 0.02],
+  ["Barber Divinity", "Celestial", 0.01],
+];
+packEmojis["Barber Pack"] = "💈";
+
+packs["Florist Pack"] = [
+  ["Seedling", "Common", 45.39],
+  ["Bouquet", "Uncommon", 30],
+  ["Rose Garden", "Rare", 15],
+  ["Florist King", "Legendary", 8],
+  ["Bloom Titan", "Mythic", 1],
+  ["Petal Shade", "Secret", 0.5],
+  ["Florist Lord", "Ultra Secret", 0.08],
+  ["Florist Prime", "Mystical", 0.02],
+  ["Florist Divinity", "Celestial", 0.01],
+];
+packEmojis["Florist Pack"] = "💐";
+
+packs["Astronomer Pack"] = [
+  ["Star Chart", "Common", 45.39],
+  ["Binary Star", "Uncommon", 30],
+  ["Pulsar", "Rare", 15],
+  ["Astronomer King", "Legendary", 8],
+  ["Cosmos Titan", "Mythic", 1],
+  ["Eclipse Shade", "Secret", 0.5],
+  ["Astronomer Lord", "Ultra Secret", 0.08],
+  ["Astronomer Prime", "Mystical", 0.02],
+  ["Astronomer Divinity", "Celestial", 0.01],
+];
+packEmojis["Astronomer Pack"] = "🔭";
+
+packs["Werewolf Pack"] = [
+  ["Moon Pup", "Common", 45.39],
+  ["Night Howler", "Uncommon", 30],
+  ["Alpha Were", "Rare", 15],
+  ["Werewolf King", "Legendary", 8],
+  ["Lycan Titan", "Mythic", 1],
+  ["Silver Shade", "Secret", 0.5],
+  ["Werewolf Lord", "Ultra Secret", 0.08],
+  ["Werewolf Prime", "Mystical", 0.02],
+  ["Werewolf Divinity", "Celestial", 0.01],
+];
+packEmojis["Werewolf Pack"] = "🐺";
+
+packs["Witch Pack"] = [
+  ["Black Cat", "Common", 45.39],
+  ["Broomstick", "Uncommon", 30],
+  ["Cauldron", "Rare", 15],
+  ["Witch King", "Legendary", 8],
+  ["Coven Titan", "Mythic", 1],
+  ["Hex Shade", "Secret", 0.5],
+  ["Witch Lord", "Ultra Secret", 0.08],
+  ["Witch Prime", "Mystical", 0.02],
+  ["Witch Divinity", "Celestial", 0.01],
+];
+packEmojis["Witch Pack"] = "🧙‍♀️";
+
+packs["Necromancer Pack"] = [
+  ["Bone Shard", "Common", 45.39],
+  ["Skeleton Minion", "Uncommon", 30],
+  ["Lich", "Rare", 15],
+  ["Necro King", "Legendary", 8],
+  ["Death Titan", "Mythic", 1],
+  ["Soul Shade", "Secret", 0.5],
+  ["Necromancer Lord", "Ultra Secret", 0.08],
+  ["Necromancer Prime", "Mystical", 0.02],
+  ["Necromancer Divinity", "Celestial", 0.01],
+];
+packEmojis["Necromancer Pack"] = "💀";
+
+packs["Paladin Pack"] = [
+  ["Holy Shield", "Common", 45.39],
+  ["Light Blade", "Uncommon", 30],
+  ["Divine Armor", "Rare", 15],
+  ["Paladin King", "Legendary", 8],
+  ["Holy Titan", "Mythic", 1],
+  ["Radiance Shade", "Secret", 0.5],
+  ["Paladin Lord", "Ultra Secret", 0.08],
+  ["Paladin Prime", "Mystical", 0.02],
+  ["Paladin Divinity", "Celestial", 0.01],
+];
+packEmojis["Paladin Pack"] = "⚔️";
+
+packs["Ranger Pack"] = [
+  ["Tracker", "Common", 45.39],
+  ["Bowstring", "Uncommon", 30],
+  ["Beast Master", "Rare", 15],
+  ["Ranger King", "Legendary", 8],
+  ["Wild Titan", "Mythic", 1],
+  ["Forest Shade", "Secret", 0.5],
+  ["Ranger Lord", "Ultra Secret", 0.08],
+  ["Ranger Prime", "Mystical", 0.02],
+  ["Ranger Divinity", "Celestial", 0.01],
+];
+packEmojis["Ranger Pack"] = "🏹";
+
+packs["Bard Pack"] = [
+  ["Lute", "Common", 45.39],
+  ["Song of Courage", "Uncommon", 30],
+  ["Epic Ballad", "Rare", 15],
+  ["Bard King", "Legendary", 8],
+  ["Melody Titan", "Mythic", 1],
+  ["Rhyme Shade", "Secret", 0.5],
+  ["Bard Lord", "Ultra Secret", 0.08],
+  ["Bard Prime", "Mystical", 0.02],
+  ["Bard Divinity", "Celestial", 0.01],
+];
+packEmojis["Bard Pack"] = "🪕";
+
+packs["Sorcerer Pack"] = [
+  ["Magic Spark", "Common", 45.39],
+  ["Fire Bolt", "Uncommon", 30],
+  ["Chain Lightning", "Rare", 15],
+  ["Sorcerer King", "Legendary", 8],
+  ["Arcane Titan", "Mythic", 1],
+  ["Mystic Shade", "Secret", 0.5],
+  ["Sorcerer Lord", "Ultra Secret", 0.08],
+  ["Sorcerer Prime", "Mystical", 0.02],
+  ["Sorcerer Divinity", "Celestial", 0.01],
+];
+packEmojis["Sorcerer Pack"] = "🔮";
+
+packs["Shaman Pack"] = [
+  ["Spirit Stone", "Common", 45.39],
+  ["Totem Pole", "Uncommon", 30],
+  ["Dream Walker", "Rare", 15],
+  ["Shaman King", "Legendary", 8],
+  ["Ancestral Titan", "Mythic", 1],
+  ["Spirit Shade", "Secret", 0.5],
+  ["Shaman Lord", "Ultra Secret", 0.08],
+  ["Shaman Prime", "Mystical", 0.02],
+  ["Shaman Divinity", "Celestial", 0.01],
+];
+packEmojis["Shaman Pack"] = "🪶";
+
+packs["Oracle Pack"] = [
+  ["Crystal Ball", "Common", 45.39],
+  ["Third Eye", "Uncommon", 30],
+  ["Prophecy", "Rare", 15],
+  ["Oracle King", "Legendary", 8],
+  ["Vision Titan", "Mythic", 1],
+  ["Fate Shade", "Secret", 0.5],
+  ["Oracle Lord", "Ultra Secret", 0.08],
+  ["Oracle Prime", "Mystical", 0.02],
+  ["Oracle Divinity", "Celestial", 0.01],
+];
+packEmojis["Oracle Pack"] = "🔮";
+
+packs["Minotaur Pack"] = [
+  ["Horn Fragment", "Common", 45.39],
+  ["Labyrinth Runner", "Uncommon", 30],
+  ["Bull Warrior", "Rare", 15],
+  ["Minotaur King", "Legendary", 8],
+  ["Maze Titan", "Mythic", 1],
+  ["Labyrinth Shade", "Secret", 0.5],
+  ["Minotaur Lord", "Ultra Secret", 0.08],
+  ["Minotaur Prime", "Mystical", 0.02],
+  ["Minotaur Divinity", "Celestial", 0.01],
+];
+packEmojis["Minotaur Pack"] = "🐂";
+
+packs["Hydra Pack"] = [
+  ["Hatchling Head", "Common", 45.39],
+  ["Twin Necks", "Uncommon", 30],
+  ["Five-Headed", "Rare", 15],
+  ["Hydra King", "Legendary", 8],
+  ["Regeneration Titan", "Mythic", 1],
+  ["Swamp Shade", "Secret", 0.5],
+  ["Hydra Lord", "Ultra Secret", 0.08],
+  ["Hydra Prime", "Mystical", 0.02],
+  ["Hydra Divinity", "Celestial", 0.01],
+];
+packEmojis["Hydra Pack"] = "🐍";
+
+packs["Sphinx Pack"] = [
+  ["Sand Cat", "Common", 45.39],
+  ["Riddler", "Uncommon", 30],
+  ["Guardian", "Rare", 15],
+  ["Sphinx King", "Legendary", 8],
+  ["Riddle Titan", "Mythic", 1],
+  ["Desert Shade", "Secret", 0.5],
+  ["Sphinx Lord", "Ultra Secret", 0.08],
+  ["Sphinx Prime", "Mystical", 0.02],
+  ["Sphinx Divinity", "Celestial", 0.01],
+];
+packEmojis["Sphinx Pack"] = "🦁";
+
+packs["Kraken Pack"] = [
+  ["Tentacle", "Common", 45.39],
+  ["Ink Cloud", "Uncommon", 30],
+  ["Ship Crusher", "Rare", 15],
+  ["Kraken King", "Legendary", 8],
+  ["Abyss Titan", "Mythic", 1],
+  ["Deep Shade", "Secret", 0.5],
+  ["Kraken Lord", "Ultra Secret", 0.08],
+  ["Kraken Prime", "Mystical", 0.02],
+  ["Kraken Divinity", "Celestial", 0.01],
+];
+packEmojis["Kraken Pack"] = "🦑";
+
+packs["Gargoyle Pack"] = [
+  ["Stone Wing", "Common", 45.39],
+  ["Perch Guard", "Uncommon", 30],
+  ["Night Watcher", "Rare", 15],
+  ["Gargoyle King", "Legendary", 8],
+  ["Stone Titan", "Mythic", 1],
+  ["Chimera Shade", "Secret", 0.5],
+  ["Gargoyle Lord", "Ultra Secret", 0.08],
+  ["Gargoyle Prime", "Mystical", 0.02],
+  ["Gargoyle Divinity", "Celestial", 0.01],
+];
+packEmojis["Gargoyle Pack"] = "🗿";
+
+packs["Djinn Pack"] = [
+  ["Smoke Ring", "Common", 45.39],
+  ["Brass Lamp", "Uncommon", 30],
+  ["Wish Granter", "Rare", 15],
+  ["Djinn King", "Legendary", 8],
+  ["Genie Titan", "Mythic", 1],
+  ["Mirage Shade", "Secret", 0.5],
+  ["Djinn Lord", "Ultra Secret", 0.08],
+  ["Djinn Prime", "Mystical", 0.02],
+  ["Djinn Divinity", "Celestial", 0.01],
+];
+packEmojis["Djinn Pack"] = "🧞";
+
+packs["Vampire Pack"] = [
+  ["Fang", "Common", 45.39],
+  ["Night Stalker", "Uncommon", 30],
+  ["Blood Moon", "Rare", 15],
+  ["Vampire King", "Legendary", 8],
+  ["Nosferatu Titan", "Mythic", 1],
+  ["Coffin Shade", "Secret", 0.5],
+  ["Vampire Lord", "Ultra Secret", 0.08],
+  ["Vampire Prime", "Mystical", 0.02],
+  ["Vampire Divinity", "Celestial", 0.01],
+];
+packEmojis["Vampire Pack"] = "🧛";
+
+packs["Ghost Pack"] = [
+  ["Orb", "Common", 45.39],
+  ["Poltergeist", "Uncommon", 30],
+  ["Banshee", "Rare", 15],
+  ["Ghost King", "Legendary", 8],
+  ["Phantom Titan", "Mythic", 1],
+  ["Veil Shade", "Secret", 0.5],
+  ["Ghost Lord", "Ultra Secret", 0.08],
+  ["Ghost Prime", "Mystical", 0.02],
+  ["Ghost Divinity", "Celestial", 0.01],
+];
+packEmojis["Ghost Pack"] = "👻";
+
+packs["Goblin Pack"] = [
+  ["Gremlin", "Common", 45.39],
+  ["Hobgoblin", "Uncommon", 30],
+  ["Goblin Chief", "Rare", 15],
+  ["Goblin King", "Legendary", 8],
+  ["Horde Titan", "Mythic", 1],
+  ["Cave Shade", "Secret", 0.5],
+  ["Goblin Lord", "Ultra Secret", 0.08],
+  ["Goblin Prime", "Mystical", 0.02],
+  ["Goblin Divinity", "Celestial", 0.01],
+];
+packEmojis["Goblin Pack"] = "👺";
+
+packs["Yeti Pack"] = [
+  ["Footprint", "Common", 45.39],
+  ["Snow Beast", "Uncommon", 30],
+  ["Abominable", "Rare", 15],
+  ["Yeti King", "Legendary", 8],
+  ["Frost Titan", "Mythic", 1],
+  ["Blizzard Shade", "Secret", 0.5],
+  ["Yeti Lord", "Ultra Secret", 0.08],
+  ["Yeti Prime", "Mystical", 0.02],
+  ["Yeti Divinity", "Celestial", 0.01],
+];
+packEmojis["Yeti Pack"] = "❄️";
+
+packs["Leprechaun Pack"] = [
+  ["Four-Leaf Clover", "Common", 45.39],
+  ["Pot of Gold", "Uncommon", 30],
+  ["Rainbow Walker", "Rare", 15],
+  ["Leprechaun King", "Legendary", 8],
+  ["Lucky Titan", "Mythic", 1],
+  ["Fortune Shade", "Secret", 0.5],
+  ["Leprechaun Lord", "Ultra Secret", 0.08],
+  ["Leprechaun Prime", "Mystical", 0.02],
+  ["Leprechaun Divinity", "Celestial", 0.01],
+];
+packEmojis["Leprechaun Pack"] = "🍀";
+
+packs["Griffin Pack"] = [
+  ["Eagle Wing", "Common", 45.39],
+  ["Lion Paw", "Uncommon", 30],
+  ["Sky Patrol", "Rare", 15],
+  ["Griffin King", "Legendary", 8],
+  ["Aerial Titan", "Mythic", 1],
+  ["Roost Shade", "Secret", 0.5],
+  ["Griffin Lord", "Ultra Secret", 0.08],
+  ["Griffin Prime", "Mystical", 0.02],
+  ["Griffin Divinity", "Celestial", 0.01],
+];
+packEmojis["Griffin Pack"] = "🦅";
+
+packs["Basilisk Pack"] = [
+  ["Stone Gaze", "Common", 45.39],
+  ["Scale Armor", "Uncommon", 30],
+  ["Death Stare", "Rare", 15],
+  ["Basilisk King", "Legendary", 8],
+  ["Petrify Titan", "Mythic", 1],
+  ["Serpent Shade", "Secret", 0.5],
+  ["Basilisk Lord", "Ultra Secret", 0.08],
+  ["Basilisk Prime", "Mystical", 0.02],
+  ["Basilisk Divinity", "Celestial", 0.01],
+];
+packEmojis["Basilisk Pack"] = "🐍";
+
+packs["Chimera Pack"] = [
+  ["Lion Head", "Common", 45.39],
+  ["Goat Body", "Uncommon", 30],
+  ["Serpent Tail", "Rare", 15],
+  ["Chimera King", "Legendary", 8],
+  ["Hybrid Titan", "Mythic", 1],
+  ["Monster Shade", "Secret", 0.5],
+  ["Chimera Lord", "Ultra Secret", 0.08],
+  ["Chimera Prime", "Mystical", 0.02],
+  ["Chimera Divinity", "Celestial", 0.01],
+];
+packEmojis["Chimera Pack"] = "🐲";
+
+packs["Cyclops Pack"] = [
+  ["Boulder", "Common", 45.39],
+  ["Club", "Uncommon", 30],
+  ["One-Eye Scout", "Rare", 15],
+  ["Cyclops King", "Legendary", 8],
+  ["Giant Titan", "Mythic", 1],
+  ["Cave Shade", "Secret", 0.5],
+  ["Cyclops Lord", "Ultra Secret", 0.08],
+  ["Cyclops Prime", "Mystical", 0.02],
+  ["Cyclops Divinity", "Celestial", 0.01],
+];
+packEmojis["Cyclops Pack"] = "👁️";
+
+packs["Nymph Pack"] = [
+  ["Dewdrop", "Common", 45.39],
+  ["Stream Dancer", "Uncommon", 30],
+  ["Forest Nymph", "Rare", 15],
+  ["Nymph Queen", "Legendary", 8],
+  ["Nature Titan", "Mythic", 1],
+  ["Glade Shade", "Secret", 0.5],
+  ["Nymph Lord", "Ultra Secret", 0.08],
+  ["Nymph Prime", "Mystical", 0.02],
+  ["Nymph Divinity", "Celestial", 0.01],
+];
+packEmojis["Nymph Pack"] = "🧚‍♀️";
+
+packs["Chemistry Pack"] = [
+  ["Atom", "Common", 45.39],
+  ["Molecule", "Uncommon", 30],
+  ["Catalyst", "Rare", 15],
+  ["Chemistry King", "Legendary", 8],
+  ["Reaction Titan", "Mythic", 1],
+  ["Element Shade", "Secret", 0.5],
+  ["Chemistry Lord", "Ultra Secret", 0.08],
+  ["Chemistry Prime", "Mystical", 0.02],
+  ["Chemistry Divinity", "Celestial", 0.01],
+];
+packEmojis["Chemistry Pack"] = "🧪";
+
+packs["Astronomy Pack"] = [
+  ["Planetarium", "Common", 45.39],
+  ["Telescope Lens", "Uncommon", 30],
+  ["Galaxy Cluster", "Rare", 15],
+  ["Astronomy King", "Legendary", 8],
+  ["Celestial Titan", "Mythic", 1],
+  ["Void Shade", "Secret", 0.5],
+  ["Astronomy Lord", "Ultra Secret", 0.08],
+  ["Astronomy Prime", "Mystical", 0.02],
+  ["Astronomy Divinity", "Celestial", 0.01],
+];
+packEmojis["Astronomy Pack"] = "🌠";
+
+packs["Geology Pack"] = [
+  ["Mineral", "Common", 45.39],
+  ["Geode", "Uncommon", 30],
+  ["Diamond Vein", "Rare", 15],
+  ["Geology King", "Legendary", 8],
+  ["Tectonic Titan", "Mythic", 1],
+  ["Magma Shade", "Secret", 0.5],
+  ["Geology Lord", "Ultra Secret", 0.08],
+  ["Geology Prime", "Mystical", 0.02],
+  ["Geology Divinity", "Celestial", 0.01],
+];
+packEmojis["Geology Pack"] = "🪨";
+
+packs["Meteorology Pack"] = [
+  ["Barometer", "Common", 45.39],
+  ["Weather Vane", "Uncommon", 30],
+  ["Storm Chaser", "Rare", 15],
+  ["Meteorology King", "Legendary", 8],
+  ["Forecast Titan", "Mythic", 1],
+  ["Climate Shade", "Secret", 0.5],
+  ["Meteorology Lord", "Ultra Secret", 0.08],
+  ["Meteorology Prime", "Mystical", 0.02],
+  ["Meteorology Divinity", "Celestial", 0.01],
+];
+packEmojis["Meteorology Pack"] = "🌤️";
+
+packs["Botany Pack"] = [
+  ["Sprout", "Common", 45.39],
+  ["Fern Leaf", "Uncommon", 30],
+  ["Redwood", "Rare", 15],
+  ["Botany King", "Legendary", 8],
+  ["Chlorophyll Titan", "Mythic", 1],
+  ["Root Shade", "Secret", 0.5],
+  ["Botany Lord", "Ultra Secret", 0.08],
+  ["Botany Prime", "Mystical", 0.02],
+  ["Botany Divinity", "Celestial", 0.01],
+];
+packEmojis["Botany Pack"] = "🌱";
+
+packs["Paleontology Pack"] = [
+  ["Fossil Fragment", "Common", 45.39],
+  ["Amber", "Uncommon", 30],
+  ["Complete Skeleton", "Rare", 15],
+  ["Paleo King", "Legendary", 8],
+  ["Excavation Titan", "Mythic", 1],
+  ["Sediment Shade", "Secret", 0.5],
+  ["Paleontology Lord", "Ultra Secret", 0.08],
+  ["Paleontology Prime", "Mystical", 0.02],
+  ["Paleontology Divinity", "Celestial", 0.01],
+];
+packEmojis["Paleontology Pack"] = "🦴";
+
+packs["VR Pack"] = [
+  ["Headset", "Common", 45.39],
+  ["Controller", "Uncommon", 30],
+  ["Virtual World", "Rare", 15],
+  ["VR King", "Legendary", 8],
+  ["Matrix Titan", "Mythic", 1],
+  ["Render Shade", "Secret", 0.5],
+  ["VR Lord", "Ultra Secret", 0.08],
+  ["VR Prime", "Mystical", 0.02],
+  ["VR Divinity", "Celestial", 0.01],
+];
+packEmojis["VR Pack"] = "🥽";
+
+packs["3D Print Pack"] = [
+  ["Filament", "Common", 45.39],
+  ["Layer Print", "Uncommon", 30],
+  ["Prototype", "Rare", 15],
+  ["Print King", "Legendary", 8],
+  ["Additive Titan", "Mythic", 1],
+  ["Nozzle Shade", "Secret", 0.5],
+  ["3D Print Lord", "Ultra Secret", 0.08],
+  ["3D Print Prime", "Mystical", 0.02],
+  ["3D Print Divinity", "Celestial", 0.01],
+];
+packEmojis["3D Print Pack"] = "🖨️";
+
+packs["Drone Pack"] = [
+  ["Propeller", "Common", 45.39],
+  ["FPV Goggles", "Uncommon", 30],
+  ["Racing Drone", "Rare", 15],
+  ["Drone King", "Legendary", 8],
+  ["Aerial Titan", "Mythic", 1],
+  ["Signal Shade", "Secret", 0.5],
+  ["Drone Lord", "Ultra Secret", 0.08],
+  ["Drone Prime", "Mystical", 0.02],
+  ["Drone Divinity", "Celestial", 0.01],
+];
+packEmojis["Drone Pack"] = "🛩️";
+
+packs["Solar Pack"] = [
+  ["Solar Cell", "Common", 45.39],
+  ["Panel Array", "Uncommon", 30],
+  ["Solar Farm", "Rare", 15],
+  ["Solar King", "Legendary", 8],
+  ["Photon Titan", "Mythic", 1],
+  ["UV Shade", "Secret", 0.5],
+  ["Solar Lord", "Ultra Secret", 0.08],
+  ["Solar Prime", "Mystical", 0.02],
+  ["Solar Divinity", "Celestial", 0.01],
+];
+packEmojis["Solar Pack"] = "☀️";
+
+packs["Wind Power Pack"] = [
+  ["Breeze", "Common", 45.39],
+  ["Windmill", "Uncommon", 30],
+  ["Turbine Farm", "Rare", 15],
+  ["Wind King", "Legendary", 8],
+  ["Gust Titan", "Mythic", 1],
+  ["Cyclone Shade", "Secret", 0.5],
+  ["Wind Lord", "Ultra Secret", 0.08],
+  ["Wind Prime", "Mystical", 0.02],
+  ["Wind Divinity", "Celestial", 0.01],
+];
+packEmojis["Wind Power Pack"] = "💨";
+
+packs["Battery Pack"] = [
+  ["AA Cell", "Common", 45.39],
+  ["Lithium Ion", "Uncommon", 30],
+  ["Power Wall", "Rare", 15],
+  ["Battery King", "Legendary", 8],
+  ["Energy Titan", "Mythic", 1],
+  ["Charge Shade", "Secret", 0.5],
+  ["Battery Lord", "Ultra Secret", 0.08],
+  ["Battery Prime", "Mystical", 0.02],
+  ["Battery Divinity", "Celestial", 0.01],
+];
+packEmojis["Battery Pack"] = "🔋";
+
+packs["Microscope Pack"] = [
+  ["Slide", "Common", 45.39],
+  ["Cell Sample", "Uncommon", 30],
+  ["Microbe", "Rare", 15],
+  ["Micro King", "Legendary", 8],
+  ["Nano Titan", "Mythic", 1],
+  ["Lens Shade", "Secret", 0.5],
+  ["Microscope Lord", "Ultra Secret", 0.08],
+  ["Microscope Prime", "Mystical", 0.02],
+  ["Microscope Divinity", "Celestial", 0.01],
+];
+packEmojis["Microscope Pack"] = "🔬";
+
+packs["Magnet Pack"] = [
+  ["Iron Filing", "Common", 45.39],
+  ["Bar Magnet", "Uncommon", 30],
+  ["Electromagnet", "Rare", 15],
+  ["Magnet King", "Legendary", 8],
+  ["Polar Titan", "Mythic", 1],
+  ["Field Shade", "Secret", 0.5],
+  ["Magnet Lord", "Ultra Secret", 0.08],
+  ["Magnet Prime", "Mystical", 0.02],
+  ["Magnet Divinity", "Celestial", 0.01],
+];
+packEmojis["Magnet Pack"] = "🧲";
+
+packs["Compass Pack"] = [
+  ["Needle", "Common", 45.39],
+  ["Rose Compass", "Uncommon", 30],
+  ["Gyroscope", "Rare", 15],
+  ["Navigator King", "Legendary", 8],
+  ["Direction Titan", "Mythic", 1],
+  ["North Shade", "Secret", 0.5],
+  ["Compass Lord", "Ultra Secret", 0.08],
+  ["Compass Prime", "Mystical", 0.02],
+  ["Compass Divinity", "Celestial", 0.01],
+];
+packEmojis["Compass Pack"] = "🧭";
+
+packs["Clock Tower Pack"] = [
+  ["Pendulum", "Common", 45.39],
+  ["Gear Train", "Uncommon", 30],
+  ["Bell Tower", "Rare", 15],
+  ["Clock Tower King", "Legendary", 8],
+  ["Time Titan", "Mythic", 1],
+  ["Midnight Shade", "Secret", 0.5],
+  ["Clock Tower Lord", "Ultra Secret", 0.08],
+  ["Clock Tower Prime", "Mystical", 0.02],
+  ["Clock Tower Divinity", "Celestial", 0.01],
+];
+packEmojis["Clock Tower Pack"] = "🕰️";
+
+packs["Radio Pack"] = [
+  ["Antenna Wire", "Common", 45.39],
+  ["AM Signal", "Uncommon", 30],
+  ["FM Broadcast", "Rare", 15],
+  ["Radio King", "Legendary", 8],
+  ["Frequency Titan", "Mythic", 1],
+  ["Static Shade", "Secret", 0.5],
+  ["Radio Lord", "Ultra Secret", 0.08],
+  ["Radio Prime", "Mystical", 0.02],
+  ["Radio Divinity", "Celestial", 0.01],
+];
+packEmojis["Radio Pack"] = "📻";
+
+packs["Camera Pack"] = [
+  ["Lens Cap", "Common", 45.39],
+  ["Film Roll", "Uncommon", 30],
+  ["SLR", "Rare", 15],
+  ["Camera King", "Legendary", 8],
+  ["Shutter Titan", "Mythic", 1],
+  ["Focus Shade", "Secret", 0.5],
+  ["Camera Lord", "Ultra Secret", 0.08],
+  ["Camera Prime", "Mystical", 0.02],
+  ["Camera Divinity", "Celestial", 0.01],
+];
+packEmojis["Camera Pack"] = "📷";
+
+packs["Thermometer Pack"] = [
+  ["Mercury Drop", "Common", 45.39],
+  ["Digital Read", "Uncommon", 30],
+  ["Infrared", "Rare", 15],
+  ["Thermo King", "Legendary", 8],
+  ["Heat Titan", "Mythic", 1],
+  ["Fever Shade", "Secret", 0.5],
+  ["Thermometer Lord", "Ultra Secret", 0.08],
+  ["Thermometer Prime", "Mystical", 0.02],
+  ["Thermometer Divinity", "Celestial", 0.01],
+];
+packEmojis["Thermometer Pack"] = "🌡️";
+
+packs["Electricity Pack"] = [
+  ["Static Ball", "Common", 45.39],
+  ["Tesla Coil", "Uncommon", 30],
+  ["Lightning Rod", "Rare", 15],
+  ["Volt King", "Legendary", 8],
+  ["Current Titan", "Mythic", 1],
+  ["Arc Shade", "Secret", 0.5],
+  ["Electricity Lord", "Ultra Secret", 0.08],
+  ["Electricity Prime", "Mystical", 0.02],
+  ["Electricity Divinity", "Celestial", 0.01],
+];
+packEmojis["Electricity Pack"] = "⚡";
+
+packs["Atom Pack"] = [
+  ["Proton", "Common", 45.39],
+  ["Neutron", "Uncommon", 30],
+  ["Electron Cloud", "Rare", 15],
+  ["Atom King", "Legendary", 8],
+  ["Fusion Titan", "Mythic", 1],
+  ["Fission Shade", "Secret", 0.5],
+  ["Atom Lord", "Ultra Secret", 0.08],
+  ["Atom Prime", "Mystical", 0.02],
+  ["Atom Divinity", "Celestial", 0.01],
+];
+packEmojis["Atom Pack"] = "⚛️";
+
+packs["DNA Pack"] = [
+  ["Nucleotide", "Common", 45.39],
+  ["Double Helix", "Uncommon", 30],
+  ["Gene Splice", "Rare", 15],
+  ["DNA King", "Legendary", 8],
+  ["Genome Titan", "Mythic", 1],
+  ["Mutation Shade", "Secret", 0.5],
+  ["DNA Lord", "Ultra Secret", 0.08],
+  ["DNA Prime", "Mystical", 0.02],
+  ["DNA Divinity", "Celestial", 0.01],
+];
+packEmojis["DNA Pack"] = "🧬";
+
+packs["Fossil Pack"] = [
+  ["Trilobite", "Common", 45.39],
+  ["Ammonite", "Uncommon", 30],
+  ["Raptor Claw", "Rare", 15],
+  ["Fossil King", "Legendary", 8],
+  ["Amber Titan", "Mythic", 1],
+  ["Petrified Shade", "Secret", 0.5],
+  ["Fossil Lord", "Ultra Secret", 0.08],
+  ["Fossil Prime", "Mystical", 0.02],
+  ["Fossil Divinity", "Celestial", 0.01],
+];
+packEmojis["Fossil Pack"] = "🦕";
+
+packs["Volcano Science Pack"] = [
+  ["Seismograph", "Common", 45.39],
+  ["Lava Sample", "Uncommon", 30],
+  ["Pyroclastic Flow", "Rare", 15],
+  ["Volcanologist King", "Legendary", 8],
+  ["Eruption Titan", "Mythic", 1],
+  ["Ash Cloud Shade", "Secret", 0.5],
+  ["Volcano Science Lord", "Ultra Secret", 0.08],
+  ["Volcano Science Prime", "Mystical", 0.02],
+  ["Volcano Science Divinity", "Celestial", 0.01],
+];
+packEmojis["Volcano Science Pack"] = "🌋";
+
+packs["Space Probe Pack"] = [
+  ["Solar Panel", "Common", 45.39],
+  ["Antenna Dish", "Uncommon", 30],
+  ["Voyager", "Rare", 15],
+  ["Probe King", "Legendary", 8],
+  ["Deep Space Titan", "Mythic", 1],
+  ["Void Shade", "Secret", 0.5],
+  ["Space Probe Lord", "Ultra Secret", 0.08],
+  ["Space Probe Prime", "Mystical", 0.02],
+  ["Space Probe Divinity", "Celestial", 0.01],
+];
+packEmojis["Space Probe Pack"] = "🛰️";
 
 // Draw a random item with equal chance for each rarity (~12.5% each)
 const packRarities = rarityOrder.filter((r) => r !== "Exotic");
