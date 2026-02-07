@@ -1,11 +1,16 @@
  import { useState } from "react";
  import { motion, AnimatePresence } from "framer-motion";
- import { Search, ArrowLeftRight, Check, X, AlertCircle } from "lucide-react";
+ import { Search, ArrowLeftRight, Check, X, AlertCircle, Users, Circle } from "lucide-react";
  import { Input } from "@/components/ui/input";
  import { Button } from "@/components/ui/button";
  import { InventoryItem, rarityColors, rarityGlowColors } from "@/data/gameData";
  import { TradeOffer } from "@/hooks/useTrading";
- 
+
+ interface OnlinePlayer {
+   nickname: string;
+   online_at: string;
+ }
+
  interface TradeViewProps {
    inventory: Record<string, InventoryItem>;
    nickname: string | null;
@@ -23,6 +28,7 @@
    onCancelTrade: () => void;
    checkPlayerOnline: (nickname: string) => boolean;
    waitingForResponse: boolean;
+   onlinePlayers?: OnlinePlayer[];
  }
  
  export function TradeView({
@@ -42,6 +48,7 @@
    onCancelTrade,
    checkPlayerOnline,
    waitingForResponse,
+   onlinePlayers = [],
  }: TradeViewProps) {
    const [searchNickname, setSearchNickname] = useState("");
    const [error, setError] = useState<string | null>(null);
@@ -131,6 +138,39 @@
              >
                {isSearching ? "Searching..." : "Request Trade"}
              </Button>
+
+             {/* Online players list */}
+             {onlinePlayers.length > 0 && (
+               <div className="mt-2">
+                 <div className="flex items-center gap-2 mb-2">
+                   <Users className="w-4 h-4 text-muted-foreground" />
+                   <span className="text-sm font-semibold text-muted-foreground">
+                     Online Players ({onlinePlayers.length})
+                   </span>
+                 </div>
+                 <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                   {onlinePlayers.map((player) => (
+                     <motion.button
+                       key={player.nickname}
+                       whileHover={{ scale: 1.02 }}
+                       whileTap={{ scale: 0.98 }}
+                       onClick={() => {
+                         setSearchNickname(player.nickname);
+                         setError(null);
+                       }}
+                       className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left transition-all
+                         ${searchNickname === player.nickname
+                           ? "bg-primary/20 border border-primary/40"
+                           : "bg-black/30 border border-white/10 hover:bg-black/20 hover:border-white/20"
+                         }`}
+                     >
+                       <Circle className="w-2.5 h-2.5 fill-green-500 text-green-500 flex-shrink-0" />
+                       <span className="font-semibold text-sm text-foreground">{player.nickname}</span>
+                     </motion.button>
+                   ))}
+                 </div>
+               </div>
+             )}
            </div>
          </motion.div>
        </div>

@@ -92,7 +92,7 @@ const Index = () => {
     getPartnerNickname,
   } = useTrading(nickname);
 
-  const { isPlayerOnline } = useOnlinePresence(nickname);
+  const { onlinePlayers, isPlayerOnline } = useOnlinePresence(nickname);
   const { isBanned } = useBanCheck(nickname);
   const { adminItems } = useAdminGifts(nickname);
 
@@ -419,6 +419,7 @@ const Index = () => {
                       onDeclineTrade={declineTrade}
                       onCancelTrade={cancelTrade}
                       checkPlayerOnline={isPlayerOnline}
+                      onlinePlayers={onlinePlayers.filter((p) => p.nickname !== nickname)}
                       waitingForResponse={waitingForTradeResponse}
                     />
                   )}
