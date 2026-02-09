@@ -91,10 +91,10 @@ export function HostGameModal({
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         className="bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/30
-                   rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+                   rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
           <h2 className="text-2xl font-bold text-foreground">🎮 Host Game</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X size={20} />
@@ -102,126 +102,134 @@ export function HostGameModal({
         </div>
 
         {!pinCode ? (
-          <div className="space-y-4">
-            {/* Gamemode Selector */}
-            <div>
-              <Label>Gamemode</Label>
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                {gameModes.map((mode) => (
-                  <GameModeCard
-                    key={mode.id}
-                    icon={mode.icon}
-                    label={mode.label}
-                    description={mode.description}
-                    selected={gameMode === mode.id}
-                    gradient={mode.gradient}
-                    onClick={() => setGameMode(mode.id)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Rarity selector — only for Classic */}
-            {gameMode === "classic" && (
+          <>
+            <div className="space-y-4 overflow-y-auto px-6 flex-1 min-h-0">
+              {/* Gamemode Selector */}
               <div>
-                <Label>Ends in ___ Rarity</Label>
-                <Select
-                  value={targetRarity}
-                  onValueChange={(v) => setTargetRarity(v as Rarity)}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectableRarities.map((rarity) => (
-                      <SelectItem key={rarity} value={rarity}>
-                        <span style={{ color: rarityInfo[rarity].color }}>
-                          {rarity}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Gamemode</Label>
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  {gameModes.map((mode) => (
+                    <GameModeCard
+                      key={mode.id}
+                      icon={mode.icon}
+                      label={mode.label}
+                      description={mode.description}
+                      selected={gameMode === mode.id}
+                      gradient={mode.gradient}
+                      onClick={() => setGameMode(mode.id)}
+                    />
+                  ))}
+                </div>
               </div>
-            )}
 
-            <div>
-              <Label>Time Limit: {timeLimit} Minutes (Max. 30)</Label>
-              <input
-                type="range"
-                min={1}
-                max={30}
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(Number(e.target.value))}
-                className="w-full mt-2 accent-primary"
-              />
-            </div>
-
-            {error && (
-              <p className="text-destructive text-sm">{error}</p>
-            )}
-
-            <Button
-              onClick={handleCreate}
-              disabled={!nickname || isCreating}
-              className="w-full gradient-button"
-            >
-              {isCreating ? "Creating..." : "Create Game"}
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="text-center">
-              <p className="text-muted-foreground text-sm mb-2">PIN Code</p>
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-4xl font-mono font-bold tracking-widest text-primary">
-                  {pinCode}
-                </span>
-                <Button variant="ghost" size="icon" onClick={copyPin}>
-                  {copied ? <Check size={20} className="text-green-500" /> : <Copy size={20} />}
-                </Button>
-              </div>
-            </div>
-
-            <div className="bg-black/30 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Users size={18} />
-                <span className="font-semibold">Players ({players.length})</span>
-              </div>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {players.map((player) => (
-                  <div
-                    key={player.id}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <span className={player.is_host ? "text-primary font-bold" : ""}>
-                      {player.nickname}
-                      {player.is_host && " (Host)"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="text-center text-sm text-muted-foreground">
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-8 h-8 flex items-center justify-center">{selectedMode.icon}</div>
-                <span className="font-bold text-primary">{selectedMode.label}</span>
-              </div>
+              {/* Rarity selector — only for Classic */}
               {gameMode === "classic" && (
-                <p className="mt-1">Target: <span className="font-bold" style={{ color: rarityInfo[targetRarity]?.color }}>{targetRarity}</span> or higher</p>
+                <div>
+                  <Label>Ends in ___ Rarity</Label>
+                  <Select
+                    value={targetRarity}
+                    onValueChange={(v) => setTargetRarity(v as Rarity)}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectableRarities.map((rarity) => (
+                        <SelectItem key={rarity} value={rarity}>
+                          <span style={{ color: rarityInfo[rarity].color }}>
+                            {rarity}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div>
+                <Label>Time Limit: {timeLimit} Minutes (Max. 30)</Label>
+                <input
+                  type="range"
+                  min={1}
+                  max={30}
+                  value={timeLimit}
+                  onChange={(e) => setTimeLimit(Number(e.target.value))}
+                  className="w-full mt-2 accent-primary"
+                />
+              </div>
+
+              {error && (
+                <p className="text-destructive text-sm">{error}</p>
               )}
             </div>
 
-            <Button
-              onClick={onStartGame}
-              disabled={players.length < 1}
-              className="w-full gradient-button"
-            >
-              <Play size={18} className="mr-2" />
-              Start Game
-            </Button>
-          </div>
+            <div className="p-6 pt-4 flex-shrink-0">
+              <Button
+                onClick={handleCreate}
+                disabled={!nickname || isCreating}
+                className="w-full gradient-button"
+              >
+                {isCreating ? "Creating..." : "Create Game"}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="space-y-4 overflow-y-auto px-6 flex-1 min-h-0">
+              <div className="text-center">
+                <p className="text-muted-foreground text-sm mb-2">PIN Code</p>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-4xl font-mono font-bold tracking-widest text-primary">
+                    {pinCode}
+                  </span>
+                  <Button variant="ghost" size="icon" onClick={copyPin}>
+                    {copied ? <Check size={20} className="text-green-500" /> : <Copy size={20} />}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-black/30 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users size={18} />
+                  <span className="font-semibold">Players ({players.length})</span>
+                </div>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {players.map((player) => (
+                    <div
+                      key={player.id}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <span className={player.is_host ? "text-primary font-bold" : ""}>
+                        {player.nickname}
+                        {player.is_host && " (Host)"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="text-center text-sm text-muted-foreground">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-8 h-8 flex items-center justify-center">{selectedMode.icon}</div>
+                  <span className="font-bold text-primary">{selectedMode.label}</span>
+                </div>
+                {gameMode === "classic" && (
+                  <p className="mt-1">Target: <span className="font-bold" style={{ color: rarityInfo[targetRarity]?.color }}>{targetRarity}</span> or higher</p>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6 pt-4 flex-shrink-0">
+              <Button
+                onClick={onStartGame}
+                disabled={players.length < 1}
+                className="w-full gradient-button"
+              >
+                <Play size={18} className="mr-2" />
+                Start Game
+              </Button>
+            </div>
+          </>
         )}
       </motion.div>
     </motion.div>
