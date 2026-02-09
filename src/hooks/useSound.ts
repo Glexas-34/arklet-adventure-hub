@@ -412,8 +412,17 @@ export function useSound() {
   }, []);
 
   const playReveal = useCallback(() => {
-    playTone(523, 0.12, "sine", 0.2);
-    playTone(659, 0.15, "sine", 0.2, 0.1);
+    // Casino coin cascade — rapid bright metallic jingle
+    playTone(1200, 0.06, "square", 0.12);
+    playTone(1500, 0.06, "square", 0.12, 0.05);
+    playTone(1800, 0.06, "square", 0.12, 0.10);
+    playTone(1200, 0.06, "square", 0.10, 0.15);
+    playTone(1500, 0.06, "square", 0.10, 0.20);
+    playTone(2000, 0.08, "square", 0.14, 0.25);
+    // Shimmery high layer
+    playTone(2400, 0.04, "sine", 0.06, 0.08);
+    playTone(2400, 0.04, "sine", 0.06, 0.18);
+    playTone(3000, 0.05, "sine", 0.05, 0.28);
   }, []);
 
   const playRareReveal = useCallback(() => {
