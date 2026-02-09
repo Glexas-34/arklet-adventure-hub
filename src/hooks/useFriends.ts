@@ -138,25 +138,31 @@ export function useFriends(nickname: string | null) {
   }, [sendRequest]);
 
   const acceptRequest = useCallback(async (friendshipId: string) => {
-    await supabase
+    const { error } = await supabase
       .from("friendships")
       .update({ status: "accepted" })
       .eq("id", friendshipId);
-  }, []);
+    if (error) console.error("Error accepting friend request:", error);
+    fetchFriends();
+  }, [fetchFriends]);
 
   const declineRequest = useCallback(async (friendshipId: string) => {
-    await supabase
+    const { error } = await supabase
       .from("friendships")
       .update({ status: "declined" })
       .eq("id", friendshipId);
-  }, []);
+    if (error) console.error("Error declining friend request:", error);
+    fetchFriends();
+  }, [fetchFriends]);
 
   const removeFriend = useCallback(async (friendshipId: string) => {
-    await supabase
+    const { error } = await supabase
       .from("friendships")
       .delete()
       .eq("id", friendshipId);
-  }, []);
+    if (error) console.error("Error removing friend:", error);
+    fetchFriends();
+  }, [fetchFriends]);
 
   return {
     friends,
