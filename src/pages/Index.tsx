@@ -10,6 +10,9 @@ import { LeaderboardView } from "@/components/LeaderboardView";
 import { TradeView } from "@/components/TradeView";
 import { TradeRequestModal } from "@/components/TradeRequestModal";
 import { ChatView } from "@/components/ChatView";
+import { FriendsView } from "@/components/FriendsView";
+import { NewsView } from "@/components/NewsView";
+import { FriendRequestModal } from "@/components/FriendRequestModal";
 
 import { Confetti } from "@/components/Confetti";
 import { HostGameModal } from "@/components/HostGameModal";
@@ -24,9 +27,13 @@ import { usePlayerProfile } from "@/hooks/usePlayerProfile";
 import { useTrading } from "@/hooks/useTrading";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { useAdminGifts } from "@/hooks/useAdminGifts";
-import { Rarity, InventoryItem, BlookItem } from "@/data/gameData";
+import { useFriends } from "@/hooks/useFriends";
+import { useAnnouncement } from "@/hooks/useAnnouncement";
+import { Rarity, InventoryItem, BlookItem, packs } from "@/data/gameData";
+import { getDailyPackName, dailyPacks } from "@/data/dailyPacks";
+import { useSpawnedPacks } from "@/hooks/useSpawnedPacks";
 import { ResultBar } from "@/components/ResultBar";
-import { useSound } from "@/hooks/useSound";
+import { useSound, unlockAudio, triggerGameAlertSound } from "@/hooks/useSound";
 import { trackPageView, trackEvent } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -38,7 +45,7 @@ import { FishingReelingView } from "@/components/multiplayer/FishingReelingView"
 import { PlatformRunView } from "@/components/multiplayer/PlatformRunView";
 import { FlappyBirdView } from "@/components/multiplayer/FlappyBirdView";
 
-type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat";
+type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat" | "friends" | "news";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>("packs");
@@ -99,7 +106,18 @@ const Index = () => {
   const { onlinePlayers, isPlayerOnline } = useOnlinePresence(nickname);
   const { isBanned } = useBanCheck(nickname);
   const { adminItems } = useAdminGifts(nickname);
+  const { spawnedPackNames } = useSpawnedPacks();
+  const { friends, incomingRequests, sendRequestByIdOrName, acceptRequest, declineRequest, removeFriend } = useFriends(nickname);
+  const { announcement } = useAnnouncement();
   const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal } = useSound();
+
+  // Daily packs: today's pack + admin-spawned packs + all original (non-daily) packs
+  const availablePackNames = useMemo(() => {
+    const today = getDailyPackName(new Date());
+    const spawned = spawnedPackNames.filter((n) => n !== today);
+    const originalPacks = Object.keys(packs).filter((n) => !(n in dailyPacks));
+    return [today, ...spawned, ...originalPacks];
+  }, [spawnedPackNames]);
 
   // Combined unique count: inventory items + admin-gifted items not already in inventory
   const combinedUniqueCount = useCallback(() => {
@@ -131,6 +149,24 @@ const Index = () => {
   joinRoomRef.current = joinRoom;
   const nicknameRef = useRef(nickname);
   nicknameRef.current = nickname;
+  const processedTradeRef = useRef<string | null>(null);
+
+  // Friend request modal: show the first pending incoming request
+  const currentFriendRequest = incomingRequests.length > 0 ? incomingRequests[0] : null;
+
+  const handleAcceptFriend = useCallback(() => {
+    if (currentFriendRequest) acceptRequest(currentFriendRequest.id);
+  }, [currentFriendRequest, acceptRequest]);
+
+  const handleDeclineFriend = useCallback(() => {
+    if (currentFriendRequest) declineRequest(currentFriendRequest.id);
+  }, [currentFriendRequest, declineRequest]);
+
+  // Trade from friends page: initiate trade and switch to trade view
+  const handleFriendTrade = useCallback((targetNickname: string) => {
+    initiateTradeRequest(targetNickname);
+    setCurrentView("trade");
+  }, [initiateTradeRequest]);
 
   const isInGame = currentRoom !== null && currentRoom.status === "playing";
   const isTrading = activeSession?.status === "trading";
@@ -144,7 +180,8 @@ const Index = () => {
       : activeSession.requester_accepted
     : false;
 
-  // Complete trade when both accept
+  // Complete trade when both accept — both players call completeTrade for reliability
+  // (counter increment is guarded inside completeTrade, item transfer guarded by processedTradeRef)
   useEffect(() => {
     if (activeSession?.requester_accepted && activeSession?.target_accepted && !tradeCompleted) {
       completeTrade();
@@ -153,27 +190,34 @@ const Index = () => {
 
   // Handle trade completion - transfer items
   useEffect(() => {
-    if (tradeCompleted && activeSession) {
-      trackEvent("trade_completed", { items_given: myOffers.length, items_received: theirOffers.length });
-      // Remove items I offered
-      myOffers.forEach((offer) => {
-        if (inventory[offer.item_name]) {
-          updateItemCount(offer.item_name, -offer.quantity);
-        }
-      });
+    if (!tradeCompleted || !activeSession || processedTradeRef.current === activeSession.id) return;
+    processedTradeRef.current = activeSession.id;
 
-      // Add items I received
-      theirOffers.forEach((offer) => {
-        for (let i = 0; i < offer.quantity; i++) {
-          addItem(offer.item_name, offer.item_rarity as Rarity);
-        }
-      });
+    trackEvent("trade_completed", { items_given: myOffers.length, items_received: theirOffers.length });
 
-      // Reset trade state and go back to inventory
-      resetTradeState();
-      setCurrentView("inventory");
+    // Remove items I offered
+    for (const offer of myOffers) {
+      updateItemCount(offer.item_name, -offer.quantity);
     }
+
+    // Add items I received
+    for (const offer of theirOffers) {
+      for (let i = 0; i < offer.quantity; i++) {
+        addItem(offer.item_name, offer.item_rarity as Rarity);
+      }
+    }
+
+    // Reset trade state and go back to inventory
+    resetTradeState();
+    setCurrentView("inventory");
   }, [tradeCompleted]);
+
+  // Reset processed trade ref when a new trade session starts
+  useEffect(() => {
+    if (activeSession) {
+      processedTradeRef.current = null;
+    }
+  }, [activeSession?.id]);
 
   // Switch to trade view when trade starts
   useEffect(() => {
@@ -204,6 +248,21 @@ const Index = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Unlock audio on first user interaction (needed for iOS Safari)
+  useEffect(() => {
+    const handler = () => {
+      unlockAudio();
+      document.removeEventListener("touchstart", handler);
+      document.removeEventListener("click", handler);
+    };
+    document.addEventListener("touchstart", handler, { once: true });
+    document.addEventListener("click", handler, { once: true });
+    return () => {
+      document.removeEventListener("touchstart", handler);
+      document.removeEventListener("click", handler);
+    };
   }, []);
 
   // When game starts, switch to packs view (classic only; other modes render inline)
@@ -252,9 +311,11 @@ const Index = () => {
             flappy_bird: "Flappy Bird",
           };
           const pin = room.pin_code;
+          triggerGameAlertSound();
           toast({
             title: "🎮 New Game Hosted!",
             description: `${room.host_nickname} is hosting ${modeLabel[room.game_mode] || room.game_mode} — PIN: ${pin}`,
+            variant: "game",
             action: nicknameRef.current ? (
               <ToastAction
                 altText="Join game"
@@ -263,7 +324,7 @@ const Index = () => {
                     joinRoomRef.current(pin, nicknameRef.current);
                   }
                 }}
-                className="bg-green-600 hover:bg-green-500 text-white border-0 font-bold px-4"
+                className="bg-green-500 hover:bg-green-400 text-white border-0 font-bold px-5 py-2 text-base rounded-lg"
               >
                 Join Game
               </ToastAction>
@@ -384,6 +445,8 @@ const Index = () => {
               onJoinGame={() => setShowJoinModal(true)}
               isInGame={isInGame}
               onStartTrade={() => setCurrentView("trade")}
+              onOpenFriends={() => setCurrentView("friends")}
+              friendRequestCount={incomingRequests.length}
             />
 
             <motion.main
@@ -392,7 +455,7 @@ const Index = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className={`flex-1 overflow-hidden pb-16 md:pb-0 ${currentRoom?.status === "playing" ? "pt-28" : ""}`}
+              className={`flex-1 overflow-hidden pb-24 md:pb-0 ${currentRoom?.status === "playing" ? "pt-28" : ""}`}
             >
               {/* Non-classic game mode views (take over main area) */}
               {isInGame && currentRoom?.game_mode === "steal_and_get" ? (
@@ -434,13 +497,15 @@ const Index = () => {
                     <PacksView
                       onItemObtained={handleItemObtained}
                       onRareReveal={handleRareReveal}
+                      availablePackNames={availablePackNames}
+                      announcement={announcement}
                     />
                   )}
                   {currentView === "inventory" && (
                     <InventoryView inventory={inventory} adminItems={adminItems} />
                   )}
                   {currentView === "index" && (
-                    <IndexView inventory={inventory} />
+                    <IndexView inventory={inventory} announcement={announcement} />
                   )}
                   {currentView === "leaderboard" && (
                     <LeaderboardView currentNickname={nickname} />
@@ -469,6 +534,18 @@ const Index = () => {
                   {currentView === "chat" && (
                     <ChatView nickname={nickname} onSimulatePull={handleSimulatePull} />
                   )}
+                  {currentView === "friends" && (
+                    <FriendsView
+                      friends={friends}
+                      nickname={nickname}
+                      onSendRequest={sendRequestByIdOrName}
+                      onRemoveFriend={removeFriend}
+                      onRequestTrade={handleFriendTrade}
+                      checkPlayerOnline={isPlayerOnline}
+                      onlinePlayers={onlinePlayers.filter((p) => p.nickname !== nickname)}
+                    />
+                  )}
+                  {currentView === "news" && <NewsView />}
                 </>
               )}
             </motion.main>
@@ -481,6 +558,7 @@ const Index = () => {
             onHostGame={() => setShowHostModal(true)}
             onJoinGame={() => setShowJoinModal(true)}
             isInGame={isInGame}
+            friendRequestCount={incomingRequests.length}
           />
 
           {/* Confetti overlay */}
@@ -530,6 +608,14 @@ const Index = () => {
             requesterNickname={incomingRequest?.requester_nickname || ""}
             onAccept={acceptTradeRequest}
             onDecline={declineTradeRequest}
+          />
+
+          {/* Friend Request Modal */}
+          <FriendRequestModal
+            isOpen={!!currentFriendRequest}
+            requesterNickname={currentFriendRequest?.nickname || ""}
+            onAccept={handleAcceptFriend}
+            onDecline={handleDeclineFriend}
           />
         </motion.div>
       ) : (

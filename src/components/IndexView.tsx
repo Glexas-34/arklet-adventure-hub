@@ -3,18 +3,31 @@ import { packs, rarityInfo, rarityColors, packEmojis, InventoryItem } from "@/da
 
 interface IndexViewProps {
   inventory: Record<string, InventoryItem>;
+  announcement?: string;
 }
 
-export function IndexView({ inventory }: IndexViewProps) {
+export function IndexView({ inventory, announcement }: IndexViewProps) {
   return (
     <div className="h-full overflow-y-auto p-4">
-      <motion.h2 
+      <motion.h2
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-2xl font-bold mb-6 text-foreground"
       >
         📖 All Blooks Index
       </motion.h2>
+
+      {announcement && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 px-4 py-3 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30"
+        >
+          <p className="text-sm font-semibold text-yellow-200">
+            📢 {announcement}
+          </p>
+        </motion.div>
+      )}
 
       <div className="space-y-6">
         {Object.entries(packs).map(([packName, items], packIndex) => {

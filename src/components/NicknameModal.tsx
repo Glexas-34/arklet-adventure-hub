@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User } from "lucide-react";
+import { sanitizeNickname } from "@/lib/sanitize";
+import { Link } from "react-router-dom";
 
 interface NicknameModalProps {
   isOpen: boolean;
@@ -18,23 +20,16 @@ export function NicknameModal({ isOpen, onSave }: NicknameModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nickname.trim()) {
-      setError("Please enter a nickname");
-      return;
-    }
-    if (nickname.length < 2) {
-      setError("Nickname must be at least 2 characters");
-      return;
-    }
-    if (nickname.length > 20) {
-      setError("Nickname must be 20 characters or less");
+    const validation = sanitizeNickname(nickname);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid nickname");
       return;
     }
 
     setError(null);
     setIsSubmitting(true);
-    
-    const result = await onSave(nickname.trim());
+
+    const result = await onSave(validation.value);
 
     if (!result.success) {
       setError(result.error || "Failed to save nickname");
@@ -100,6 +95,13 @@ export function NicknameModal({ isOpen, onSave }: NicknameModalProps) {
           >
             {isSubmitting ? "Saving..." : "Continue"}
           </motion.button>
+
+          <p className="text-center text-[11px] text-muted-foreground mt-3">
+            By continuing, you agree to our{" "}
+            <Link to="/terms" className="underline hover:text-foreground transition-colors">
+              Terms of Service
+            </Link>
+          </p>
         </form>
       </motion.div>
     </motion.div>

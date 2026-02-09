@@ -4,17 +4,20 @@ import { PackCard } from "./PackCard";
 import { PackPreview } from "./PackPreview";
 import { ResultBar } from "./ResultBar";
 import { packs, BlookItem, Rarity, rollPack } from "@/data/gameData";
+import { dailyPacks } from "@/data/dailyPacks";
 import { useSound } from "@/hooks/useSound";
 import { trackEvent } from "@/lib/analytics";
 
 interface PacksViewProps {
   onItemObtained: (name: string, rarity: Rarity) => void;
   onRareReveal?: (rarity: Rarity) => void;
+  availablePackNames?: string[];
+  announcement?: string;
 }
 
 const RARE_RARITIES: Rarity[] = ["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical"];
 
-export function PacksView({ onItemObtained, onRareReveal }: PacksViewProps) {
+export function PacksView({ onItemObtained, onRareReveal, availablePackNames, announcement }: PacksViewProps) {
   const [hoveredPack, setHoveredPack] = useState<string | null>(null);
   const [previewVisible, setPreviewVisible] = useState(true);
   const [resultItem, setResultItem] = useState<BlookItem | null>(null);
@@ -66,6 +69,20 @@ export function PacksView({ onItemObtained, onRareReveal }: PacksViewProps) {
     setShowResult(false);
   };
 
+  // Determine which packs to show
+  const packNames = availablePackNames
+    ? availablePackNames.filter((name) => packs[name])
+    : Object.keys(packs);
+
+  // Split into today's pack, spawned packs, and original packs when availablePackNames is provided
+  const todayPack = availablePackNames ? packNames[0] : null;
+  const spawnedPacks = availablePackNames
+    ? packNames.slice(1).filter((n) => n in dailyPacks)
+    : [];
+  const originalPacks = availablePackNames
+    ? packNames.filter((n) => !(n in dailyPacks))
+    : [];
+
   return (
     <div className="h-full overflow-y-auto p-4">
       <motion.h2
@@ -76,29 +93,117 @@ export function PacksView({ onItemObtained, onRareReveal }: PacksViewProps) {
         🎁 Choose a Pack to Open
       </motion.h2>
 
+      {announcement && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 px-4 py-3 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30"
+        >
+          <p className="text-sm font-semibold text-yellow-200">
+            📢 {announcement}
+          </p>
+        </motion.div>
+      )}
+
       <PackPreview
         packName={hoveredPack}
         isVisible={previewVisible && hoveredPack !== null}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.keys(packs).map((packName, index) => (
-          <motion.div
-            key={packName}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.03, type: "spring", stiffness: 300, damping: 25 }}
-            onMouseEnter={() => setHoveredPack(packName)}
-            onMouseLeave={() => setHoveredPack(null)}
-          >
-            <PackCard
-              name={packName}
-              onClick={() => openPack(packName)}
-              disabled={showResult}
-            />
-          </motion.div>
-        ))}
-      </div>
+      {availablePackNames ? (
+        <>
+          {/* Today's Pack section */}
+          {todayPack && (
+            <>
+              <h3 className="text-lg font-semibold text-foreground/80 mb-3">📅 Today's Pack</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  onMouseEnter={() => setHoveredPack(todayPack)}
+                  onMouseLeave={() => setHoveredPack(null)}
+                >
+                  <PackCard
+                    name={todayPack}
+                    onClick={() => openPack(todayPack)}
+                    disabled={showResult}
+                  />
+                </motion.div>
+              </div>
+            </>
+          )}
+
+          {/* Spawned Packs section */}
+          {spawnedPacks.length > 0 && (
+            <>
+              <h3 className="text-lg font-semibold text-foreground/80 mb-3">✨ Spawned Packs</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {spawnedPacks.map((packName, index) => (
+                  <motion.div
+                    key={packName}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03, type: "spring", stiffness: 300, damping: 25 }}
+                    onMouseEnter={() => setHoveredPack(packName)}
+                    onMouseLeave={() => setHoveredPack(null)}
+                  >
+                    <PackCard
+                      name={packName}
+                      onClick={() => openPack(packName)}
+                      disabled={showResult}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Original Packs section */}
+          {originalPacks.length > 0 && (
+            <>
+              <h3 className="text-lg font-semibold text-foreground/80 mb-3">📦 Packs</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {originalPacks.map((packName, index) => (
+                  <motion.div
+                    key={packName}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03, type: "spring", stiffness: 300, damping: 25 }}
+                    onMouseEnter={() => setHoveredPack(packName)}
+                    onMouseLeave={() => setHoveredPack(null)}
+                  >
+                    <PackCard
+                      name={packName}
+                      onClick={() => openPack(packName)}
+                      disabled={showResult}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {packNames.map((packName, index) => (
+            <motion.div
+              key={packName}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.03, type: "spring", stiffness: 300, damping: 25 }}
+              onMouseEnter={() => setHoveredPack(packName)}
+              onMouseLeave={() => setHoveredPack(null)}
+            >
+              <PackCard
+                name={packName}
+                onClick={() => openPack(packName)}
+                disabled={showResult}
+              />
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       <ResultBar
         item={resultItem}

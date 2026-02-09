@@ -4,6 +4,7 @@ import { Shield } from "lucide-react";
 import { isAdminUser } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
 import { Rarity, rarityOrder, packs, BlookItem } from "@/data/gameData";
+import { findDailyPackByQuery } from "@/data/dailyPacks";
 
 interface AdminPanelProps {
   nickname: string | null;
@@ -27,6 +28,10 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
     const unbanMatch = trimmed.match(/^\/unban\s+(.+)$/i);
     const giveMatch = trimmed.match(/^\/give\s+(\S+)\s+(.+)$/i);
     const pullMatch = trimmed.match(/^\/pull\s+(.+)$/i);
+    const spawnMatch = trimmed.match(/^\/spawn\s+(.+)$/i);
+    const unspawnMatch = trimmed.match(/^\/unspawn\s+(.+)$/i);
+    const notifyMatch = trimmed.match(/^\/notify\s+(.+)$/i);
+    const notifyClear = /^\/notify\s*$/i.test(trimmed);
 
     if (pullMatch) {
       const rest = pullMatch[1];
@@ -154,7 +159,9 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
           setFeedback({ type: "error", text: error.message });
         }
       } else {
-        setFeedback({ type: "success", text: `Banned ${target}` });
+        // Also remove from leaderboard
+        await supabase.from("player_profiles").delete().eq("nickname", target);
+        setFeedback({ type: "success", text: `Banned ${target} and removed from leaderboard` });
         setCommand("");
       }
     } else if (unbanMatch) {
@@ -174,8 +181,68 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
         setFeedback({ type: "success", text: `Unbanned ${target}` });
         setCommand("");
       }
+    } else if (spawnMatch) {
+      const query = spawnMatch[1].trim();
+      const packName = findDailyPackByQuery(query);
+      if (!packName) {
+        setFeedback({ type: "error", text: `Could not find daily pack for "${query}". Try formats like "Jan 15", "01-15", "1/15"` });
+        return;
+      }
+      const packKey = packName.toLowerCase().replace(/\s+/g, "_");
+      const { error } = await supabase
+        .from("spawned_packs")
+        .insert({ pack_key: packKey, pack_name: packName, spawned_by: nickname! });
+      if (error) {
+        if (error.code === "42P01") {
+          setFeedback({ type: "error", text: "Table not found. Run the spawned_packs migration SQL in Supabase Dashboard." });
+        } else if (error.code === "23505") {
+          setFeedback({ type: "error", text: `${packName} is already spawned.` });
+        } else {
+          setFeedback({ type: "error", text: error.message });
+        }
+      } else {
+        setFeedback({ type: "success", text: `Spawned ${packName}` });
+        setCommand("");
+      }
+    } else if (unspawnMatch) {
+      const query = unspawnMatch[1].trim();
+      const packName = findDailyPackByQuery(query);
+      if (!packName) {
+        setFeedback({ type: "error", text: `Could not find daily pack for "${query}". Try formats like "Jan 15", "01-15", "1/15"` });
+        return;
+      }
+      const packKey = packName.toLowerCase().replace(/\s+/g, "_");
+      const { error } = await supabase
+        .from("spawned_packs")
+        .delete()
+        .eq("pack_key", packKey);
+      if (error) {
+        if (error.code === "42P01") {
+          setFeedback({ type: "error", text: "Table not found. Run the spawned_packs migration SQL in Supabase Dashboard." });
+        } else {
+          setFeedback({ type: "error", text: error.message });
+        }
+      } else {
+        setFeedback({ type: "success", text: `Unspawned ${packName}` });
+        setCommand("");
+      }
+    } else if (notifyMatch || notifyClear) {
+      const message = notifyMatch ? notifyMatch[1].trim() : "";
+      const { error } = await supabase
+        .from("site_announcements")
+        .upsert({ id: "current", message, set_by: nickname!, updated_at: new Date().toISOString() });
+      if (error) {
+        if (error.code === "42P01") {
+          setFeedback({ type: "error", text: "Table not found. Run the site_announcements migration." });
+        } else {
+          setFeedback({ type: "error", text: error.message });
+        }
+      } else {
+        setFeedback({ type: "success", text: message ? `Announcement set: "${message}"` : "Announcement cleared" });
+        setCommand("");
+      }
     } else {
-      setFeedback({ type: "error", text: "Unknown command. Try /give, /ban, /unban, /pull" });
+      setFeedback({ type: "error", text: "Unknown command. Try /give, /ban, /unban, /pull, /spawn, /unspawn, /notify" });
     }
   };
 
@@ -208,7 +275,7 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleCommand();
                   }}
-                  placeholder="/give | /pull | /ban | /unban"
+                  placeholder="/give | /pull | /ban | /unban | /spawn | /unspawn | /notify"
                   className="flex-1 px-3 py-2 rounded-lg bg-black/40 border border-red-500/20 text-foreground text-sm outline-none focus:border-red-500/50 transition-colors placeholder:text-muted-foreground"
                 />
                 <motion.button

@@ -157,6 +157,51 @@ export type Database = {
         }
         Relationships: []
       }
+      site_announcements: {
+        Row: {
+          id: string
+          message: string
+          set_by: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          message: string
+          set_by: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          message?: string
+          set_by?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          id: string
+          requester_nickname: string
+          target_nickname: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          requester_nickname: string
+          target_nickname: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          requester_nickname?: string
+          target_nickname?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       banned_users: {
         Row: {
           id: string
@@ -195,6 +240,30 @@ export type Database = {
           id?: string
           sender_nickname?: string
           message?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      spawned_packs: {
+        Row: {
+          id: string
+          pack_key: string
+          pack_name: string
+          spawned_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          pack_key: string
+          pack_name: string
+          spawned_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          pack_key?: string
+          pack_name?: string
+          spawned_by?: string
           created_at?: string
         }
         Relationships: []

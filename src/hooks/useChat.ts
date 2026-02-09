@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeChatMessage } from "@/lib/sanitize";
 
 export interface ChatMessage {
   id: string;
@@ -8,10 +9,13 @@ export interface ChatMessage {
   created_at: string;
 }
 
+const RATE_LIMIT_MS = 2000; // 2 seconds between messages
+
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const fetchedRef = useRef(false);
+  const lastSendRef = useRef(0);
 
   const fetchMessages = async () => {
     try {
@@ -66,8 +70,19 @@ export function useChat() {
   }, []);
 
   const sendMessage = useCallback(async (nickname: string, text: string): Promise<string | null> => {
-    const trimmed = text.trim();
-    if (!trimmed || !nickname) return "Missing nickname or message";
+    // Sanitize input
+    const result = sanitizeChatMessage(text);
+    if (!result.valid) return result.error || "Invalid message";
+    if (!nickname) return "Missing nickname";
+
+    // Client-side rate limiting
+    const now = Date.now();
+    if (now - lastSendRef.current < RATE_LIMIT_MS) {
+      return "Please wait a moment before sending another message";
+    }
+    lastSendRef.current = now;
+
+    const trimmed = result.value;
 
     // Add message to state immediately
     const tempId = `temp-${Date.now()}`;

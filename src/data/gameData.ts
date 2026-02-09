@@ -5065,6 +5065,12 @@ Object.keys(packs).forEach((packName) => {
   items.push([dName, "Divine" as Rarity, 0.005]);
 });
 
+// === Merge daily packs (366 calendar packs) ===
+// dailyPacks already include Celestial + Divine inline, so they skip the loop above.
+import { dailyPacks, dailyPackEmojis } from "./dailyPacks";
+Object.assign(packs, dailyPacks);
+Object.assign(packEmojis, dailyPackEmojis);
+
 // Roll function with explicit chances
 export function rollPack(packName: string): [string, Rarity, number] {
   const pack = packs[packName];

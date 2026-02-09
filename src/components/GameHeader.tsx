@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, User, Pencil, Hash } from "lucide-react";
+import { sanitizeNickname } from "@/lib/sanitize";
 
 interface GameHeaderProps {
   nickname?: string | null;
@@ -41,20 +42,12 @@ export function GameHeader({ nickname, userNumber, onChangeNickname }: GameHeade
 
   const handleChangeUsername = async () => {
     if (!onChangeNickname) return;
-    const trimmed = newName.trim();
-    if (!trimmed) {
-      setError("Please enter a name");
+    const validation = sanitizeNickname(newName);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid name");
       return;
     }
-    if (trimmed.length < 2) {
-      setError("Must be at least 2 characters");
-      return;
-    }
-    if (trimmed.length > 20) {
-      setError("Must be 20 characters or less");
-      return;
-    }
-    if (trimmed === nickname) {
+    if (validation.value === nickname) {
       setIsEditing(false);
       setError(null);
       return;
@@ -62,7 +55,7 @@ export function GameHeader({ nickname, userNumber, onChangeNickname }: GameHeade
 
     setIsSubmitting(true);
     setError(null);
-    const result = await onChangeNickname(trimmed);
+    const result = await onChangeNickname(validation.value);
     setIsSubmitting(false);
 
     if (result.success) {

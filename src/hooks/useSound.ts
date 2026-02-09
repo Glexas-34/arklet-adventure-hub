@@ -374,6 +374,25 @@ function stopArcadeMusic() {
   }
 }
 
+/** Call once on first user interaction to unlock AudioContext on iOS */
+export function unlockAudio() {
+  const ctx = getCtx();
+  if (!ctx) return;
+  // Play a silent 1-sample buffer to unlock on iOS Safari
+  const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.connect(ctx.destination);
+  src.start(0);
+}
+
+/** Standalone alert sound (3 ascending beeps) for game notifications */
+export function triggerGameAlertSound() {
+  playTone(600, 0.12, "square", 0.3);
+  playTone(800, 0.12, "square", 0.3, 0.15);
+  playTone(1000, 0.18, "square", 0.35, 0.3);
+}
+
 export function useSound() {
   const lastHover = useRef(0);
 

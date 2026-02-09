@@ -29,6 +29,7 @@ const toastVariants = cva(
       variant: {
         default: "border bg-background text-foreground",
         destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
+        game: "border-green-400/60 bg-gradient-to-r from-green-900/95 to-emerald-900/95 text-white shadow-[0_0_20px_rgba(34,197,94,0.4)] animate-game-toast-pulse",
       },
     },
     defaultVariants: {
