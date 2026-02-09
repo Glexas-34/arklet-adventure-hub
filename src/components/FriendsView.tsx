@@ -40,7 +40,7 @@ export function FriendsView({
 
   const fetchSuggestions = useCallback(
     async (query: string) => {
-      if (query.length < 2) {
+      if (query.length < 1) {
         setSuggestions([]);
         return;
       }
@@ -50,7 +50,7 @@ export function FriendsView({
         .map((p) => p.nickname)
         .filter(
           (n) =>
-            n.toLowerCase().includes(query.toLowerCase()) &&
+            n.toLowerCase().startsWith(query.toLowerCase()) &&
             n !== nickname &&
             !friendNicknames.includes(n)
         );
@@ -59,7 +59,7 @@ export function FriendsView({
       const { data } = await supabase
         .from("player_profiles")
         .select("nickname")
-        .ilike("nickname", `%${query}%`)
+        .ilike("nickname", `${query}%`)
         .limit(10);
 
       const dbMatches = (data || [])
@@ -80,14 +80,14 @@ export function FriendsView({
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (searchInput.trim().length < 2) {
+    if (searchInput.trim().length < 1) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
     debounceRef.current = setTimeout(() => {
       fetchSuggestions(searchInput.trim());
-    }, 300);
+    }, 100);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
