@@ -12,6 +12,7 @@ import { TradeRequestModal } from "@/components/TradeRequestModal";
 import { ChatView } from "@/components/ChatView";
 import { FriendsView } from "@/components/FriendsView";
 import { NewsView } from "@/components/NewsView";
+import { ShopView } from "@/components/ShopView";
 import { FriendRequestModal } from "@/components/FriendRequestModal";
 
 import { Confetti } from "@/components/Confetti";
@@ -28,6 +29,7 @@ import { useTrading } from "@/hooks/useTrading";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { useAdminGifts } from "@/hooks/useAdminGifts";
 import { useFriends } from "@/hooks/useFriends";
+import { useShop } from "@/hooks/useShop";
 import { useAnnouncement } from "@/hooks/useAnnouncement";
 import { Rarity, InventoryItem, BlookItem, packs } from "@/data/gameData";
 import { getDailyPackName, dailyPacks } from "@/data/dailyPacks";
@@ -45,7 +47,7 @@ import { FishingReelingView } from "@/components/multiplayer/FishingReelingView"
 import { PlatformRunView } from "@/components/multiplayer/PlatformRunView";
 import { FlappyBirdView } from "@/components/multiplayer/FlappyBirdView";
 
-type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat" | "friends" | "news";
+type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat" | "friends" | "news" | "shop";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>("packs");
@@ -108,6 +110,7 @@ const Index = () => {
   const { adminItems } = useAdminGifts(nickname);
   const { spawnedPackNames } = useSpawnedPacks();
   const { friends, incomingRequests, sendRequestByIdOrName, acceptRequest, declineRequest, removeFriend } = useFriends(nickname);
+  const { listings, listItem, buyItem, returnItem, isLoading: shopLoading } = useShop(nickname);
   const { announcement } = useAnnouncement();
   const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal } = useSound();
 
@@ -167,6 +170,26 @@ const Index = () => {
     initiateTradeRequest(targetNickname);
     setCurrentView("trade");
   }, [initiateTradeRequest]);
+
+  const handleSellItem = useCallback(async (itemName: string, itemRarity: string) => {
+    if (!nickname) return;
+    updateItemCount(itemName, -1);
+    await listItem(nickname, itemName, itemRarity);
+  }, [nickname, updateItemCount, listItem]);
+
+  const handleBuyItem = useCallback(async (listingId: string) => {
+    const listing = await buyItem(listingId);
+    if (listing) {
+      addItem(listing.item_name, listing.item_rarity as Rarity);
+    }
+  }, [buyItem, addItem]);
+
+  const handleReturnItem = useCallback(async (listingId: string) => {
+    const listing = await returnItem(listingId);
+    if (listing) {
+      addItem(listing.item_name, listing.item_rarity as Rarity);
+    }
+  }, [returnItem, addItem]);
 
   const isInGame = currentRoom !== null && currentRoom.status === "playing";
   const isTrading = activeSession?.status === "trading";
@@ -546,6 +569,17 @@ const Index = () => {
                     />
                   )}
                   {currentView === "news" && <NewsView />}
+                  {currentView === "shop" && (
+                    <ShopView
+                      inventory={inventory}
+                      listings={listings}
+                      nickname={nickname}
+                      isLoading={shopLoading}
+                      onSell={handleSellItem}
+                      onBuy={handleBuyItem}
+                      onReturn={handleReturnItem}
+                    />
+                  )}
                 </>
               )}
             </motion.main>
@@ -575,10 +609,11 @@ const Index = () => {
           <HostGameModal
             isOpen={showHostModal}
             onClose={() => {
-              if (!currentRoom) {
-                setShowHostModal(false);
-                setGamePinCode(null);
+              if (currentRoom) {
+                leaveRoom();
               }
+              setShowHostModal(false);
+              setGamePinCode(null);
             }}
             nickname={nickname}
             onCreateRoom={handleCreateRoom}

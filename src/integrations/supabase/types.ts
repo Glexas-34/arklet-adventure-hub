@@ -268,6 +268,30 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_listings: {
+        Row: {
+          id: string
+          seller_nickname: string
+          item_name: string
+          item_rarity: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          seller_nickname: string
+          item_name: string
+          item_rarity: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          seller_nickname?: string
+          item_name?: string
+          item_rarity?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       trade_offers: {
         Row: {
           created_at: string

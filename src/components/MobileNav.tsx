@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Package, Backpack, Trophy, MessageSquare, Gamepad2, Users, LogIn, X, ArrowLeftRight, UserPlus, Newspaper } from "lucide-react";
+import { Package, Backpack, Trophy, MessageSquare, Gamepad2, Users, LogIn, X, ArrowLeftRight, UserPlus, Newspaper, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat" | "friends" | "news";
+type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat" | "friends" | "news" | "shop";
 
 interface MobileNavProps {
   currentView: View;
@@ -20,6 +20,7 @@ const tabs: { id: View; icon: typeof Package }[] = [
   { id: "trade", icon: ArrowLeftRight },
   { id: "friends", icon: UserPlus },
   { id: "news", icon: Newspaper },
+  { id: "shop", icon: ShoppingBag },
   { id: "chat", icon: MessageSquare },
 ];
 

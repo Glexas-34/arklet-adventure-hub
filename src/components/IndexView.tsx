@@ -14,7 +14,7 @@ export function IndexView({ inventory, announcement }: IndexViewProps) {
         animate={{ opacity: 1, y: 0 }}
         className="text-2xl font-bold mb-6 text-foreground"
       >
-        📖 All Blooks Index
+        📖 All Arks Index
       </motion.h2>
 
       {announcement && (

@@ -80,7 +80,7 @@ export function GameHeader({ nickname, userNumber, onChangeNickname }: GameHeade
         <Sparkles className="w-6 h-6 md:w-8 md:h-8 text-primary-foreground drop-shadow-lg" />
       </motion.div>
       <h1 className="text-lg md:text-2xl font-bold text-primary-foreground drop-shadow-lg">
-        Arklet Blooks
+        Arklet Arks
       </h1>
       <motion.span
         initial={{ scale: 0 }}

@@ -236,10 +236,13 @@
                      whileHover={{ scale: 1.05 }}
                      onClick={() => onRemoveItem(offer.item_name)}
                      className={`${rarityColors[offer.item_rarity as keyof typeof rarityColors]}
-                       bg-black/40 rounded-lg px-2 py-0.5 text-xs font-medium flex items-center gap-1`}
+                       bg-black/40 rounded-lg px-2 py-1 text-xs font-medium flex flex-col items-start`}
                    >
-                     {offer.item_name}
-                     <span className="bg-black/40 rounded px-1">×{offer.quantity}</span>
+                     <span className="flex items-center gap-1">
+                       {offer.item_name}
+                       <span className="bg-black/40 rounded px-1">×{offer.quantity}</span>
+                     </span>
+                     <span className="text-[9px] opacity-60">{offer.item_rarity}</span>
                    </motion.button>
                  ))
                )}
@@ -262,10 +265,13 @@
                      initial={{ scale: 0 }}
                      animate={{ scale: 1 }}
                      className={`${rarityColors[offer.item_rarity as keyof typeof rarityColors]}
-                       bg-black/40 rounded-lg px-2 py-0.5 text-xs font-medium flex items-center gap-1`}
+                       bg-black/40 rounded-lg px-2 py-1 text-xs font-medium flex flex-col items-start`}
                    >
-                     {offer.item_name}
-                     <span className="bg-black/40 rounded px-1">×{offer.quantity}</span>
+                     <span className="flex items-center gap-1">
+                       {offer.item_name}
+                       <span className="bg-black/40 rounded px-1">×{offer.quantity}</span>
+                     </span>
+                     <span className="text-[9px] opacity-60">{offer.item_rarity}</span>
                    </motion.div>
                  ))
                )}

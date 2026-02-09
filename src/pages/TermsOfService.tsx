@@ -10,7 +10,7 @@ export default function TermsOfService() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Arklet Blooks
+          Back to Arklet Arks
         </Link>
 
         <h1 className="text-3xl md:text-4xl font-black mb-2">Terms of Service</h1>
@@ -20,7 +20,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-bold text-foreground mb-2">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using Arklet Blooks ("the Service"), you agree to be bound by these Terms
+              By accessing and using Arklet Arks ("the Service"), you agree to be bound by these Terms
               of Service. If you do not agree to these terms, please do not use the Service.
             </p>
           </section>
@@ -28,7 +28,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-bold text-foreground mb-2">2. Description of Service</h2>
             <p>
-              Arklet Blooks is a free-to-play online pack simulator and multiplayer game. The Service
+              Arklet Arks is a free-to-play online pack simulator and multiplayer game. The Service
               allows users to open virtual packs, collect items, trade with other players, and
               participate in multiplayer game modes. All items and collectibles are virtual and hold no
               real-world monetary value.
@@ -62,7 +62,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-bold text-foreground mb-2">5. Virtual Items</h2>
             <p>
-              All virtual items, including Blooks of any rarity, are the property of Arklet Blooks. You
+              All virtual items, including Arks of any rarity, are the property of Arklet Arks. You
               are granted a limited, non-transferable license to use virtual items within the Service.
               Virtual items have no real-world value and cannot be exchanged for money, goods, or
               services outside of the Service.
@@ -119,7 +119,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-bold text-foreground mb-2">11. Limitation of Liability</h2>
             <p>
-              To the fullest extent permitted by law, Arklet Blooks and its operators shall not be
+              To the fullest extent permitted by law, Arklet Arks and its operators shall not be
               liable for any indirect, incidental, special, consequential, or punitive damages arising
               from your use of or inability to use the Service.
             </p>
@@ -144,7 +144,7 @@ export default function TermsOfService() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-white/10 text-center text-xs text-muted-foreground">
-          <p>Arklet Blooks - Pack Simulator</p>
+          <p>Arklet Arks - Pack Simulator</p>
         </div>
       </div>
     </div>
