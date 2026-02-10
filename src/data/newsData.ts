@@ -130,46 +130,6 @@ export const newsArticles: NewsArticle[] = [
       "The GOAT debate has moved to a new arena. Cristiano Ronaldo posted a screenshot of his Arklet collection alongside the caption: \"@Messi let's settle this. Classic Mode. Legendary target. Loser trades their rarest Ark.\" Messi responded with a single thumbs-up emoji. The match is set for Friday. Vegas oddsmakers have it at even money. FIFA is reportedly considering adding Arklet as an official esport.",
   },
   {
-    id: "13",
-    emoji: "🏛️",
-    title: "U.S. Congress Proposes 'Ark Rarity Transparency Act' After Trading Disputes",
-    author: "The Washington Post Gaming",
-    date: "Feb 9, 2026",
-    category: "Trending",
-    content:
-      "After a flood of complaints from parents whose children made questionable trades, a bipartisan group of senators introduced the Ark Rarity Transparency Act. The bill would require all virtual trading platforms to display item rarity in 72-point font. Senator Mike Thompson admitted during the press conference that he himself lost a Mythic in a bad trade last week. \"This is personal,\" he said.",
-  },
-  {
-    id: "14",
-    emoji: "⚖️",
-    title: "Player Sentenced to 20 Years of Only Opening Common Packs",
-    author: "Arklet Justice Weekly",
-    date: "Feb 8, 2026",
-    category: "Trending",
-    content:
-      "In a landmark ruling, user @FreedomTrader has been banned from opening anything above Common rarity for 20 years after attempting to create a pro-democracy movement within the Mythic Ark trading community. The defendant's lawyer argued that 'forcing someone to pull Commons for two decades violates the Geneva Convention,' but judges remained unmoved, citing his 47 Twitter threads about fair pack odds as 'crimes against the meta.'",
-  },
-  {
-    id: "15",
-    emoji: "🎭",
-    title: "Racist Meme Depicting Common Ark Sparks Outrage in Community",
-    author: "Arklet Ethics Monitor",
-    date: "Feb 8, 2026",
-    category: "Trending",
-    content:
-      "Top player DonaldArk47 posted an edited image mocking two legendary collectors by photoshopping their Divine Arks into Commons, with lawmakers calling it 'beyond the pale.' The controversy has split the community between those who think it's 'just banter' and those pointing out he literally spent 6 hours in Photoshop to make Celestial-tier players look poor. DonaldArk47 has since doubled down, claiming 'everyone knows Common Arks have the best stats actually.'",
-  },
-  {
-    id: "16",
-    emoji: "☢️",
-    title: "US Demands Iran Bring Better Trades to Nuclear Pack Exchange Summit",
-    author: "Geopolitical Gamer Tribune",
-    date: "Feb 8, 2026",
-    category: "Player",
-    content:
-      "International tensions rose today as American Arklet diplomats told Iranian players to 'stop lowballing' and bring actual concessions to next week's trade negotiations. Sources say Iran has been offering Uncommons for Divines for months while secretly stockpiling enough Mythic Arks to 'threaten regional pack stability.' The UN Security Council has scheduled an emergency session to discuss one player's 847 pending trade requests.",
-  },
-  {
     id: "17",
     emoji: "🎤",
     title: "Taylor Swift Admits She's Been Using Auto-Open Macro Since 2024",

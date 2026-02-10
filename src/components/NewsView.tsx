@@ -21,7 +21,7 @@ export function NewsView() {
       </motion.h2>
 
       <div className="space-y-4 max-w-2xl">
-        {newsArticles.map((article, index) => (
+        {[...newsArticles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((article, index) => (
           <motion.div
             key={article.id}
             initial={{ opacity: 0, y: 15 }}

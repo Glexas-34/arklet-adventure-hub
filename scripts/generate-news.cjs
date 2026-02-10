@@ -141,7 +141,9 @@ For each article, provide a JSON object with these fields:
 - category: one of "Celebrity", "Player", "Trending", "Tech", "Entertainment"
 - content: 2-3 sentences of satirical content. Be genuinely funny — use absurd escalation, irony, and unexpected twists.
 
-IMPORTANT: Return ONLY a valid JSON array of 6 objects, no markdown, no explanation. Example format:
+IMPORTANT RULES:
+- Do NOT include any articles based on political, geopolitical, or boring/dry topics. Skip any real headlines about politics, elections, government, wars, international relations, economics, finance, legal rulings, or anything kids would find boring. ONLY use headlines about sports, entertainment, tech, gaming, celebrities, viral trends, funny/weird stories, and other topics that kids and teens would find exciting and entertaining.
+- Return ONLY a valid JSON array of 6 objects, no markdown, no explanation. Example format:
 [{"emoji":"x","title":"x","author":"x","category":"x","content":"x"}]`;
 
   console.log("Calling Claude API...");
