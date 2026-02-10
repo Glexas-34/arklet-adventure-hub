@@ -42,11 +42,15 @@ export function JoinGameModal({ isOpen, onClose, nickname, onJoin, error }: Join
   const fetchAvailableRooms = async () => {
     setLoadingRooms(true);
     try {
+      // Only show rooms created in the last hour — older ones are stale/abandoned
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
       // Fetch waiting rooms
       const { data: rooms, error: roomsError } = await supabase
         .from("game_rooms")
         .select("id, pin_code, host_nickname, game_mode, target_rarity, time_limit_minutes")
         .eq("status", "waiting")
+        .gte("created_at", oneHourAgo)
         .order("created_at", { ascending: false });
 
       if (roomsError || !rooms) {
@@ -81,7 +85,8 @@ export function JoinGameModal({ isOpen, onClose, nickname, onJoin, error }: Join
         })
       );
 
-      setAvailableRooms(roomsWithCounts);
+      // Only show rooms that still have at least one player (host present)
+      setAvailableRooms(roomsWithCounts.filter((r) => r.player_count > 0));
     } catch {
       setAvailableRooms([]);
     }
