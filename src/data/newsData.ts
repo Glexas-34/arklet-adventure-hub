@@ -159,4 +159,64 @@ export const newsArticles: NewsArticle[] = [
     content:
       "First-grader Timmy Chen stunned the Arklet world by defeating three-time world champion NinjaBlade in a stunning upset, only to type 'git gud noob L+ratio' before his mom could stop him. The heartwarming underdog story quickly soured as Timmy proceeded to teabag emote for 45 seconds and claim he'd been 'carrying trash players like you since preschool.' NinjaBlade has announced his retirement, citing 'irrecoverable psychological damage from a child who can't multiply yet.'",
   },
+  {
+    id: "20",
+    emoji: "🎒",
+    title: "Players Demand Pack Opening Rights After Trump Divine Arks Banned",
+    author: "The Daily Ark Trader",
+    date: "Feb 10, 2026",
+    category: "Trending",
+    content:
+      "Arklet HQ announced Divine-tier 'Freedom Eagle' arks can no longer be opened in Democratic states, causing mass confusion as players frantically drive across state lines with unopened packs. One player was stopped at the border with 47 Celestial packs strapped to their chest, claiming they were 'seeking pack asylum.' The situation has spiraled into what economists are calling 'the Great Pack Migration of 2026.'",
+  },
+  {
+    id: "21",
+    emoji: "🏫",
+    title: "Middle School Ark Trading Goes Wrong, 10 Collections Deleted",
+    author: "Playground Post",
+    date: "Feb 10, 2026",
+    category: "Player",
+    content:
+      "A trade war at Tumbler Ridge Middle School escalated to catastrophic levels when student James accidentally hit 'Delete All' on 9 classmates' accounts plus his own after a disputed Mythic swap. 'He said his Legendary Dragon was mint condition, but it had 3 pixels missing,' explained one victim. The school has now implemented a mandatory 3-day waiting period for all lunch table trades.",
+  },
+  {
+    id: "22",
+    emoji: "🌍",
+    title: "Arklet Devs Delete 'Climate Change' Themed Pack After Backlash",
+    author: "Pack Facts Weekly",
+    date: "Feb 10, 2026",
+    category: "Tech",
+    content:
+      "The controversial 'Melting Ice' pack has been removed from Arklet after players complained the arks were 'too hot to handle' and kept disappearing from inventories. Developers initially claimed this was a feature, not a bug, saying 'it creates scarcity.' The pack included a Divine 'Greenhouse Gas' ark that reportedly made other arks in your collection slightly warmer each day.",
+  },
+  {
+    id: "23",
+    emoji: "🎤",
+    title: "Taylor Swift Reveals She's Been Grinding Arklet Since 2019",
+    author: "Celebrity Gaming Gazette",
+    date: "Feb 10, 2026",
+    category: "Celebrity",
+    content:
+      "The pop star shocked fans by revealing her 'Midnight' album was actually about losing a Divine 'Moon Cat' ark in a bad trade. 'Anti-Hero is literally about the guy who scammed me out of my Celestials,' Swift explained during her Eras Tour. She's now challenging the trader to a 1v1 livestream, with all proceeds going to her ark recovery fund.",
+  },
+  {
+    id: "24",
+    emoji: "🍕",
+    title: "Teen Trades Entire College Fund for Single Mythic 'Pizza Rat'",
+    author: "Regret Report",
+    date: "Feb 10, 2026",
+    category: "Player",
+    content:
+      "17-year-old Brandon Matthews liquidated his $80,000 college savings to purchase the only existing Mythic 'Pizza Rat' ark, arguing 'college is temporary, but Pizza Rat is forever.' His parents initially threatened legal action until the ark's value tripled overnight when a celebrity collector offered $240,000. Brandon is now homeschooling himself through Arklet trading tutorials on YouTube.",
+  },
+  {
+    id: "25",
+    emoji: "👻",
+    title: "Dwayne 'The Rock' Johnson Caught Using 7 Alt Accounts to Boost Wins",
+    author: "Muscle & Multiplayer Magazine",
+    date: "Feb 10, 2026",
+    category: "Celebrity",
+    content:
+      "The actor was exposed when all seven accounts named 'NotTheRock1' through 'NotTheRock7' entered the same tournament lobby and immediately surrendered to his main account. 'I thought if I believed in myself seven times harder, it wasn't cheating,' Johnson explained in a tearful Instagram apology. He's been banned for 30 days and forced to donate his entire Divine collection to random new players.",
+  },
 ];

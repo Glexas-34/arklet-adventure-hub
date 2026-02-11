@@ -7,6 +7,7 @@
 const fs = require("fs");
 const path = require("path");
 const https = require("https");
+const dns = require("dns");
 const { execSync } = require("child_process");
 
 // Load API key
@@ -19,6 +20,27 @@ if (!API_KEY) {
 }
 
 const NEWS_FILE = path.join(__dirname, "..", "src", "data", "newsData.ts");
+
+// Use Google public DNS as fallback if system DNS is flaky
+dns.setServers(["8.8.8.8", "1.1.1.1", "192.168.1.1"]);
+
+// Sleep helper
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Retry wrapper — retries up to `times` with exponential backoff
+async function retry(fn, label, times = 5) {
+  for (let attempt = 1; attempt <= times; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      const delay = attempt * 15000; // 15s, 30s, 45s, 60s, 75s
+      console.warn(`[Attempt ${attempt}/${times}] ${label} failed: ${e.message}`);
+      if (attempt === times) throw e;
+      console.log(`  Retrying in ${delay / 1000}s...`);
+      await sleep(delay);
+    }
+  }
+}
 
 // Format today's date as "Mon DD, YYYY"
 function getTodayFormatted() {
@@ -37,7 +59,7 @@ function getNextId() {
 // Fetch real headlines from Google News RSS
 function fetchRealHeadlines() {
   return new Promise((resolve, reject) => {
-    https.get("https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en", (res) => {
+    const req = https.get("https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en", { timeout: 15000 }, (res) => {
       let data = "";
       res.on("data", chunk => data += chunk);
       res.on("end", () => {
@@ -56,7 +78,9 @@ function fetchRealHeadlines() {
         resolve(titles.slice(0, 15));
       });
       res.on("error", reject);
-    }).on("error", reject);
+    });
+    req.on("error", reject);
+    req.on("timeout", () => { req.destroy(); reject(new Error("Headline fetch timed out")); });
   });
 }
 
@@ -73,6 +97,7 @@ function callClaude(prompt) {
       hostname: "api.anthropic.com",
       path: "/v1/messages",
       method: "POST",
+      timeout: 60000,
       headers: {
         "Content-Type": "application/json",
         "x-api-key": API_KEY,
@@ -99,6 +124,7 @@ function callClaude(prompt) {
     });
 
     req.on("error", reject);
+    req.on("timeout", () => { req.destroy(); reject(new Error("Claude API request timed out")); });
     req.write(body);
     req.end();
   });
@@ -107,17 +133,27 @@ function callClaude(prompt) {
 async function main() {
   console.log(`[${new Date().toISOString()}] Starting daily news generation...`);
 
+  // Wait a bit for network to stabilize (cron can fire before WiFi is ready)
+  await sleep(10000);
+
   const today = getTodayFormatted();
   const nextId = getNextId();
   console.log(`Date: ${today}, Next ID: ${nextId}`);
 
-  // Fetch real headlines
+  // Check if we already generated articles for today
+  const currentContent = fs.readFileSync(NEWS_FILE, "utf-8");
+  if (currentContent.includes(`date: "${today}"`)) {
+    console.log(`Articles for ${today} already exist, skipping.`);
+    return;
+  }
+
+  // Fetch real headlines (with retries)
   let headlines = [];
   try {
-    headlines = await fetchRealHeadlines();
+    headlines = await retry(() => fetchRealHeadlines(), "Headline fetch", 3);
     console.log(`Fetched ${headlines.length} real headlines`);
   } catch (e) {
-    console.warn("Could not fetch headlines, will generate without them:", e.message);
+    console.warn("Could not fetch headlines after retries, will generate without them:", e.message);
   }
 
   const headlineList = headlines.length > 0
@@ -146,8 +182,8 @@ IMPORTANT RULES:
 - Return ONLY a valid JSON array of 6 objects, no markdown, no explanation. Example format:
 [{"emoji":"x","title":"x","author":"x","category":"x","content":"x"}]`;
 
-  console.log("Calling Claude API...");
-  const response = await callClaude(prompt);
+  console.log("Calling Claude API (with retries)...");
+  const response = await retry(() => callClaude(prompt), "Claude API", 5);
 
   // Parse the JSON response
   let articles;
@@ -206,6 +242,7 @@ IMPORTANT RULES:
       cwd: path.join(__dirname, ".."),
       stdio: "inherit",
       timeout: 180000,
+      env: { ...process.env, PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin" },
     });
     console.log("Build complete!");
   } catch (e) {
