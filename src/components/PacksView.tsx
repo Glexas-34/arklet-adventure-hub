@@ -45,7 +45,10 @@ export function PacksView({ onItemObtained, onRareReveal, availablePackNames, an
     trackEvent("pack_opened", { pack_name: packName, item_name: name, rarity });
 
     // Play sound based on rarity
-    if (rarity === "Divine") {
+    if (rarity === "Ascendent" || rarity === "Transcendent") {
+      playDivineReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Divine") {
       playDivineReveal();
       onRareReveal?.(rarity);
     } else if (rarity === "Celestial") {

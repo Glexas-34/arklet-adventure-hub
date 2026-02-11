@@ -47,7 +47,13 @@
       "Bash(sudo cat:*)",
       "Bash(git status:*)",
       "Bash(xargs:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git -C /home/pi/arklet status)",
+      "Bash(git -C /home/pi/arklet diff)",
+      "Bash(git -C /home/pi/arklet log --oneline -5)",
+      "Bash(git -C /home/pi/arklet add src/components/NewsView.tsx scripts/generate-news.cjs src/data/newsData.ts)",
+      "Bash(git -C /home/pi/arklet commit -m \"$\\(cat <<''EOF''\nSort news newest-first, remove political articles, filter boring topics from generator\n\n- Sort news articles by date descending in NewsView so newest appear on top\n- Remove 4 political/geopolitical articles from newsData.ts\n- Update generate-news.cjs prompt to exclude political, geopolitical, and boring/dry topics\n- Only allow kid-friendly topics: sports, entertainment, tech, gaming, celebrities, viral trends\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /home/pi/arklet push)"
     ]
   }
 }

@@ -1,111 +1,87 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { MiniGameProps } from "./types";
-import { useSound } from "@/hooks/useSound";
 
-const CELL = 20;
-const GRID = 20;
-const CANVAS_SIZE = CELL * GRID;
-const MAX_SCORE = 25;
+const W = 400;
+const H = 300;
+const CELL_SIZE = 20;
+const COLS = W / CELL_SIZE; // 20
+const ROWS = H / CELL_SIZE; // 15
+const TICK_MS = 125; // 8fps
+const MAX_SCORE = 50;
 
-type Dir = "up" | "down" | "left" | "right";
+type Direction = "up" | "down" | "left" | "right";
 
-export function SnakeGame({ onGameEnd, onExit }: MiniGameProps) {
+interface Point {
+  x: number;
+  y: number;
+}
+
+export function SnakeGame({ onGameEnd, onExit, onScoreChange }: MiniGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [started, setStarted] = useState(false);
-  const [gameOver, setGameOver] = useState(false);
-  const [score, setScore] = useState(0);
+  const [phase, setPhase] = useState<"menu" | "play" | "dead">("menu");
   const stateRef = useRef({
-    snake: [{ x: 10, y: 10 }],
-    food: { x: 15, y: 10 },
-    dir: "right" as Dir,
-    nextDir: "right" as Dir,
+    snake: [{ x: 10, y: 7 }] as Point[],
+    direction: "right" as Direction,
+    nextDirection: "right" as Direction,
+    apple: { x: 15, y: 7 } as Point,
     score: 0,
   });
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const { playCorrect, playWrong } = useSound();
+  const tickRef = useRef<NodeJS.Timeout | null>(null);
+  const scoreRef = useRef(0);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  const spawnFood = useCallback(() => {
-    const s = stateRef.current;
-    let pos: { x: number; y: number };
-    do {
-      pos = {
-        x: Math.floor(Math.random() * GRID),
-        y: Math.floor(Math.random() * GRID),
-      };
-    } while (s.snake.some((seg) => seg.x === pos.x && seg.y === pos.y));
-    s.food = pos;
+  const resetState = useCallback(() => {
+    stateRef.current = {
+      snake: [{ x: 10, y: 7 }],
+      direction: "right",
+      nextDirection: "right",
+      apple: { x: 15, y: 7 },
+      score: 0,
+    };
+    scoreRef.current = 0;
   }, []);
 
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const s = stateRef.current;
-
-    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
-    // Grid
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
-    for (let i = 0; i < GRID; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * CELL, 0);
-      ctx.lineTo(i * CELL, CANVAS_SIZE);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0, i * CELL);
-      ctx.lineTo(CANVAS_SIZE, i * CELL);
-      ctx.stroke();
+  const spawnApple = useCallback((snake: Point[]) => {
+    const available: Point[] = [];
+    for (let x = 0; x < COLS; x++) {
+      for (let y = 0; y < ROWS; y++) {
+        if (!snake.some((seg) => seg.x === x && seg.y === y)) {
+          available.push({ x, y });
+        }
+      }
     }
+    return available.length > 0
+      ? available[Math.floor(Math.random() * available.length)]
+      : { x: 15, y: 7 };
+  }, []);
 
-    // Food
-    ctx.fillStyle = "#ef4444";
-    ctx.beginPath();
-    ctx.arc(s.food.x * CELL + CELL / 2, s.food.y * CELL + CELL / 2, CELL / 2 - 2, 0, Math.PI * 2);
-    ctx.fill();
+  const gameTick = useCallback(() => {
+    const s = stateRef.current;
+    s.direction = s.nextDirection;
 
-    // Snake
-    s.snake.forEach((seg, i) => {
-      const brightness = 1 - i * 0.03;
-      ctx.fillStyle = `hsl(142, 70%, ${Math.max(30, 50 * brightness)}%)`;
-      ctx.beginPath();
-      ctx.roundRect(seg.x * CELL + 1, seg.y * CELL + 1, CELL - 2, CELL - 2, 4);
-      ctx.fill();
-    });
-
-    // Eyes on head
+    // Calculate new head position
     const head = s.snake[0];
-    ctx.fillStyle = "white";
-    ctx.beginPath();
-    ctx.arc(head.x * CELL + CELL / 3, head.y * CELL + CELL / 3, 3, 0, Math.PI * 2);
-    ctx.arc(head.x * CELL + (2 * CELL) / 3, head.y * CELL + CELL / 3, 3, 0, Math.PI * 2);
-    ctx.fill();
-  }, []);
-
-  const tick = useCallback(() => {
-    const s = stateRef.current;
-    s.dir = s.nextDir;
-
-    const head = { ...s.snake[0] };
-    switch (s.dir) {
-      case "up": head.y--; break;
-      case "down": head.y++; break;
-      case "left": head.x--; break;
-      case "right": head.x++; break;
+    let newHead: Point;
+    switch (s.direction) {
+      case "up":
+        newHead = { x: head.x, y: head.y - 1 };
+        break;
+      case "down":
+        newHead = { x: head.x, y: head.y + 1 };
+        break;
+      case "left":
+        newHead = { x: head.x - 1, y: head.y };
+        break;
+      case "right":
+        newHead = { x: head.x + 1, y: head.y };
+        break;
     }
 
-    // Check collision
-    if (
-      head.x < 0 || head.x >= GRID ||
-      head.y < 0 || head.y >= GRID ||
-      s.snake.some((seg) => seg.x === head.x && seg.y === head.y)
-    ) {
-      clearInterval(intervalRef.current);
-      setGameOver(true);
-      playWrong();
+    // Check wall collision
+    if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
+      setPhase("dead");
       onGameEnd({
         score: s.score,
         maxScore: MAX_SCORE,
@@ -114,91 +90,229 @@ export function SnakeGame({ onGameEnd, onExit }: MiniGameProps) {
       return;
     }
 
-    s.snake.unshift(head);
+    // Check self collision
+    if (s.snake.some((seg) => seg.x === newHead.x && seg.y === newHead.y)) {
+      setPhase("dead");
+      onGameEnd({
+        score: s.score,
+        maxScore: MAX_SCORE,
+        normalizedScore: Math.min(1, s.score / MAX_SCORE),
+      });
+      return;
+    }
 
-    if (head.x === s.food.x && head.y === s.food.y) {
+    // Add new head
+    s.snake.unshift(newHead);
+
+    // Check apple collision
+    if (newHead.x === s.apple.x && newHead.y === s.apple.y) {
       s.score++;
-      setScore(s.score);
-      spawnFood();
-      playCorrect();
+      scoreRef.current = s.score;
+      onScoreChange?.(s.score);
+      s.apple = spawnApple(s.snake);
     } else {
+      // Remove tail if no apple eaten
       s.snake.pop();
     }
 
-    draw();
-  }, [draw, spawnFood, onGameEnd, playCorrect, playWrong]);
+    // Draw
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Background
+    const bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#0a0a1a");
+    bg.addColorStop(1, "#1a0a2e");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid pattern
+    ctx.strokeStyle = "rgba(255,255,255,0.03)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= COLS; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * CELL_SIZE, 0);
+      ctx.lineTo(x * CELL_SIZE, H);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= ROWS; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * CELL_SIZE);
+      ctx.lineTo(W, y * CELL_SIZE);
+      ctx.stroke();
+    }
+
+    // Apple (red with glow)
+    ctx.shadowColor = "#ff0000";
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = "#ff0033";
+    ctx.beginPath();
+    ctx.arc(
+      s.apple.x * CELL_SIZE + CELL_SIZE / 2,
+      s.apple.y * CELL_SIZE + CELL_SIZE / 2,
+      CELL_SIZE / 2 - 2,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Apple highlight
+    ctx.fillStyle = "#ff3366";
+    ctx.beginPath();
+    ctx.arc(
+      s.apple.x * CELL_SIZE + CELL_SIZE / 2 - 3,
+      s.apple.y * CELL_SIZE + CELL_SIZE / 2 - 3,
+      3,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+
+    // Snake (neon green with glow)
+    ctx.shadowColor = "#22ff44";
+    ctx.shadowBlur = 12;
+    s.snake.forEach((seg, i) => {
+      // Gradient from bright green (head) to darker green (tail)
+      const alpha = 1 - (i / s.snake.length) * 0.4;
+      ctx.fillStyle = i === 0 ? "#33ff55" : `rgba(34, 255, 68, ${alpha})`;
+      ctx.beginPath();
+      ctx.roundRect(
+        seg.x * CELL_SIZE + 2,
+        seg.y * CELL_SIZE + 2,
+        CELL_SIZE - 4,
+        CELL_SIZE - 4,
+        4
+      );
+      ctx.fill();
+
+      // Head eyes
+      if (i === 0) {
+        ctx.fillStyle = "#0a0a1a";
+        ctx.shadowBlur = 0;
+        const eyeSize = 3;
+        const eyeOffset = 5;
+        let leftEye = { x: seg.x * CELL_SIZE + eyeOffset, y: seg.y * CELL_SIZE + eyeOffset };
+        let rightEye = { x: seg.x * CELL_SIZE + CELL_SIZE - eyeOffset, y: seg.y * CELL_SIZE + eyeOffset };
+
+        // Adjust eye position based on direction
+        if (s.direction === "down") {
+          leftEye.y = seg.y * CELL_SIZE + CELL_SIZE - eyeOffset;
+          rightEye.y = seg.y * CELL_SIZE + CELL_SIZE - eyeOffset;
+        } else if (s.direction === "left") {
+          leftEye = { x: seg.x * CELL_SIZE + eyeOffset, y: seg.y * CELL_SIZE + eyeOffset };
+          rightEye = { x: seg.x * CELL_SIZE + eyeOffset, y: seg.y * CELL_SIZE + CELL_SIZE - eyeOffset };
+        } else if (s.direction === "right") {
+          leftEye = { x: seg.x * CELL_SIZE + CELL_SIZE - eyeOffset, y: seg.y * CELL_SIZE + eyeOffset };
+          rightEye = { x: seg.x * CELL_SIZE + CELL_SIZE - eyeOffset, y: seg.y * CELL_SIZE + CELL_SIZE - eyeOffset };
+        }
+
+        ctx.beginPath();
+        ctx.arc(leftEye.x, leftEye.y, eyeSize, 0, Math.PI * 2);
+        ctx.arc(rightEye.x, rightEye.y, eyeSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 12;
+      }
+    });
+    ctx.shadowBlur = 0;
+
+    // HUD
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 16px Fredoka, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`Score: ${s.score}`, 10, 24);
+
+    ctx.fillStyle = "#ffffff60";
+    ctx.font = "12px Fredoka, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(`Length: ${s.snake.length}`, W - 10, 24);
+  }, [onGameEnd, onScoreChange, spawnApple]);
 
   useEffect(() => {
-    if (!started || gameOver) return;
+    if (phase !== "play") return;
 
-    draw();
-    intervalRef.current = setInterval(tick, 120);
+    resetState();
+    tickRef.current = setInterval(gameTick, TICK_MS);
 
-    const handleKey = (e: KeyboardEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
       const s = stateRef.current;
-      switch (e.key) {
-        case "ArrowUp": case "w": if (s.dir !== "down") s.nextDir = "up"; break;
-        case "ArrowDown": case "s": if (s.dir !== "up") s.nextDir = "down"; break;
-        case "ArrowLeft": case "a": if (s.dir !== "right") s.nextDir = "left"; break;
-        case "ArrowRight": case "d": if (s.dir !== "left") s.nextDir = "right"; break;
+      if (e.key === "ArrowUp" && s.direction !== "down") {
+        s.nextDirection = "up";
+      } else if (e.key === "ArrowDown" && s.direction !== "up") {
+        s.nextDirection = "down";
+      } else if (e.key === "ArrowLeft" && s.direction !== "right") {
+        s.nextDirection = "left";
+      } else if (e.key === "ArrowRight" && s.direction !== "left") {
+        s.nextDirection = "right";
       }
     };
 
-    window.addEventListener("keydown", handleKey);
-    return () => {
-      clearInterval(intervalRef.current);
-      window.removeEventListener("keydown", handleKey);
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     };
-  }, [started, gameOver, draw, tick]);
 
-  // Touch swipe handling on canvas
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-  };
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!touchStartRef.current) return;
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - touchStartRef.current.x;
+      const dy = touch.clientY - touchStartRef.current.y;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!touchStartRef.current) return;
-    const touch = e.changedTouches[0];
-    const dx = touch.clientX - touchStartRef.current.x;
-    const dy = touch.clientY - touchStartRef.current.y;
-    const s = stateRef.current;
+      const s = stateRef.current;
+      if (absX > absY) {
+        // Horizontal swipe
+        if (dx > 0 && s.direction !== "left") {
+          s.nextDirection = "right";
+        } else if (dx < 0 && s.direction !== "right") {
+          s.nextDirection = "left";
+        }
+      } else {
+        // Vertical swipe
+        if (dy > 0 && s.direction !== "up") {
+          s.nextDirection = "down";
+        } else if (dy < 0 && s.direction !== "down") {
+          s.nextDirection = "up";
+        }
+      }
+      touchStartRef.current = null;
+    };
 
-    if (Math.abs(dx) > Math.abs(dy)) {
-      if (dx > 20 && s.dir !== "left") s.nextDir = "right";
-      else if (dx < -20 && s.dir !== "right") s.nextDir = "left";
-    } else {
-      if (dy > 20 && s.dir !== "up") s.nextDir = "down";
-      else if (dy < -20 && s.dir !== "down") s.nextDir = "up";
-    }
-    touchStartRef.current = null;
-  };
+    window.addEventListener("keydown", handleKeyDown);
+    const canvas = canvasRef.current;
+    canvas?.addEventListener("touchstart", handleTouchStart, { passive: true });
+    canvas?.addEventListener("touchend", handleTouchEnd, { passive: true });
 
-  const handleDirButton = (dir: Dir) => {
-    const s = stateRef.current;
-    if (dir === "up" && s.dir !== "down") s.nextDir = "up";
-    if (dir === "down" && s.dir !== "up") s.nextDir = "down";
-    if (dir === "left" && s.dir !== "right") s.nextDir = "left";
-    if (dir === "right" && s.dir !== "left") s.nextDir = "right";
-  };
+    return () => {
+      if (tickRef.current) clearInterval(tickRef.current);
+      window.removeEventListener("keydown", handleKeyDown);
+      canvas?.removeEventListener("touchstart", handleTouchStart);
+      canvas?.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [phase, resetState, gameTick]);
 
-  if (!started) {
+  if (phase === "menu") {
     return (
       <div className="max-w-md mx-auto text-center">
         <div className="flex items-center gap-3 mb-4">
-          <motion.button whileTap={{ scale: 0.9 }} onClick={onExit}
-            className="p-2 rounded-xl bg-black/30 text-foreground hover:bg-black/50 min-h-[44px] min-w-[44px] flex items-center justify-center">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={onExit}
+            className="p-2 rounded-xl bg-black/30 text-foreground hover:bg-black/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
             <ArrowLeft size={20} />
           </motion.button>
-          <h3 className="text-xl font-bold text-foreground">🐍 Snake</h3>
+          <h3 className="text-xl font-bold text-foreground">Hungry Snek</h3>
         </div>
-        <p className="text-muted-foreground mb-6">Use arrow keys, WASD, swipe, or the D-pad to move!</p>
+        <p className="text-muted-foreground mb-2">Use arrow keys or swipe to move!</p>
+        <p className="text-muted-foreground mb-6 text-sm">Eat apples to grow, but don't hit yourself or the walls.</p>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setStarted(true)}
+          onClick={() => setPhase("play")}
           className="gradient-button text-primary-foreground font-bold px-8 py-4 rounded-xl text-xl"
         >
           Start!
@@ -209,57 +323,33 @@ export function SnakeGame({ onGameEnd, onExit }: MiniGameProps) {
 
   return (
     <div className="max-w-md mx-auto">
-      <div className="flex items-center gap-3 mb-4">
-        <motion.button whileTap={{ scale: 0.9 }} onClick={onExit}
-          className="p-2 rounded-xl bg-black/30 text-foreground hover:bg-black/50 min-h-[44px] min-w-[44px] flex items-center justify-center">
+      <div className="flex items-center gap-3 mb-3">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={onExit}
+          className="p-2 rounded-xl bg-black/30 text-foreground hover:bg-black/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
+        >
           <ArrowLeft size={20} />
         </motion.button>
-        <h3 className="text-xl font-bold text-foreground">🐍 Snake</h3>
-        <span className="ml-auto text-lg font-bold text-foreground">🍎 {score}</span>
+        <h3 className="text-xl font-bold text-foreground">Hungry Snek</h3>
+        <span className="ml-auto text-lg font-bold text-foreground">{scoreRef.current}</span>
       </div>
 
       <canvas
         ref={canvasRef}
-        width={CANVAS_SIZE}
-        height={CANVAS_SIZE}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        className="w-full max-w-[400px] aspect-square mx-auto rounded-2xl bg-black/50 border-2 border-white/10 touch-none"
+        width={W}
+        height={H}
+        className="w-full max-w-[400px] mx-auto rounded-2xl bg-black/50 border-2 border-white/10 touch-none select-none"
+        style={{ aspectRatio: `${W}/${H}` }}
       />
 
-      {/* Mobile D-pad */}
-      <div className="md:hidden mt-4 flex flex-col items-center gap-2">
-        <motion.button
-          whileTap={{ scale: 0.8 }}
-          onClick={() => handleDirButton("up")}
-          className="w-14 h-14 rounded-xl bg-black/40 border border-white/20 flex items-center justify-center text-foreground active:bg-white/20"
-        >
-          <ArrowUp size={24} />
-        </motion.button>
-        <div className="flex gap-2">
-          <motion.button
-            whileTap={{ scale: 0.8 }}
-            onClick={() => handleDirButton("left")}
-            className="w-14 h-14 rounded-xl bg-black/40 border border-white/20 flex items-center justify-center text-foreground active:bg-white/20"
-          >
-            <ChevronLeft size={24} />
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.8 }}
-            onClick={() => handleDirButton("down")}
-            className="w-14 h-14 rounded-xl bg-black/40 border border-white/20 flex items-center justify-center text-foreground active:bg-white/20"
-          >
-            <ArrowDown size={24} />
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.8 }}
-            onClick={() => handleDirButton("right")}
-            className="w-14 h-14 rounded-xl bg-black/40 border border-white/20 flex items-center justify-center text-foreground active:bg-white/20"
-          >
-            <ChevronRight size={24} />
-          </motion.button>
+      {phase === "dead" && (
+        <div className="mt-4 text-center">
+          <p className="text-2xl font-bold text-red-400">Game Over!</p>
+          <p className="text-muted-foreground">Final Score: {scoreRef.current}</p>
+          <p className="text-muted-foreground text-sm">Length: {stateRef.current.snake.length}</p>
         </div>
-      </div>
+      )}
     </div>
   );
 }

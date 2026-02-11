@@ -2,9 +2,26 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Rarity, rarityOrder } from "@/data/gameData";
 
-export type GameMode = "classic" | "steal_and_get" | "block_buster" | "fishing" | "platform_run" | "flappy_bird";
+export type GameMode =
+  | "classic" | "steal_and_get" | "block_buster" | "fishing" | "platform_run" | "flappy_bird"
+  | "tanks" | "bowman" | "miniputt" | "pinchhitter"
+  | "bloons" | "helicopter" | "raftwars" | "kittencannon" | "zombocalypse"
+  | "effingworms" | "monkeyslap" | "dragracer" | "bubblespinner" | "impossiblequiz"
+  | "snake" | "whackamole" | "reaction" | "brickbreaker" | "typing"
+  | "math" | "colormatch" | "memory" | "pattern"
+  | "towerstack" | "speedbuilder" | "ghosthunter" | "rocketgoal" | "kartdash"
+  | "targetblitz" | "eggtoss" | "zonerunner" | "gardenrush" | "mineclicker";
 
-const VALID_MODES: string[] = ["classic", "steal_and_get", "block_buster", "fishing", "platform_run", "flappy_bird"];
+const VALID_MODES: string[] = [
+  "classic", "steal_and_get", "block_buster", "fishing", "platform_run", "flappy_bird",
+  "tanks", "bowman", "miniputt", "pinchhitter",
+  "bloons", "helicopter", "raftwars", "kittencannon", "zombocalypse",
+  "effingworms", "monkeyslap", "dragracer", "bubblespinner", "impossiblequiz",
+  "snake", "whackamole", "reaction", "brickbreaker", "typing",
+  "math", "colormatch", "memory", "pattern",
+  "towerstack", "speedbuilder", "ghosthunter", "rocketgoal", "kartdash",
+  "targetblitz", "eggtoss", "zonerunner", "gardenrush", "mineclicker",
+];
 
 export interface GameRoom {
   id: string;

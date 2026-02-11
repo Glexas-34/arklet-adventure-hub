@@ -37,7 +37,11 @@ export function useShop(nickname: string | null) {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "shop_listings" },
         (payload) => {
-          setListings((prev) => [payload.new as ShopListing, ...prev]);
+          const newListing = payload.new as ShopListing;
+          setListings((prev) => {
+            if (prev.some((l) => l.id === newListing.id)) return prev;
+            return [newListing, ...prev];
+          });
         }
       )
       .on(
@@ -56,13 +60,23 @@ export function useShop(nickname: string | null) {
 
   const listItem = useCallback(
     async (sellerNickname: string, itemName: string, itemRarity: string) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("shop_listings")
-        .insert({ seller_nickname: sellerNickname, item_name: itemName, item_rarity: itemRarity });
+        .insert({ seller_nickname: sellerNickname, item_name: itemName, item_rarity: itemRarity })
+        .select()
+        .single();
 
       if (error) {
         console.error("Error listing item:", error);
         return false;
+      }
+
+      // Optimistically add to local state so it appears immediately
+      if (data) {
+        setListings((prev) => {
+          if (prev.some((l) => l.id === data.id)) return prev;
+          return [data as ShopListing, ...prev];
+        });
       }
       return true;
     },

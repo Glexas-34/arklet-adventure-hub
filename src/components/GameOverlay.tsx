@@ -13,6 +13,7 @@ import {
   PlatformRunIcon,
   FlappyBirdIcon,
 } from "@/components/GameModeIcons";
+import { GAME_LIST } from "@/components/games/types";
 
 interface GameOverlayProps {
   room: GameRoom;
@@ -22,13 +23,25 @@ interface GameOverlayProps {
   onLeave: () => void;
 }
 
-const modeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
+// Featured modes with SVG icons
+const featuredLabels: Record<string, { label: string; icon: React.ReactNode }> = {
   classic: { label: "Classic Opening", icon: <ClassicIcon size={20} /> },
   steal_and_get: { label: "Steal & Get", icon: <StealAndGetIcon size={20} /> },
   block_buster: { label: "Block Buster", icon: <BlockBusterIcon size={20} /> },
   fishing: { label: "Fishing Reeling", icon: <FishingIcon size={20} /> },
   platform_run: { label: "Platform Run", icon: <PlatformRunIcon size={20} /> },
   flappy_bird: { label: "Flappy Bird", icon: <FlappyBirdIcon size={20} /> },
+};
+
+// Auto-generate labels for all arcade games from GAME_LIST
+const arcadeLabels: Record<string, { label: string; icon: React.ReactNode }> = {};
+for (const g of GAME_LIST) {
+  arcadeLabels[g.id] = { label: g.name, icon: <span className="text-base">{g.emoji}</span> };
+}
+
+const modeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
+  ...arcadeLabels,
+  ...featuredLabels, // featured overrides arcade entries with same id
 };
 
 export function GameOverlay({
@@ -269,11 +282,12 @@ export function GameOverlay({
                   transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                   className="mx-auto mb-2 flex justify-center"
                 >
-                  {room.game_mode === "steal_and_get" && <StealAndGetIcon size={80} />}
-                  {room.game_mode === "block_buster" && <BlockBusterIcon size={80} />}
-                  {room.game_mode === "fishing" && <FishingIcon size={80} />}
-                  {room.game_mode === "platform_run" && <PlatformRunIcon size={80} />}
-                  {room.game_mode === "flappy_bird" && <FlappyBirdIcon size={80} />}
+                  {room.game_mode === "steal_and_get" ? <StealAndGetIcon size={80} />
+                  : room.game_mode === "block_buster" ? <BlockBusterIcon size={80} />
+                  : room.game_mode === "fishing" ? <FishingIcon size={80} />
+                  : room.game_mode === "platform_run" ? <PlatformRunIcon size={80} />
+                  : room.game_mode === "flappy_bird" ? <FlappyBirdIcon size={80} />
+                  : <span className="text-6xl">{GAME_LIST.find(g => g.id === room.game_mode)?.emoji || "🎮"}</span>}
                 </motion.div>
                 <h2 className="text-4xl md:text-5xl font-bold mb-2">Time's Up!</h2>
                 {rankedPlayers.length > 0 && rankedPlayers[0].current_item && (

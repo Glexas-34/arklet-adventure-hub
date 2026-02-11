@@ -59,6 +59,11 @@ export default {
           secret: "hsl(var(--rarity-secret))",
           "ultra-secret": "hsl(var(--rarity-ultra-secret))",
           mystical: "hsl(var(--rarity-mystical))",
+          exotic: "hsl(var(--rarity-exotic))",
+          celestial: "hsl(var(--rarity-celestial))",
+          divine: "hsl(var(--rarity-divine))",
+          transcendent: "hsl(var(--rarity-transcendent))",
+          ascendent: "hsl(var(--rarity-ascendent))",
         },
       },
       borderRadius: {

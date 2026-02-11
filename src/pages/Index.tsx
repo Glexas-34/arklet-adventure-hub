@@ -46,6 +46,8 @@ import { BlockBusterView } from "@/components/multiplayer/BlockBusterView";
 import { FishingReelingView } from "@/components/multiplayer/FishingReelingView";
 import { PlatformRunView } from "@/components/multiplayer/PlatformRunView";
 import { FlappyBirdView } from "@/components/multiplayer/FlappyBirdView";
+import { ArcadeMultiAdapter, ARCADE_MODE_IDS } from "@/components/multiplayer/ArcadeMultiAdapter";
+import { GAME_LIST } from "@/components/games/types";
 
 type View = "packs" | "inventory" | "index" | "leaderboard" | "trade" | "chat" | "friends" | "news" | "shop";
 
@@ -325,6 +327,7 @@ const Index = () => {
           const room = payload.new as { host_nickname: string; game_mode: string; pin_code: string };
           // Don't notify yourself
           if (room.host_nickname === nickname) return;
+          const arcadeLabel = GAME_LIST.find((g) => g.id === room.game_mode)?.name;
           const modeLabel: Record<string, string> = {
             classic: "Classic Opening",
             steal_and_get: "Steal & Get",
@@ -332,6 +335,7 @@ const Index = () => {
             fishing: "Fishing Reeling",
             platform_run: "Platform Run",
             flappy_bird: "Flappy Bird",
+            ...(arcadeLabel ? { [room.game_mode]: arcadeLabel } : {}),
           };
           const pin = room.pin_code;
           triggerGameAlertSound();
@@ -384,9 +388,10 @@ const Index = () => {
   }, [currentRoom?.status, reportScore]);
 
   const handleRareReveal = useCallback((rarity: Rarity) => {
-    if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical", "Celestial", "Divine"].includes(rarity)) {
+    if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical", "Celestial", "Divine", "Transcendent", "Ascendent"].includes(rarity)) {
       setConfettiIntensity(
-        rarity === "Celestial" || rarity === "Divine" ? "celestial"
+        rarity === "Transcendent" || rarity === "Ascendent" ? "celestial"
+          : rarity === "Celestial" || rarity === "Divine" ? "celestial"
           : rarity === "Mystical" ? "mystical"
           : "normal"
       );
@@ -400,7 +405,8 @@ const Index = () => {
     setShowSimulation(true);
 
     const rarity = item.rarity;
-    if (rarity === "Divine") playDivineReveal();
+    if (rarity === "Ascendent" || rarity === "Transcendent") playDivineReveal();
+    else if (rarity === "Divine") playDivineReveal();
     else if (rarity === "Celestial") playCelestialReveal();
     else if (rarity === "Mystical") playMysticalReveal();
     else if (rarity === "Ultra Secret") playEpicReveal();
@@ -464,8 +470,8 @@ const Index = () => {
               totalItems={getTotalItems()}
               uniqueItems={combinedUniqueCount()}
               onClearInventory={handleClearInventory}
-              onHostGame={() => setShowHostModal(true)}
-              onJoinGame={() => setShowJoinModal(true)}
+              onHostGame={() => { unlockAudio(); setShowHostModal(true); }}
+              onJoinGame={() => { unlockAudio(); setShowJoinModal(true); }}
               isInGame={isInGame}
               onStartTrade={() => setCurrentView("trade")}
               onOpenFriends={() => setCurrentView("friends")}
@@ -510,6 +516,13 @@ const Index = () => {
                 />
               ) : isInGame && currentRoom?.game_mode === "flappy_bird" ? (
                 <FlappyBirdView
+                  timeRemaining={timeRemaining}
+                  onItemObtained={handleItemObtained}
+                  onScoreChange={handleScoreChange}
+                />
+              ) : isInGame && currentRoom?.game_mode && ARCADE_MODE_IDS.includes(currentRoom.game_mode) ? (
+                <ArcadeMultiAdapter
+                  gameId={currentRoom.game_mode}
                   timeRemaining={timeRemaining}
                   onItemObtained={handleItemObtained}
                   onScoreChange={handleScoreChange}
@@ -589,8 +602,8 @@ const Index = () => {
           <MobileNav
             currentView={currentView}
             onViewChange={setCurrentView}
-            onHostGame={() => setShowHostModal(true)}
-            onJoinGame={() => setShowJoinModal(true)}
+            onHostGame={() => { unlockAudio(); setShowHostModal(true); }}
+            onJoinGame={() => { unlockAudio(); setShowJoinModal(true); }}
             isInGame={isInGame}
             friendRequestCount={incomingRequests.length}
           />

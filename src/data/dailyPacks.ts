@@ -238,6 +238,14 @@ for (const theme of monthlyThemes) {
     const divineChance = 0.005;
     items[0] = [items[0][0], items[0][1], +(items[0][2] - divineChance).toFixed(3)];
     items.push([`${theme.name} ${day} Godform`, "Divine" as Rarity, divineChance]);
+    // Transcendent item unique per day
+    const transcendentChance = 0.001;
+    items[0] = [items[0][0], items[0][1], +(items[0][2] - transcendentChance).toFixed(4)];
+    items.push([`${theme.name} ${day} Transcendent`, "Transcendent" as Rarity, transcendentChance]);
+    // Ascendent item unique per day
+    const ascendentChance = 0.0005;
+    items[0] = [items[0][0], items[0][1], +(items[0][2] - ascendentChance).toFixed(4)];
+    items.push([`${theme.name} ${day} Ascendent`, "Ascendent" as Rarity, ascendentChance]);
 
     dailyPacks[packName] = items;
     dailyPackEmojis[packName] = theme.emoji;

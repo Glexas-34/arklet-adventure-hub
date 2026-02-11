@@ -374,10 +374,14 @@ function stopArcadeMusic() {
   }
 }
 
-/** Call once on first user interaction to unlock AudioContext on iOS */
+/** Call once on first user interaction to unlock AudioContext on iOS/Chrome */
 export function unlockAudio() {
   const ctx = getCtx();
   if (!ctx) return;
+  // Explicitly resume (required by Chrome on iPhone)
+  if (ctx.state === "suspended") {
+    ctx.resume();
+  }
   // Play a silent 1-sample buffer to unlock on iOS Safari
   const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
   const src = ctx.createBufferSource();

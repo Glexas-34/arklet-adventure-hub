@@ -102,7 +102,21 @@ export function ResultBar({ item, isVisible, onClose }: ResultBarProps) {
       return;
     }
 
-    if (item.rarity === "Celestial" || item.rarity === "Divine") {
+    if (item.rarity === "Ascendent") {
+      const holdTimer = setTimeout(() => setPhase("hold"), 3000);
+      const readyTimer = setTimeout(() => setPhase("ready"), 6000);
+      return () => {
+        clearTimeout(holdTimer);
+        clearTimeout(readyTimer);
+      };
+    } else if (item.rarity === "Transcendent") {
+      const holdTimer = setTimeout(() => setPhase("hold"), 2000);
+      const readyTimer = setTimeout(() => setPhase("ready"), 4000);
+      return () => {
+        clearTimeout(holdTimer);
+        clearTimeout(readyTimer);
+      };
+    } else if (item.rarity === "Celestial" || item.rarity === "Divine") {
       // Auto-advance phases for epic animations
       const holdTimer = setTimeout(() => setPhase("hold"), item.rarity === "Divine" ? 800 : 600);
       const readyTimer = setTimeout(() => setPhase("ready"), item.rarity === "Divine" ? 2000 : 1800);
@@ -120,6 +134,234 @@ export function ResultBar({ item, isVisible, onClose }: ResultBarProps) {
   const isRare = item.rarity === "Ultra Secret" || item.rarity === "Mystical";
   const isCelestial = item.rarity === "Celestial";
   const isDivine = item.rarity === "Divine";
+  const isTranscendent = item.rarity === "Transcendent";
+  const isAscendent = item.rarity === "Ascendent";
+
+  // --- ASCENDENT: waits 3s, appears at random spot, teleports to another, goes invisible, reappears at center ---
+  if (isAscendent) {
+    // Pre-compute two random positions (percentage based, avoiding edges)
+    const [randSpot1] = useState(() => ({
+      x: (Math.random() - 0.5) * 60,
+      y: (Math.random() - 0.5) * 60,
+    }));
+    const [randSpot2] = useState(() => ({
+      x: (Math.random() - 0.5) * 60,
+      y: (Math.random() - 0.5) * 60,
+    }));
+
+    return (
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={phase === "ready" ? onClose : undefined}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+            style={{ cursor: phase === "ready" ? "pointer" : "default" }}
+          >
+            {/* Pure white flash on arrival */}
+            <motion.div
+              className="absolute inset-0 bg-white"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0.9, 0, 0, 0.6, 0, 0, 0, 1, 0.2] }}
+              transition={{ duration: 6, times: [0, 0.49, 0.5, 0.55, 0.61, 0.625, 0.67, 0.74, 0.79, 0.8, 0.9] }}
+            />
+
+            {/* Dark backdrop */}
+            <motion.div
+              className="absolute inset-0 bg-black/95"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 1] }}
+              transition={{ duration: 3.2, times: [0, 0.95, 1] }}
+            />
+
+            {/* The card - appears at random spot, teleports, goes invisible, appears at center */}
+            <motion.div
+              className={`relative z-10 bg-black/95 backdrop-blur-xl rounded-3xl border-4 text-center overflow-hidden ${glowClass}`}
+              style={{ borderColor: rarityInfo.Ascendent.color }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{
+                opacity: [0, 0, 1, 1, 1, 1, 0, 0, 1, 1],
+                scale: [0.8, 0.8, 0.9, 0.9, 0.9, 0.9, 0.5, 0.5, 1.2, 1],
+                x: [0, 0, `${randSpot1.x}vw`, `${randSpot1.x}vw`, `${randSpot2.x}vw`, `${randSpot2.x}vw`, 0, 0, 0, 0],
+                y: [0, 0, `${randSpot1.y}vh`, `${randSpot1.y}vh`, `${randSpot2.y}vh`, `${randSpot2.y}vh`, 0, 0, 0, 0],
+              }}
+              transition={{
+                duration: 6,
+                times: [0, 0.49, 0.5, 0.62, 0.625, 0.74, 0.75, 0.79, 0.8, 0.9],
+                ease: "easeInOut",
+              }}
+            >
+              <div className="px-12 py-10">
+                {/* Radiant white rotating glow */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `conic-gradient(from 0deg, transparent, #ffffff20, transparent, #ffffff15, transparent, #ffffff20, transparent)`,
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 5 }}
+                >
+                  <motion.p
+                    className="text-sm font-bold uppercase tracking-widest mb-2"
+                    style={{ color: rarityInfo.Ascendent.color }}
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    Ascendent
+                  </motion.p>
+                  <motion.h3
+                    className={`text-3xl font-black mb-1 ${colorClass}`}
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 1.2, repeat: Infinity }}
+                  >
+                    {item.name}
+                  </motion.h3>
+                </motion.div>
+
+                {phase === "ready" && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-muted-foreground mt-4"
+                  >
+                    Click anywhere to dismiss
+                  </motion.p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Massive shockwave on final center reveal */}
+            <motion.div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 pointer-events-none"
+              style={{ borderColor: "hsl(0 0% 100% / 0.6)" }}
+              initial={{ width: 0, height: 0, opacity: 0 }}
+              animate={{ width: [0, 0, 800], height: [0, 0, 800], opacity: [0, 1, 0] }}
+              transition={{ delay: 4.8, duration: 0.8, ease: "easeOut" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // --- TRANSCENDENT: waits 2s then spins in from center ---
+  if (isTranscendent) {
+    return (
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={phase === "ready" ? onClose : undefined}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+            style={{ cursor: phase === "ready" ? "pointer" : "default" }}
+          >
+            {/* Deep red/black backdrop */}
+            <motion.div
+              className="absolute inset-0"
+              style={{ background: "radial-gradient(circle, #ff000030, #000000)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 1] }}
+              transition={{ duration: 2.2, times: [0, 0.9, 1] }}
+            />
+
+            {/* Red flash on arrival */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "radial-gradient(circle, #ff404080, transparent 60%)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 1, 0] }}
+              transition={{ delay: 2, duration: 0.6 }}
+            />
+
+            {/* The card - invisible for 2s, then spins into center */}
+            <motion.div
+              className={`relative z-10 bg-black/95 backdrop-blur-xl rounded-3xl border-4 text-center overflow-hidden ${glowClass}`}
+              style={{ borderColor: rarityInfo.Transcendent.color }}
+              initial={{ opacity: 0, scale: 0, rotate: -720 }}
+              animate={{
+                opacity: [0, 0, 1, 1],
+                scale: [0, 0, 1.3, 1],
+                rotate: [-720, -720, 0, 0],
+              }}
+              transition={{
+                duration: 3.5,
+                times: [0, 0.57, 0.85, 1],
+                ease: [
+                  [0.22, 1, 0.36, 1],
+                  [0.22, 1, 0.36, 1],
+                  [0.22, 1, 0.36, 1],
+                  [0.22, 1, 0.36, 1],
+                ],
+              }}
+            >
+              <div className="px-12 py-10">
+                {/* Red rotating glow */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `conic-gradient(from 0deg, transparent, #ff404018, transparent, #ff404012, transparent, #ff404018, transparent)`,
+                  }}
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 3 }}
+                >
+                  <motion.p
+                    className="text-sm font-bold uppercase tracking-widest mb-2"
+                    style={{ color: rarityInfo.Transcendent.color }}
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    Transcendent
+                  </motion.p>
+                  <motion.h3
+                    className={`text-3xl font-black mb-1 ${colorClass}`}
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    {item.name}
+                  </motion.h3>
+                </motion.div>
+
+                {phase === "ready" && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-muted-foreground mt-4"
+                  >
+                    Click anywhere to dismiss
+                  </motion.p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Shockwave ring on arrival */}
+            <motion.div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 pointer-events-none"
+              style={{ borderColor: "hsl(0 100% 55% / 0.6)" }}
+              initial={{ width: 0, height: 0, opacity: 0 }}
+              animate={{ width: [0, 0, 600], height: [0, 0, 600], opacity: [0, 1, 0] }}
+              transition={{ delay: 2, duration: 0.8, ease: "easeOut" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
 
   // --- CELESTIAL: Card grows to fill entire screen, then shrinks back ---
   if (isCelestial) {

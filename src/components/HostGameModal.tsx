@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { X, Users, Play, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -19,17 +19,58 @@ import {
   FishingIcon,
   PlatformRunIcon,
   FlappyBirdIcon,
-  GameModeCard,
 } from "@/components/GameModeIcons";
+import { GAME_LIST } from "@/components/games/types";
 
-const gameModes: { id: GameMode; label: string; description: string; gradient: string; icon: React.ReactNode }[] = [
-  { id: "classic", label: "Classic Opening", description: "Race to a target rarity", gradient: "from-red-500 to-orange-500", icon: <ClassicIcon size={56} /> },
-  { id: "steal_and_get", label: "Steal & Get", description: "Mystery boxes & steal items", gradient: "from-purple-500 to-indigo-500", icon: <StealAndGetIcon size={56} /> },
-  { id: "block_buster", label: "Block Buster", description: "Breakout game with drops", gradient: "from-cyan-500 to-blue-500", icon: <BlockBusterIcon size={56} /> },
-  { id: "fishing", label: "Fishing Reeling", description: "Cast & reel to catch items", gradient: "from-blue-500 to-teal-500", icon: <FishingIcon size={56} /> },
-  { id: "platform_run", label: "Platform Run", description: "Jump & collect items", gradient: "from-green-500 to-emerald-500", icon: <PlatformRunIcon size={56} /> },
-  { id: "flappy_bird", label: "Flappy Bird", description: "Flap & collect items", gradient: "from-sky-400 to-blue-500", icon: <FlappyBirdIcon size={56} /> },
+type Category = "Featured" | "Action" | "Sports" | "Puzzle";
+
+interface ModeEntry {
+  id: GameMode;
+  label: string;
+  description: string;
+  gradient: string;
+  emoji?: string;
+  icon?: React.ReactNode;
+  category: Category;
+}
+
+const featuredModes: ModeEntry[] = [
+  { id: "classic", label: "Classic Opening", description: "Race to a target rarity", gradient: "from-red-500 to-orange-500", icon: <ClassicIcon size={32} />, category: "Featured" },
+  { id: "steal_and_get", label: "Steal & Get", description: "Mystery boxes & steal items", gradient: "from-purple-500 to-indigo-500", icon: <StealAndGetIcon size={32} />, category: "Featured" },
+  { id: "block_buster", label: "Block Buster", description: "Breakout game with drops", gradient: "from-cyan-500 to-blue-500", icon: <BlockBusterIcon size={32} />, category: "Featured" },
+  { id: "fishing", label: "Fishing Reeling", description: "Cast & reel to catch items", gradient: "from-blue-500 to-teal-500", icon: <FishingIcon size={32} />, category: "Featured" },
+  { id: "platform_run", label: "Platform Run", description: "Jump & collect items", gradient: "from-green-500 to-emerald-500", icon: <PlatformRunIcon size={32} />, category: "Featured" },
+  { id: "flappy_bird", label: "Flappy Bird", description: "Flap & collect items", gradient: "from-sky-400 to-blue-500", icon: <FlappyBirdIcon size={32} />, category: "Featured" },
 ];
+
+// Category assignments for arcade games
+const arcadeCategories: Record<string, Category> = {
+  snake: "Action", whackamole: "Action", helicopter: "Action",
+  bloons: "Action", kittencannon: "Action", zombocalypse: "Action",
+  effingworms: "Action", monkeyslap: "Action", ghosthunter: "Action",
+  kartdash: "Action", targetblitz: "Action", zonerunner: "Action",
+  tanks: "Action", raftwars: "Sports",
+  miniputt: "Sports", pinchhitter: "Sports", bowman: "Sports",
+  dragracer: "Sports", rocketgoal: "Sports", eggtoss: "Sports",
+  reaction: "Puzzle", brickbreaker: "Puzzle", typing: "Puzzle",
+  math: "Puzzle", impossiblequiz: "Puzzle", colormatch: "Puzzle",
+  memory: "Puzzle", pattern: "Puzzle", bubblespinner: "Puzzle",
+  towerstack: "Puzzle", speedbuilder: "Puzzle", gardenrush: "Puzzle",
+  mineclicker: "Puzzle",
+};
+
+// Build arcade modes from GAME_LIST
+const arcadeModes: ModeEntry[] = GAME_LIST.map((g) => ({
+  id: g.id as GameMode,
+  label: g.name,
+  description: g.description,
+  gradient: g.color,
+  emoji: g.emoji,
+  category: arcadeCategories[g.id] || "Action",
+}));
+
+const allModes = [...featuredModes, ...arcadeModes];
+const categories: Category[] = ["Featured", "Action", "Sports", "Puzzle"];
 
 interface HostGameModalProps {
   isOpen: boolean;
@@ -55,6 +96,7 @@ export function HostGameModal({
   const [targetRarity, setTargetRarity] = useState<Rarity>("Rare");
   const [timeLimit, setTimeLimit] = useState(2);
   const [gameMode, setGameMode] = useState<GameMode>("classic");
+  const [activeCategory, setActiveCategory] = useState<Category>("Featured");
   const [isCreating, setIsCreating] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -76,7 +118,8 @@ export function HostGameModal({
   };
 
   const selectableRarities = rarityOrder.filter((r) => r !== "Exotic");
-  const selectedMode = gameModes.find((m) => m.id === gameMode)!;
+  const selectedMode = allModes.find((m) => m.id === gameMode);
+  const filteredModes = allModes.filter((m) => m.category === activeCategory);
 
   return (
     <motion.div
@@ -104,22 +147,63 @@ export function HostGameModal({
         {!pinCode ? (
           <>
             <div className="space-y-4 overflow-y-auto px-6 flex-1 min-h-0">
-              {/* Gamemode Selector */}
+              {/* Category tabs */}
               <div>
                 <Label>Gamemode</Label>
-                <div className="grid grid-cols-2 gap-3 mt-2">
-                  {gameModes.map((mode) => (
-                    <GameModeCard
-                      key={mode.id}
-                      icon={mode.icon}
-                      label={mode.label}
-                      description={mode.description}
-                      selected={gameMode === mode.id}
-                      gradient={mode.gradient}
-                      onClick={() => setGameMode(mode.id)}
-                    />
+                <div className="flex gap-1.5 mt-2 mb-3 overflow-x-auto pb-1">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all
+                        ${activeCategory === cat
+                          ? "bg-primary text-primary-foreground shadow-lg"
+                          : "bg-white/10 text-muted-foreground hover:bg-white/20"
+                        }`}
+                    >
+                      {cat}
+                    </button>
                   ))}
                 </div>
+
+                {/* 3-column compact grid */}
+                <div className="grid grid-cols-3 gap-2">
+                  {filteredModes.map((mode) => {
+                    const isSelected = gameMode === mode.id;
+                    return (
+                      <motion.button
+                        key={mode.id}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setGameMode(mode.id)}
+                        className={`relative p-2 rounded-xl border-2 text-center transition-all overflow-hidden
+                          ${isSelected
+                            ? "border-primary bg-primary/15 shadow-lg shadow-primary/20"
+                            : "border-white/10 bg-black/30 hover:border-white/20"
+                          }`}
+                      >
+                        {isSelected && (
+                          <div className={`absolute inset-0 bg-gradient-to-br ${mode.gradient} opacity-10 rounded-xl`} />
+                        )}
+                        <div className="relative flex flex-col items-center gap-0.5">
+                          {mode.icon ? (
+                            <div className="w-8 h-8 flex items-center justify-center">{mode.icon}</div>
+                          ) : (
+                            <div className="w-8 h-8 flex items-center justify-center text-xl">{mode.emoji}</div>
+                          )}
+                          <div className="text-[11px] font-bold leading-tight">{mode.label}</div>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                {/* Selected mode description */}
+                {selectedMode && (
+                  <div className="mt-2 text-xs text-muted-foreground text-center">
+                    {selectedMode.emoji && <span className="mr-1">{selectedMode.emoji}</span>}
+                    {selectedMode.description}
+                  </div>
+                )}
               </div>
 
               {/* Rarity selector — only for Classic */}
@@ -210,8 +294,12 @@ export function HostGameModal({
 
               <div className="text-center text-sm text-muted-foreground">
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-8 h-8 flex items-center justify-center">{selectedMode.icon}</div>
-                  <span className="font-bold text-primary">{selectedMode.label}</span>
+                  {selectedMode?.icon ? (
+                    <div className="w-8 h-8 flex items-center justify-center">{selectedMode.icon}</div>
+                  ) : (
+                    <span className="text-xl">{selectedMode?.emoji}</span>
+                  )}
+                  <span className="font-bold text-primary">{selectedMode?.label}</span>
                 </div>
                 {gameMode === "classic" && (
                   <p className="mt-1">Target: <span className="font-bold" style={{ color: rarityInfo[targetRarity]?.color }}>{targetRarity}</span> or higher</p>

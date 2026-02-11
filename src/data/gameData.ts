@@ -9,7 +9,9 @@ export type Rarity =
   | "Mystical"
   | "Exotic"
   | "Celestial"
-  | "Divine";
+  | "Divine"
+  | "Transcendent"
+  | "Ascendent";
 
 export interface BlookItem {
   name: string;
@@ -35,6 +37,8 @@ export const rarityInfo: Record<Rarity, { color: string; show: boolean }> = {
   Exotic: { color: "#ff66b2", show: false },
   Celestial: { color: "#ffd700", show: false },
   Divine: { color: "#c8a2ff", show: false },
+  Transcendent: { color: "#ff4040", show: false },
+  Ascendent: { color: "#ffffff", show: false },
 };
 
 export const rarityColors: Record<Rarity, string> = {
@@ -49,6 +53,8 @@ export const rarityColors: Record<Rarity, string> = {
   Exotic: "rarity-exotic",
   Celestial: "rarity-celestial",
   Divine: "rarity-divine",
+  Transcendent: "rarity-transcendent",
+  Ascendent: "rarity-ascendent",
 };
 
 export const rarityBgColors: Record<Rarity, string> = {
@@ -63,6 +69,8 @@ export const rarityBgColors: Record<Rarity, string> = {
   Exotic: "bg-rarity-exotic",
   Celestial: "bg-rarity-celestial",
   Divine: "bg-rarity-divine",
+  Transcendent: "bg-rarity-transcendent",
+  Ascendent: "bg-rarity-ascendent",
 };
 
 export const rarityGlowColors: Record<Rarity, string> = {
@@ -77,6 +85,8 @@ export const rarityGlowColors: Record<Rarity, string> = {
   Exotic: "glow-exotic",
   Celestial: "glow-celestial",
   Divine: "glow-divine",
+  Transcendent: "glow-transcendent",
+  Ascendent: "glow-ascendent",
 };
 
 export const rarityOrder: Rarity[] = [
@@ -91,6 +101,8 @@ export const rarityOrder: Rarity[] = [
   "Exotic",
   "Celestial",
   "Divine",
+  "Transcendent",
+  "Ascendent",
 ];
 
 // Pack data: [name, rarity, chance%]
@@ -5065,8 +5077,24 @@ Object.keys(packs).forEach((packName) => {
   items.push([dName, "Divine" as Rarity, 0.005]);
 });
 
+// === Add Transcendent rarity (0.001%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const tName = packName.replace(" Pack", "") + " Transcendent";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.001).toFixed(4)];
+  items.push([tName, "Transcendent" as Rarity, 0.001]);
+});
+
+// === Add Ascendent rarity (0.0005%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const aName = packName.replace(" Pack", "") + " Ascendent";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.0005).toFixed(4)];
+  items.push([aName, "Ascendent" as Rarity, 0.0005]);
+});
+
 // === Merge daily packs (366 calendar packs) ===
-// dailyPacks already include Celestial + Divine inline, so they skip the loop above.
+// dailyPacks already include Celestial + Divine + Transcendent + Ascendent inline, so they skip the loops above.
 import { dailyPacks, dailyPackEmojis } from "./dailyPacks";
 Object.assign(packs, dailyPacks);
 Object.assign(packEmojis, dailyPackEmojis);

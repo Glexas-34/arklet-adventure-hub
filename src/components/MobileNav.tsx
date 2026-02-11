@@ -19,7 +19,6 @@ const tabs: { id: View; icon: typeof Package }[] = [
   { id: "leaderboard", icon: Trophy },
   { id: "trade", icon: ArrowLeftRight },
   { id: "friends", icon: UserPlus },
-  { id: "news", icon: Newspaper },
   { id: "shop", icon: ShoppingBag },
   { id: "chat", icon: MessageSquare },
 ];

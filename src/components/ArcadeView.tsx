@@ -11,15 +11,11 @@ import { useSound } from "@/hooks/useSound";
 import { Rarity } from "@/data/gameData";
 import { trackEvent } from "@/lib/analytics";
 
-import { ReactionTime } from "./games/ReactionTime";
-import { MathSprint } from "./games/MathSprint";
-import { ColorMatch } from "./games/ColorMatch";
-import { TypingSpeed } from "./games/TypingSpeed";
-import { MemoryMatch } from "./games/MemoryMatch";
-import { WhackAMole } from "./games/WhackAMole";
-import { PatternMemory } from "./games/PatternMemory";
-import { BrickBreaker } from "./games/BrickBreaker";
-import { SnakeGame } from "./games/SnakeGame";
+import { TanksGame } from "./games/TanksGame";
+import { BowmanGame } from "./games/BowmanGame";
+import { CurveBallGame } from "./games/CurveBallGame";
+import { MiniPuttGame } from "./games/MiniPuttGame";
+import { PinchHitterGame } from "./games/PinchHitterGame";
 
 interface ArcadeViewProps {
   onItemObtained: (name: string, rarity: Rarity) => void;
@@ -28,15 +24,11 @@ interface ArcadeViewProps {
 }
 
 const GAME_COMPONENTS: Record<string, React.FC<any>> = {
-  reaction: ReactionTime,
-  math: MathSprint,
-  color: ColorMatch,
-  typing: TypingSpeed,
-  memory: MemoryMatch,
-  whack: WhackAMole,
-  pattern: PatternMemory,
-  brick: BrickBreaker,
-  snake: SnakeGame,
+  tanks: TanksGame,
+  bowman: BowmanGame,
+  curveball: CurveBallGame,
+  miniputt: MiniPuttGame,
+  pinchhitter: PinchHitterGame,
 };
 
 export function ArcadeView({ onItemObtained, nickname, otherPlayers = [] }: ArcadeViewProps) {
@@ -115,7 +107,7 @@ export function ArcadeView({ onItemObtained, nickname, otherPlayers = [] }: Arca
         🕹️ Game Zone
       </motion.h2>
       <p className="text-muted-foreground mb-4 text-sm md:text-base">
-        Play games, earn cards! Higher scores = rarer rewards!
+        Classic 2-player games! Winner earns rarer rewards!
       </p>
 
       {otherPlayers.length > 0 && (
