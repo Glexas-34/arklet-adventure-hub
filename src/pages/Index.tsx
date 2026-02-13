@@ -31,9 +31,11 @@ import { useAdminGifts } from "@/hooks/useAdminGifts";
 import { useFriends } from "@/hooks/useFriends";
 import { useShop } from "@/hooks/useShop";
 import { useAnnouncement } from "@/hooks/useAnnouncement";
-import { Rarity, InventoryItem, BlookItem, packs } from "@/data/gameData";
+import { useLuckBoost } from "@/hooks/useLuckBoost";
+import { Rarity, InventoryItem, BlookItem, packs, setPrivateRarityBoost } from "@/data/gameData";
 import { getDailyPackName, dailyPacks } from "@/data/dailyPacks";
 import { useSpawnedPacks } from "@/hooks/useSpawnedPacks";
+import { useSeason } from "@/hooks/useSeason";
 import { ResultBar } from "@/components/ResultBar";
 import { useSound, unlockAudio, triggerGameAlertSound } from "@/hooks/useSound";
 import { trackPageView, trackEvent } from "@/lib/analytics";
@@ -45,6 +47,7 @@ import { StealAndGetView } from "@/components/multiplayer/StealAndGetView";
 import { BlockBusterView } from "@/components/multiplayer/BlockBusterView";
 import { FishingReelingView } from "@/components/multiplayer/FishingReelingView";
 import { PlatformRunView } from "@/components/multiplayer/PlatformRunView";
+import { VoiceChatToggle } from "@/components/VoiceChatToggle";
 import { FlappyBirdView } from "@/components/multiplayer/FlappyBirdView";
 import { ArcadeMultiAdapter, ARCADE_MODE_IDS } from "@/components/multiplayer/ArcadeMultiAdapter";
 import { GAME_LIST } from "@/components/games/types";
@@ -61,6 +64,7 @@ const Index = () => {
   const [confettiIntensity, setConfettiIntensity] = useState<"normal" | "mystical" | "celestial">("normal");
   const [simulatedItem, setSimulatedItem] = useState<BlookItem | null>(null);
   const [showSimulation, setShowSimulation] = useState(false);
+  const [privateLuck, setPrivateLuck] = useState(false);
 
   const { inventory, addItem, getTotalItems, getUniqueCount, clearInventory, updateItemCount, grantAllBlooks } = useInventory();
   const {
@@ -111,18 +115,20 @@ const Index = () => {
   const { isBanned } = useBanCheck(nickname);
   const { adminItems } = useAdminGifts(nickname);
   const { spawnedPackNames } = useSpawnedPacks();
+  const { seasonalPackName } = useSeason();
   const { friends, incomingRequests, sendRequestByIdOrName, acceptRequest, declineRequest, removeFriend } = useFriends(nickname);
   const { listings, listItem, buyItem, returnItem, isLoading: shopLoading } = useShop(nickname);
   const { announcement } = useAnnouncement();
+  const luckState = useLuckBoost();
   const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal } = useSound();
 
-  // Daily packs: today's pack + admin-spawned packs + all original (non-daily) packs
+  // Daily packs: today's pack + seasonal pack + admin-spawned packs + all original (non-daily) packs
   const availablePackNames = useMemo(() => {
     const today = getDailyPackName(new Date());
     const spawned = spawnedPackNames.filter((n) => n !== today);
-    const originalPacks = Object.keys(packs).filter((n) => !(n in dailyPacks));
-    return [today, ...spawned, ...originalPacks];
-  }, [spawnedPackNames]);
+    const originalPacks = Object.keys(packs).filter((n) => !(n in dailyPacks) && n !== seasonalPackName);
+    return [today, seasonalPackName, ...spawned, ...originalPacks];
+  }, [spawnedPackNames, seasonalPackName]);
 
   // Combined unique count: inventory items + admin-gifted items not already in inventory
   const combinedUniqueCount = useCallback(() => {
@@ -192,6 +198,17 @@ const Index = () => {
       addItem(listing.item_name, listing.item_rarity as Rarity);
     }
   }, [returnItem, addItem]);
+
+  const LUCK_TOGGLE_USERS = ["Jacob___Admin", "JASON__Admin"];
+  const showLuckToggle = nickname ? LUCK_TOGGLE_USERS.includes(nickname) : false;
+
+  const handleToggleLuck = useCallback(() => {
+    setPrivateLuck((prev) => {
+      const next = !prev;
+      setPrivateRarityBoost(next ? 2 : 1);
+      return next;
+    });
+  }, []);
 
   const isInGame = currentRoom !== null && currentRoom.status === "playing";
   const isTrading = activeSession?.status === "trading";
@@ -476,6 +493,9 @@ const Index = () => {
               onStartTrade={() => setCurrentView("trade")}
               onOpenFriends={() => setCurrentView("friends")}
               friendRequestCount={incomingRequests.length}
+              showLuckToggle={showLuckToggle}
+              privateLuck={privateLuck}
+              onToggleLuck={handleToggleLuck}
             />
 
             <motion.main
@@ -535,6 +555,7 @@ const Index = () => {
                       onRareReveal={handleRareReveal}
                       availablePackNames={availablePackNames}
                       announcement={announcement}
+                      seasonalPackName={seasonalPackName}
                     />
                   )}
                   {currentView === "inventory" && (
@@ -607,6 +628,23 @@ const Index = () => {
             isInGame={isInGame}
             friendRequestCount={incomingRequests.length}
           />
+
+          {/* Luck boost corner notification */}
+          <AnimatePresence>
+            {luckState.multiplier > 1 && (
+              <motion.div
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 100 }}
+                className="fixed bottom-4 right-4 z-50 px-4 py-2.5 rounded-xl bg-gradient-to-r from-yellow-500/90 to-amber-600/90 text-white text-sm font-bold shadow-lg shadow-yellow-500/30 backdrop-blur-sm border border-yellow-400/30 pointer-events-none"
+              >
+                {luckState.activatedBy} Enabled {luckState.multiplier}x Luck!
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Super Ark Communicator */}
+          <VoiceChatToggle nickname={nickname} />
 
           {/* Confetti overlay */}
           <Confetti trigger={showConfetti} intensity={confettiIntensity} onComplete={() => setShowConfetti(false)} />
