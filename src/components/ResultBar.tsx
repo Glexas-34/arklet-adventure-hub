@@ -102,7 +102,35 @@ export function ResultBar({ item, isVisible, onClose }: ResultBarProps) {
       return;
     }
 
-    if (item.rarity === "Ascendent") {
+    if (item.rarity === "Exotic") {
+      const holdTimer = setTimeout(() => setPhase("hold"), 5000);
+      const readyTimer = setTimeout(() => setPhase("ready"), 20000);
+      return () => {
+        clearTimeout(holdTimer);
+        clearTimeout(readyTimer);
+      };
+    } else if (item.rarity === "Primordial") {
+      const holdTimer = setTimeout(() => setPhase("hold"), 5000);
+      const readyTimer = setTimeout(() => setPhase("ready"), 10000);
+      return () => {
+        clearTimeout(holdTimer);
+        clearTimeout(readyTimer);
+      };
+    } else if (item.rarity === "Galactic") {
+      const holdTimer = setTimeout(() => setPhase("hold"), 4000);
+      const readyTimer = setTimeout(() => setPhase("ready"), 8000);
+      return () => {
+        clearTimeout(holdTimer);
+        clearTimeout(readyTimer);
+      };
+    } else if (item.rarity === "Godly") {
+      const holdTimer = setTimeout(() => setPhase("hold"), 4000);
+      const readyTimer = setTimeout(() => setPhase("ready"), 7000);
+      return () => {
+        clearTimeout(holdTimer);
+        clearTimeout(readyTimer);
+      };
+    } else if (item.rarity === "Ascendent") {
       const holdTimer = setTimeout(() => setPhase("hold"), 3000);
       const readyTimer = setTimeout(() => setPhase("ready"), 6000);
       return () => {
@@ -132,21 +160,31 @@ export function ResultBar({ item, isVisible, onClose }: ResultBarProps) {
   const colorClass = rarityColors[item.rarity];
   const glowClass = rarityGlowColors[item.rarity];
   const isRare = item.rarity === "Ultra Secret" || item.rarity === "Mystical";
+  const isExotic = item.rarity === "Exotic";
   const isCelestial = item.rarity === "Celestial";
   const isDivine = item.rarity === "Divine";
   const isTranscendent = item.rarity === "Transcendent";
   const isAscendent = item.rarity === "Ascendent";
+  const isGodly = item.rarity === "Godly";
+  const isGalactic = item.rarity === "Galactic";
+  const isPrimordial = item.rarity === "Primordial";
 
-  // --- ASCENDENT: waits 3s, appears at random spot, teleports to another, goes invisible, reappears at center ---
-  if (isAscendent) {
-    // Pre-compute two random positions (percentage based, avoiding edges)
-    const [randSpot1] = useState(() => ({
-      x: (Math.random() - 0.5) * 60,
-      y: (Math.random() - 0.5) * 60,
+  // --- EXOTIC: 20s cosmic animation — nebula → lightning → black hole → card emerge ---
+  if (isExotic) {
+    // Generate star particles for the galaxy formation
+    const starParticles = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      angle: (i / 50) * Math.PI * 2,
+      distance: 30 + Math.random() * 40,
+      size: 1 + Math.random() * 3,
+      delay: Math.random() * 3,
     }));
-    const [randSpot2] = useState(() => ({
-      x: (Math.random() - 0.5) * 60,
-      y: (Math.random() - 0.5) * 60,
+
+    // Lightning bolts
+    const lightningBolts = Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      angle: (i / 8) * 360,
+      delay: 5 + i * 0.4 + Math.random() * 0.3,
     }));
 
     return (
@@ -160,62 +198,245 @@ export function ResultBar({ item, isVisible, onClose }: ResultBarProps) {
             className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
             style={{ cursor: phase === "ready" ? "pointer" : "default" }}
           >
-            {/* Pure white flash on arrival */}
+            {/* Phase 1 (0-5s): Deep space nebula background */}
             <motion.div
-              className="absolute inset-0 bg-white"
+              className="absolute inset-0"
+              style={{
+                background: "radial-gradient(ellipse at center, #0a001a 0%, #000005 40%, #000000 100%)",
+              }}
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0, 0.9, 0, 0, 0.6, 0, 0, 0, 1, 0.2] }}
-              transition={{ duration: 6, times: [0, 0.49, 0.5, 0.55, 0.61, 0.625, 0.67, 0.74, 0.79, 0.8, 0.9] }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 2 }}
             />
 
-            {/* Dark backdrop */}
+            {/* Nebula color clouds */}
             <motion.div
-              className="absolute inset-0 bg-black/95"
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "radial-gradient(ellipse at 30% 40%, rgba(255,0,100,0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 60%, rgba(0,100,255,0.12) 0%, transparent 50%), radial-gradient(ellipse at 50% 30%, rgba(100,0,255,0.1) 0%, transparent 40%)",
+              }}
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0, 1] }}
-              transition={{ duration: 3.2, times: [0, 0.95, 1] }}
+              animate={{ opacity: [0, 0.8, 1, 0.3, 0] }}
+              transition={{ duration: 10, times: [0, 0.2, 0.4, 0.7, 1] }}
             />
 
-            {/* The card - appears at random spot, teleports, goes invisible, appears at center */}
+            {/* Star particles gravitating toward center forming galaxy (0-5s) */}
+            {starParticles.map((star) => (
+              <motion.div
+                key={star.id}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  width: star.size,
+                  height: star.size,
+                  background: "#ffffff",
+                  left: "50%",
+                  top: "50%",
+                }}
+                initial={{
+                  x: Math.cos(star.angle) * star.distance * 4,
+                  y: Math.sin(star.angle) * star.distance * 4,
+                  opacity: 0,
+                }}
+                animate={{
+                  x: [
+                    Math.cos(star.angle) * star.distance * 4,
+                    Math.cos(star.angle + 1) * star.distance * 2,
+                    Math.cos(star.angle + 2) * star.distance * 0.5,
+                    0,
+                  ],
+                  y: [
+                    Math.sin(star.angle) * star.distance * 4,
+                    Math.sin(star.angle + 1) * star.distance * 2,
+                    Math.sin(star.angle + 2) * star.distance * 0.5,
+                    0,
+                  ],
+                  opacity: [0, 0.8, 1, 0],
+                }}
+                transition={{
+                  delay: star.delay,
+                  duration: 5,
+                  times: [0, 0.3, 0.7, 1],
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+
+            {/* Spinning galaxy core (forms from stars 2-5s) */}
             <motion.div
-              className={`relative z-10 bg-black/95 backdrop-blur-xl rounded-3xl border-4 text-center overflow-hidden ${glowClass}`}
-              style={{ borderColor: rarityInfo.Ascendent.color }}
-              initial={{ opacity: 0, scale: 0.8 }}
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              style={{
+                width: 120,
+                height: 120,
+                background: "conic-gradient(from 0deg, rgba(255,255,255,0.3), rgba(100,0,255,0.2), rgba(255,0,100,0.2), rgba(0,200,255,0.2), rgba(255,255,255,0.3))",
+                borderRadius: "50%",
+                filter: "blur(8px)",
+              }}
+              initial={{ opacity: 0, scale: 0, rotate: 0 }}
               animate={{
-                opacity: [0, 0, 1, 1, 1, 1, 0, 0, 1, 1],
-                scale: [0.8, 0.8, 0.9, 0.9, 0.9, 0.9, 0.5, 0.5, 1.2, 1],
-                x: [0, 0, `${randSpot1.x}vw`, `${randSpot1.x}vw`, `${randSpot2.x}vw`, `${randSpot2.x}vw`, 0, 0, 0, 0],
-                y: [0, 0, `${randSpot1.y}vh`, `${randSpot1.y}vh`, `${randSpot2.y}vh`, `${randSpot2.y}vh`, 0, 0, 0, 0],
+                opacity: [0, 0, 0.8, 1, 0.5, 0],
+                scale: [0, 0, 1, 1.2, 0.3, 0],
+                rotate: [0, 0, 360, 720, 1080, 1440],
               }}
               transition={{
-                duration: 6,
-                times: [0, 0.49, 0.5, 0.62, 0.625, 0.74, 0.75, 0.79, 0.8, 0.9],
+                duration: 12,
+                times: [0, 0.15, 0.35, 0.5, 0.7, 0.85],
                 ease: "easeInOut",
+              }}
+            />
+
+            {/* Phase 2 (5-10s): Galaxy vibrates, turns grey. Rainbow lightning bolts */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "rgba(128,128,128,0.15)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0.4, 0.4, 0] }}
+              transition={{ duration: 12, times: [0, 0.4, 0.45, 0.7, 0.85] }}
+            />
+
+            {/* Lightning bolts shooting from center (5-10s) */}
+            {lightningBolts.map((bolt) => (
+              <motion.div
+                key={bolt.id}
+                className="absolute pointer-events-none"
+                style={{
+                  left: "50%",
+                  top: "50%",
+                  width: 3,
+                  height: "60vh",
+                  transformOrigin: "top center",
+                  transform: `rotate(${bolt.angle}deg)`,
+                  background: `linear-gradient(180deg, #ffffff, hsl(${bolt.angle} 100% 60%), transparent)`,
+                  filter: "blur(1px)",
+                }}
+                initial={{ opacity: 0, scaleY: 0 }}
+                animate={{
+                  opacity: [0, 0, 1, 0.8, 0],
+                  scaleY: [0, 0, 1, 1, 0],
+                }}
+                transition={{
+                  delay: bolt.delay,
+                  duration: 1.5,
+                  times: [0, 0.1, 0.3, 0.7, 1],
+                  ease: "easeOut",
+                }}
+              />
+            ))}
+
+            {/* Lightning burn marks on edges */}
+            {lightningBolts.map((bolt) => (
+              <motion.div
+                key={`burn-${bolt.id}`}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  left: `${50 + Math.cos((bolt.angle * Math.PI) / 180) * 45}%`,
+                  top: `${50 + Math.sin((bolt.angle * Math.PI) / 180) * 45}%`,
+                  width: 30,
+                  height: 30,
+                  background: `radial-gradient(circle, hsl(${bolt.angle} 100% 60% / 0.5), transparent)`,
+                  filter: "blur(5px)",
+                }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: [0, 0, 0.8, 0.4, 0], scale: [0, 0, 1.5, 1, 0] }}
+                transition={{
+                  delay: bolt.delay + 0.5,
+                  duration: 6,
+                  times: [0, 0.05, 0.15, 0.5, 1],
+                }}
+              />
+            ))}
+
+            {/* Phase 3 (10-15s): Black hole collapse → silence → rainbow event horizon */}
+            {/* Black hole pull-in (10-12s) */}
+            <motion.div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+              style={{
+                width: 40,
+                height: 40,
+                background: "#000000",
+                boxShadow: "0 0 60px 30px rgba(0,0,0,0.9)",
+              }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{
+                opacity: [0, 0, 1, 1, 1, 1],
+                scale: [0, 0, 0.5, 3, 20, 0],
+              }}
+              transition={{
+                duration: 16,
+                times: [0, 0.5, 0.6, 0.65, 0.75, 0.82],
+                ease: "easeInOut",
+              }}
+            />
+
+            {/* Full darkness moment (12-13s) */}
+            <motion.div
+              className="absolute inset-0 bg-black pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0, 1, 1, 0] }}
+              transition={{
+                duration: 16,
+                times: [0, 0.55, 0.65, 0.7, 0.78, 0.85],
+              }}
+            />
+
+            {/* Rainbow event horizon expanding (13-15s) */}
+            <motion.div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+              style={{
+                width: 10,
+                height: 10,
+                background: "conic-gradient(from 0deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0088, #ff0000)",
+                filter: "blur(20px)",
+              }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{
+                opacity: [0, 0, 0, 0, 1, 1, 0.3],
+                scale: [0, 0, 0, 0, 1, 80, 100],
+              }}
+              transition={{
+                duration: 18,
+                times: [0, 0.55, 0.65, 0.72, 0.75, 0.85, 0.95],
+                ease: "easeOut",
+              }}
+            />
+
+            {/* Phase 4 (15-20s): Card emerges from black hole center */}
+            <motion.div
+              className={`relative z-10 bg-black/95 backdrop-blur-xl rounded-3xl border-4 text-center overflow-hidden ${glowClass}`}
+              style={{ borderColor: "#ff00ff" }}
+              initial={{ opacity: 0, scale: 0, rotate: -180 }}
+              animate={{
+                opacity: [0, 0, 0, 0, 0, 1, 1],
+                scale: [0, 0, 0, 0, 0, 1.2, 1],
+                rotate: [-180, -180, -180, -180, -180, 10, 0],
+              }}
+              transition={{
+                duration: 20,
+                times: [0, 0.25, 0.5, 0.6, 0.72, 0.85, 0.95],
+                ease: "easeOut",
               }}
             >
               <div className="px-12 py-10">
-                {/* Radiant white rotating glow */}
+                {/* Iridescent rotating glow */}
                 <motion.div
                   className="absolute inset-0 pointer-events-none"
                   style={{
-                    background: `conic-gradient(from 0deg, transparent, #ffffff20, transparent, #ffffff15, transparent, #ffffff20, transparent)`,
+                    background: "conic-gradient(from 0deg, rgba(255,0,0,0.08), rgba(255,136,0,0.08), rgba(255,255,0,0.08), rgba(0,255,0,0.08), rgba(0,136,255,0.08), rgba(136,0,255,0.08), rgba(255,0,136,0.08), rgba(255,0,0,0.08))",
                   }}
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 />
 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 5 }}
+                  transition={{ delay: 17 }}
                 >
                   <motion.p
-                    className="text-sm font-bold uppercase tracking-widest mb-2"
-                    style={{ color: rarityInfo.Ascendent.color }}
-                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    className="text-sm font-bold uppercase tracking-widest mb-2 rarity-exotic"
+                    animate={{ opacity: [0.6, 1, 0.6] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
                   >
-                    Ascendent
+                    EXOTIC
                   </motion.p>
                   <motion.h3
                     className={`text-3xl font-black mb-1 ${colorClass}`}
@@ -238,7 +459,716 @@ export function ResultBar({ item, isVisible, onClose }: ResultBarProps) {
               </div>
             </motion.div>
 
-            {/* Massive shockwave on final center reveal */}
+            {/* Rainbow shockwave when card appears */}
+            <motion.div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 pointer-events-none"
+              style={{
+                borderImage: "conic-gradient(from 0deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0088, #ff0000) 1",
+                borderStyle: "solid",
+              }}
+              initial={{ width: 0, height: 0, opacity: 0 }}
+              animate={{ width: [0, 0, 1000], height: [0, 0, 1000], opacity: [0, 1, 0] }}
+              transition={{ delay: 16, duration: 1.5, ease: "easeOut" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // --- PRIMORDIAL: Screen inversion, UI melt, cosmic void, off-center reveal, glitchy "Game Over?" ---
+  if (isPrimordial) {
+    return (
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={phase === "ready" ? onClose : undefined}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+            style={{ cursor: phase === "ready" ? "pointer" : "default" }}
+          >
+            {/* Screen inversion filter */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{ backdropFilter: "invert(1)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 1, 1, 0] }}
+              transition={{ duration: 4, times: [0, 0.1, 0.5, 0.7] }}
+            />
+
+            {/* Cosmic background revealed behind the "melted" UI */}
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                background: "radial-gradient(ellipse at center, #0a001a 0%, #000000 50%, #1a0033 100%)",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0.3, 1] }}
+              transition={{ duration: 4, times: [0, 0.3, 0.5, 0.7] }}
+            />
+
+            {/* Distant stars in cosmic void */}
+            {Array.from({ length: 60 }, (_, i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  width: 1 + Math.random() * 2,
+                  height: 1 + Math.random() * 2,
+                  background: "#ffffff",
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 0, Math.random() * 0.8 + 0.2] }}
+                transition={{ delay: 2 + Math.random() * 2, duration: 1 }}
+              />
+            ))}
+
+            {/* Sidebar buttons melting off screen */}
+            {[
+              { label: "Open Packs", icon: "📦", bg: "linear-gradient(135deg, #6d28d9, #7c3aed)" },
+              { label: "Your Inventory", icon: "🎒", bg: "rgba(0,0,0,0.4)" },
+              { label: "Arks Available", icon: "📖", bg: "rgba(0,0,0,0.4)" },
+              { label: "Leaderboard", icon: "🏆", bg: "rgba(0,0,0,0.4)" },
+              { label: "Chat", icon: "💬", bg: "rgba(0,0,0,0.4)" },
+              { label: "Host Game", icon: "👥", bg: "linear-gradient(to right, #16a34a, #059669)" },
+              { label: "Join Game", icon: "🔑", bg: "linear-gradient(to right, #2563eb, #4f46e5)" },
+              { label: "Trade", icon: "🔄", bg: "linear-gradient(to right, #9333ea, #7c3aed)" },
+            ].map((btn, i) => (
+              <motion.div
+                key={`melt-sidebar-${i}`}
+                className="absolute pointer-events-none rounded-xl flex items-center gap-2 px-4 py-3 font-bold text-white text-sm"
+                style={{
+                  width: 200,
+                  background: btn.bg,
+                  left: 16,
+                  top: `${60 + i * 52}px`,
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                }}
+                initial={{ y: 0, rotate: 0, opacity: 0.9 }}
+                animate={{
+                  y: [0, 0, 0, "120vh"],
+                  rotate: [0, 0, -3 - i * 1.5, -8 - i * 3],
+                  opacity: [0, 0.9, 0.9, 0],
+                  scaleY: [1, 1, 1.3, 1.8],
+                }}
+                transition={{
+                  duration: 4.5,
+                  times: [0, 0.1, 0.35, 0.65],
+                  ease: "easeIn",
+                  delay: 0.3 + i * 0.12,
+                }}
+              >
+                <span>{btn.icon}</span>
+                <span>{btn.label}</span>
+              </motion.div>
+            ))}
+
+            {/* Pack cards melting off screen */}
+            {[
+              { label: "Safari Pack", color: "#854d0e" },
+              { label: "Ocean Pack", color: "#0369a1" },
+              { label: "Jungle Pack", color: "#15803d" },
+              { label: "Dino Pack", color: "#9a3412" },
+              { label: "Space Pack", color: "#1e1b4b" },
+            ].map((pack, i) => (
+              <motion.div
+                key={`melt-pack-${i}`}
+                className="absolute pointer-events-none rounded-2xl flex flex-col items-center justify-center text-white font-bold text-xs"
+                style={{
+                  width: 120,
+                  height: 140,
+                  background: `linear-gradient(145deg, ${pack.color}, ${pack.color}dd)`,
+                  right: `${40 + i * 140}px`,
+                  top: `${80 + (i % 2) * 60}px`,
+                  border: "2px solid rgba(255,255,255,0.15)",
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                }}
+                initial={{ y: 0, rotate: 0, opacity: 0.85 }}
+                animate={{
+                  y: [0, 0, 0, "120vh"],
+                  rotate: [0, 0, 5 + i * 2, 15 + i * 4],
+                  opacity: [0, 0.85, 0.85, 0],
+                  scaleY: [1, 1, 1.4, 2],
+                }}
+                transition={{
+                  duration: 5,
+                  times: [0, 0.1, 0.4, 0.7],
+                  ease: "easeIn",
+                  delay: 0.5 + i * 0.18,
+                }}
+              >
+                <span className="text-3xl mb-1">📦</span>
+                <span>{pack.label}</span>
+              </motion.div>
+            ))}
+
+            {/* The card - appears off-center after delay, intentionally misaligned */}
+            <motion.div
+              className={`relative z-10 bg-black/95 backdrop-blur-xl rounded-3xl border-4 text-center overflow-hidden ${glowClass}`}
+              style={{ borderColor: "#1a0033" }}
+              initial={{ opacity: 0, scale: 0, x: 40, y: -30, rotate: 3 }}
+              animate={{
+                opacity: [0, 0, 0, 0.7, 1],
+                scale: [0, 0, 0, 0.9, 0.95],
+                x: [40, 40, 40, 35, 30],
+                y: [-30, -30, -30, -25, -20],
+                rotate: [3, 3, 3, 2.5, 2],
+              }}
+              transition={{
+                duration: 8,
+                times: [0, 0.3, 0.5, 0.7, 0.85],
+                ease: "easeOut",
+              }}
+            >
+              <div className="px-12 py-10">
+                {/* Dark void rotating glow */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `conic-gradient(from 0deg, transparent, #1a003310, transparent, #00000020, transparent)`,
+                  }}
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 7 }}
+                >
+                  <motion.p
+                    className="text-sm font-bold uppercase tracking-widest mb-2 rarity-primordial"
+                    animate={{ opacity: [0.3, 0.7, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    Primordial
+                  </motion.p>
+                  <motion.h3
+                    className={`text-3xl font-black mb-1 ${colorClass}`}
+                    animate={{ scale: [1, 1.02, 1], x: [0, -1, 1, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    {item.name}
+                  </motion.h3>
+                </motion.div>
+
+                {phase === "ready" && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-muted-foreground mt-4"
+                  >
+                    Click anywhere to dismiss
+                  </motion.p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Glitchy "Game Over?" text above the card */}
+            <motion.div
+              className="absolute z-20 pointer-events-none"
+              style={{ top: "15%", left: "50%", transform: "translateX(-50%)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0, 1, 0.6, 1, 0.8, 1] }}
+              transition={{ duration: 8, times: [0, 0.3, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85] }}
+            >
+              <motion.h1
+                className="text-5xl md:text-7xl font-black tracking-wider select-none"
+                style={{
+                  color: "#ff0000",
+                  textShadow: "0 0 20px #ff000080, 0 0 40px #ff000040, 3px 0 #00ffff50, -3px 0 #ff00ff50",
+                  fontFamily: "monospace",
+                }}
+                animate={{
+                  x: [0, -3, 2, -1, 4, -2, 0],
+                  y: [0, 1, -2, 1, -1, 2, 0],
+                  skewX: [0, -2, 1, -1, 2, 0, 0],
+                  opacity: [1, 0.7, 1, 0.5, 1, 0.8, 1],
+                }}
+                transition={{ duration: 0.5, repeat: Infinity, repeatType: "mirror" }}
+              >
+                Game Over?
+              </motion.h1>
+            </motion.div>
+
+            {/* Glitch scanlines */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none z-30"
+              style={{
+                background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,0,0,0.03) 2px, rgba(255,0,0,0.03) 4px)",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0.5, 0.3] }}
+              transition={{ duration: 5, times: [0, 0.4, 0.6, 1] }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // --- GALACTIC: Applause → beam of light → slide down → beam disappears ---
+  if (isGalactic) {
+    return (
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={phase === "ready" ? onClose : undefined}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+            style={{ cursor: phase === "ready" ? "pointer" : "default" }}
+          >
+            {/* Dark cosmic backdrop */}
+            <motion.div
+              className="absolute inset-0"
+              style={{ background: "radial-gradient(ellipse at center, #001133, #000000)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            />
+
+            {/* Distant stars */}
+            {Array.from({ length: 40 }, (_, i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  width: 1 + Math.random() * 3,
+                  height: 1 + Math.random() * 3,
+                  background: "#ffffff",
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, Math.random() * 0.6 + 0.2, Math.random() * 0.3 + 0.1] }}
+                transition={{ delay: Math.random() * 2, duration: 2, repeat: Infinity, repeatType: "mirror" }}
+              />
+            ))}
+
+            {/* Beam of light - vertical column from top, appears after 2s */}
+            <motion.div
+              className="absolute left-1/2 -translate-x-1/2 top-0 pointer-events-none"
+              style={{
+                width: 80,
+                height: "100vh",
+                background: "linear-gradient(180deg, #00ccff 0%, #ffffff80 30%, #00ccff40 60%, transparent 100%)",
+                filter: "blur(8px)",
+              }}
+              initial={{ opacity: 0, scaleX: 0 }}
+              animate={{
+                opacity: [0, 0, 1, 1, 1, 0],
+                scaleX: [0, 0, 1, 1.2, 1, 0],
+              }}
+              transition={{
+                duration: 7,
+                times: [0, 0.28, 0.32, 0.5, 0.75, 0.85],
+                ease: "easeOut",
+              }}
+            />
+            {/* Inner bright beam core */}
+            <motion.div
+              className="absolute left-1/2 -translate-x-1/2 top-0 pointer-events-none"
+              style={{
+                width: 20,
+                height: "100vh",
+                background: "linear-gradient(180deg, #ffffff 0%, #00eeff 40%, transparent 100%)",
+                filter: "blur(3px)",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0, 0, 1, 1, 1, 0],
+              }}
+              transition={{
+                duration: 7,
+                times: [0, 0.28, 0.32, 0.5, 0.75, 0.85],
+                ease: "easeOut",
+              }}
+            />
+
+            {/* The card - slides down the beam of light */}
+            <motion.div
+              className={`relative z-10 bg-black/95 backdrop-blur-xl rounded-3xl border-4 text-center overflow-hidden ${glowClass}`}
+              style={{ borderColor: "#00ccff" }}
+              initial={{ opacity: 0, y: "-120vh", scale: 0.6 }}
+              animate={{
+                opacity: [0, 0, 0, 1, 1, 1],
+                y: ["-120vh", "-120vh", "-120vh", "-30vh", "0vh", "0vh"],
+                scale: [0.6, 0.6, 0.6, 0.9, 1.1, 1],
+              }}
+              transition={{
+                duration: 7,
+                times: [0, 0.2, 0.3, 0.5, 0.7, 0.8],
+                ease: "easeOut",
+              }}
+            >
+              <div className="px-12 py-10">
+                {/* Galactic rotating glow */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `conic-gradient(from 0deg, transparent, #00ccff12, transparent, #00ccff08, transparent)`,
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 5.5 }}
+                >
+                  <motion.p
+                    className="text-sm font-bold uppercase tracking-widest mb-2 rarity-galactic"
+                    animate={{ opacity: [0.6, 1, 0.6] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    Galactic
+                  </motion.p>
+                  <motion.h3
+                    className={`text-3xl font-black mb-1 ${colorClass}`}
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 1.2, repeat: Infinity }}
+                  >
+                    {item.name}
+                  </motion.h3>
+                </motion.div>
+
+                {phase === "ready" && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-muted-foreground mt-4"
+                  >
+                    Click anywhere to dismiss
+                  </motion.p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Flash when card reaches center */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "radial-gradient(circle, #00ccff60, transparent 60%)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0, 1, 0] }}
+              transition={{ duration: 6, times: [0, 0.5, 0.68, 0.72, 0.85] }}
+            />
+
+            {/* Shockwave on arrival */}
+            <motion.div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 pointer-events-none"
+              style={{ borderColor: "hsl(195 100% 60% / 0.6)" }}
+              initial={{ width: 0, height: 0, opacity: 0 }}
+              animate={{ width: [0, 0, 800], height: [0, 0, 800], opacity: [0, 1, 0] }}
+              transition={{ delay: 4.5, duration: 1, ease: "easeOut" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // --- GODLY: Cards multiply, cover screen, then stack into center. Black/red theme ---
+  if (isGodly) {
+    // Generate random positions for multiplying cards covering the screen
+    const cardPositions = Array.from({ length: 24 }, (_, i) => ({
+      id: i,
+      x: (i % 6) * 17 - 42 + (Math.random() - 0.5) * 8,
+      y: Math.floor(i / 6) * 25 - 38 + (Math.random() - 0.5) * 8,
+      rotate: Math.random() * 30 - 15,
+      delay: i * 0.06,
+    }));
+
+    return (
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={phase === "ready" ? onClose : undefined}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+            style={{ cursor: phase === "ready" ? "pointer" : "default" }}
+          >
+            {/* Black backdrop */}
+            <motion.div
+              className="absolute inset-0 bg-black"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            />
+
+            {/* Red shimmer overlay */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: `linear-gradient(135deg, #cc000008, #00000008, #cc000008, #00000008)`,
+                backgroundSize: "400% 400%",
+              }}
+              animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            />
+
+            {/* Red/black particles */}
+            {Array.from({ length: 30 }, (_, i) => (
+              <motion.div
+                key={i}
+                className="absolute rounded-full pointer-events-none"
+                style={{
+                  width: 2 + Math.random() * 4,
+                  height: 2 + Math.random() * 4,
+                  background: i % 2 === 0 ? "#cc0000" : "#330000",
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{
+                  opacity: [0, 0.8, 0.8, 0],
+                  scale: [0, 1.5, 1, 0],
+                }}
+                transition={{
+                  delay: 0.5 + Math.random() * 3,
+                  duration: 1 + Math.random() * 1.5,
+                  repeat: Infinity,
+                  repeatDelay: Math.random() * 2,
+                }}
+              />
+            ))}
+
+            {/* Multiplying cards that appear all over the screen */}
+            {cardPositions.map((pos) => (
+              <motion.div
+                key={pos.id}
+                className="absolute z-10 bg-black/90 backdrop-blur-sm rounded-xl border-2 pointer-events-none"
+                style={{
+                  borderColor: "#cc0000",
+                  width: 90,
+                  height: 60,
+                  boxShadow: "0 0 20px rgba(204,0,0,0.4)",
+                }}
+                initial={{
+                  opacity: 0,
+                  left: `${50 + pos.x}%`,
+                  top: `${50 + pos.y}%`,
+                  rotate: pos.rotate,
+                  scale: 0,
+                }}
+                animate={{
+                  opacity: [0, 0, 1, 1, 1, 0],
+                  scale: [0, 0, 1, 1, 0.8, 0],
+                  left: [`${50 + pos.x}%`, `${50 + pos.x}%`, `${50 + pos.x}%`, `${50 + pos.x}%`, "50%", "50%"],
+                  top: [`${50 + pos.y}%`, `${50 + pos.y}%`, `${50 + pos.y}%`, `${50 + pos.y}%`, "50%", "50%"],
+                  rotate: [pos.rotate, pos.rotate, pos.rotate, pos.rotate, 0, 0],
+                }}
+                transition={{
+                  duration: 5.5,
+                  times: [0, 0.15, 0.2 + pos.delay * 0.01, 0.55, 0.75, 0.82],
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="flex items-center justify-center h-full">
+                  <span className="text-xs text-red-500 font-bold opacity-60">{item.name}</span>
+                </div>
+              </motion.div>
+            ))}
+
+            {/* The final stacked card at center */}
+            <motion.div
+              className={`relative z-20 bg-black/95 backdrop-blur-xl rounded-3xl border-4 text-center overflow-hidden ${glowClass}`}
+              style={{ borderColor: "#cc0000" }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{
+                opacity: [0, 0, 0, 0, 1, 1],
+                scale: [0, 0, 0, 0, 1.2, 1],
+              }}
+              transition={{
+                duration: 6,
+                times: [0, 0.3, 0.5, 0.7, 0.8, 0.9],
+                ease: "easeOut",
+              }}
+            >
+              <div className="px-12 py-10">
+                {/* Dark red rotating glow */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `conic-gradient(from 0deg, transparent, #cc000015, transparent, #00000015, transparent, #cc000015, transparent)`,
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 5 }}
+                >
+                  <motion.p
+                    className="text-sm font-bold uppercase tracking-widest mb-2 rarity-godly"
+                    animate={{ opacity: [0.7, 1, 0.7] }}
+                    transition={{ duration: 1.2, repeat: Infinity }}
+                  >
+                    Godly
+                  </motion.p>
+                  <motion.h3
+                    className={`text-3xl font-black mb-1 ${colorClass}`}
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  >
+                    {item.name}
+                  </motion.h3>
+                </motion.div>
+
+                {phase === "ready" && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-muted-foreground mt-4"
+                  >
+                    Click anywhere to dismiss
+                  </motion.p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Red shockwave on final stack */}
+            <motion.div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 pointer-events-none"
+              style={{ borderColor: "rgba(204, 0, 0, 0.6)" }}
+              initial={{ width: 0, height: 0, opacity: 0 }}
+              animate={{ width: [0, 0, 1000], height: [0, 0, 1000], opacity: [0, 1, 0] }}
+              transition={{ delay: 4.5, duration: 1.2, ease: "easeOut" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // --- ASCENDENT: X-formation slide pattern ---
+  if (isAscendent) {
+    return (
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={phase === "ready" ? onClose : undefined}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+            style={{ cursor: phase === "ready" ? "pointer" : "default" }}
+          >
+            {/* Dark backdrop */}
+            <motion.div
+              className="absolute inset-0 bg-black"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            />
+
+            {/* White flash when card crosses center each time */}
+            <motion.div
+              className="absolute inset-0 bg-white pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0.7, 0, 0, 0.7, 0, 0, 1, 0.15] }}
+              transition={{ duration: 6, times: [0, 0.24, 0.25, 0.3, 0.49, 0.5, 0.55, 0.74, 0.75, 0.85] }}
+            />
+
+            {/* X-formation trail lines */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0, 0.3, 0, 0, 0.3, 0] }}
+              transition={{ duration: 6, times: [0, 0.2, 0.3, 0.4, 0.45, 0.55, 0.65] }}
+            >
+              {/* Diagonal line top-left to bottom-right */}
+              <div className="absolute inset-0" style={{
+                background: "linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.2) 49%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.2) 51%, transparent 55%)",
+              }} />
+              {/* Diagonal line top-right to bottom-left */}
+              <div className="absolute inset-0" style={{
+                background: "linear-gradient(-135deg, transparent 45%, rgba(255,255,255,0.2) 49%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.2) 51%, transparent 55%)",
+              }} />
+            </motion.div>
+
+            {/* The card - slides from top-left to bottom-right (1st diagonal), then top-right to bottom-left (2nd diagonal), settles at center */}
+            <motion.div
+              className={`relative z-10 bg-black/95 backdrop-blur-xl rounded-3xl border-4 text-center overflow-hidden ${glowClass}`}
+              style={{ borderColor: rarityInfo.Ascendent.color }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{
+                opacity: [0, 1, 1, 1, 0.3, 1, 1, 1, 1, 1],
+                scale: [0.7, 0.8, 0.9, 0.8, 0.7, 0.8, 0.9, 0.8, 1.2, 1],
+                x: ["-60vw", "-30vw", "0vw", "30vw", "60vw", "30vw", "0vw", "-30vw", "0vw", "0vw"],
+                y: ["-60vh", "-30vh", "0vh", "30vh", "60vh", "-30vh", "0vh", "30vh", "0vh", "0vh"],
+              }}
+              transition={{
+                duration: 6,
+                times: [0, 0.12, 0.25, 0.37, 0.45, 0.55, 0.65, 0.72, 0.82, 0.95],
+                ease: "easeInOut",
+              }}
+            >
+              <div className="px-12 py-10">
+                {/* Radiant white rotating glow */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `conic-gradient(from 0deg, transparent, #ffffff20, transparent, #ffffff15, transparent, #ffffff20, transparent)`,
+                  }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 5 }}
+                >
+                  <motion.p
+                    className="text-sm font-bold uppercase tracking-widest mb-2"
+                    style={{
+                      color: rarityInfo.Ascendent.color,
+                      WebkitTextStroke: "1px white",
+                      textShadow: "0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.4)",
+                    }}
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    Ascendent
+                  </motion.p>
+                  <motion.h3
+                    className={`text-3xl font-black mb-1 ${colorClass}`}
+                    style={{
+                      WebkitTextStroke: "0.5px white",
+                      textShadow: "0 0 8px rgba(255,255,255,0.6), 0 0 16px rgba(255,255,255,0.3)",
+                    }}
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 1.2, repeat: Infinity }}
+                  >
+                    {item.name}
+                  </motion.h3>
+                </motion.div>
+
+                {phase === "ready" && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-muted-foreground mt-4"
+                  >
+                    Click anywhere to dismiss
+                  </motion.p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Shockwave on final center arrival */}
             <motion.div
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 pointer-events-none"
               style={{ borderColor: "hsl(0 0% 100% / 0.6)" }}

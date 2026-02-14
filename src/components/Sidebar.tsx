@@ -16,6 +16,9 @@ interface SidebarProps {
   onStartTrade: () => void;
   onOpenFriends: () => void;
   friendRequestCount?: number;
+  showLuckToggle?: boolean;
+  privateLuck?: boolean;
+  onToggleLuck?: () => void;
 }
 
 const navItems = [
@@ -40,6 +43,9 @@ export function Sidebar({
   onStartTrade,
   onOpenFriends,
   friendRequestCount = 0,
+  showLuckToggle = false,
+  privateLuck = false,
+  onToggleLuck,
 }: SidebarProps) {
   return (
     <div className="gradient-sidebar w-56 flex-shrink-0 p-4 hidden md:flex flex-col gap-3">
@@ -65,6 +71,23 @@ export function Sidebar({
           </motion.button>
         );
       })}
+
+      {/* Private 2x Luck toggle */}
+      {showLuckToggle && (
+        <motion.button
+          whileHover={{ scale: 1.04, x: 4 }}
+          whileTap={{ scale: 0.92 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          onClick={onToggleLuck}
+          className={`flex items-center justify-center rounded-xl px-4 py-3 font-bold transition-all text-sm ${
+            privateLuck
+              ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg shadow-green-500/20"
+              : "bg-black/30 text-foreground/60 hover:bg-black/40"
+          }`}
+        >
+          2x Luck: {privateLuck ? "On" : "Off"}
+        </motion.button>
+      )}
 
       {/* Multiplayer Section */}
       {!isInGame && (

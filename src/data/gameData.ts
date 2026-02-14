@@ -11,7 +11,10 @@ export type Rarity =
   | "Celestial"
   | "Divine"
   | "Transcendent"
-  | "Ascendent";
+  | "Ascendent"
+  | "Godly"
+  | "Galactic"
+  | "Primordial";
 
 export interface BlookItem {
   name: string;
@@ -34,11 +37,14 @@ export const rarityInfo: Record<Rarity, { color: string; show: boolean }> = {
   Secret: { color: "#9c27b0", show: true },
   "Ultra Secret": { color: "#ff1744", show: false },
   Mystical: { color: "#00e5ff", show: false },
-  Exotic: { color: "#ff66b2", show: false },
+  Exotic: { color: "#ff00ff", show: false },
   Celestial: { color: "#ffd700", show: false },
   Divine: { color: "#c8a2ff", show: false },
   Transcendent: { color: "#ff4040", show: false },
-  Ascendent: { color: "#ffffff", show: false },
+  Ascendent: { color: "#000000", show: false },
+  Godly: { color: "#cc0000", show: false },
+  Galactic: { color: "#00ccff", show: false },
+  Primordial: { color: "#1a0033", show: false },
 };
 
 export const rarityColors: Record<Rarity, string> = {
@@ -55,6 +61,9 @@ export const rarityColors: Record<Rarity, string> = {
   Divine: "rarity-divine",
   Transcendent: "rarity-transcendent",
   Ascendent: "rarity-ascendent",
+  Godly: "rarity-godly",
+  Galactic: "rarity-galactic",
+  Primordial: "rarity-primordial",
 };
 
 export const rarityBgColors: Record<Rarity, string> = {
@@ -71,6 +80,9 @@ export const rarityBgColors: Record<Rarity, string> = {
   Divine: "bg-rarity-divine",
   Transcendent: "bg-rarity-transcendent",
   Ascendent: "bg-rarity-ascendent",
+  Godly: "bg-rarity-godly",
+  Galactic: "bg-rarity-galactic",
+  Primordial: "bg-rarity-primordial",
 };
 
 export const rarityGlowColors: Record<Rarity, string> = {
@@ -87,6 +99,9 @@ export const rarityGlowColors: Record<Rarity, string> = {
   Divine: "glow-divine",
   Transcendent: "glow-transcendent",
   Ascendent: "glow-ascendent",
+  Godly: "glow-godly",
+  Galactic: "glow-galactic",
+  Primordial: "glow-primordial",
 };
 
 export const rarityOrder: Rarity[] = [
@@ -103,6 +118,9 @@ export const rarityOrder: Rarity[] = [
   "Divine",
   "Transcendent",
   "Ascendent",
+  "Godly",
+  "Galactic",
+  "Primordial",
 ];
 
 // Pack data: [name, rarity, chance%]
@@ -5047,31 +5065,11 @@ export function drawStealOrItem(): { type: "steal" } | { type: "item"; name: str
 }
 
 // === Add Divine rarity (0.005%) to all existing packs ===
-const divineNames: Record<string, string> = {
-  "Wise School Pack": "Wildcats",
-  "Spooky Pack": "Soul Reaper Supreme",
-  "Ocean Pack": "Poseidon Ascended",
-  "Space Pack": "Cosmic Singularity",
-  "Fantasy Pack": "Fate Weaver",
-  "Cyber Pack": "Sentient Nexus",
-  "Jungle Pack": "Gaia Incarnate",
-  "Winter Pack": "Absolute Zero",
-  "Desert Pack": "Eternal Sands",
-  "Volcano Pack": "Magma Godform",
-  "Candy Pack": "Sugar Godform",
-  "Toy Pack": "Toy Godform",
-  "Music Pack": "Symphony Eternal",
-  "Penguin Pack": "Penguin Godform",
-  "Dragon Pack": "Dragon Godform",
-  "Phoenix Pack": "Phoenix Godform",
-  "Angel Pack": "Seraph Supreme",
-  "Demon Pack": "Demon Godform",
-  "Titan Pack": "Titan Godform",
-};
+import { divineNames, transcendentNames, ascendentNames, godlyNames, galacticNames, primordialNames } from "./rarityNames";
 
 Object.keys(packs).forEach((packName) => {
   const items = packs[packName];
-  const dName = divineNames[packName] || packName.replace(" Pack", "") + " Godform";
+  const dName = divineNames[packName] || packName.replace(" Pack", "") + " Supreme";
   // Reduce Common chance by 0.005 to make room for Divine
   items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.005).toFixed(3)];
   items.push([dName, "Divine" as Rarity, 0.005]);
@@ -5080,7 +5078,7 @@ Object.keys(packs).forEach((packName) => {
 // === Add Transcendent rarity (0.001%) to all existing packs ===
 Object.keys(packs).forEach((packName) => {
   const items = packs[packName];
-  const tName = packName.replace(" Pack", "") + " Transcendent";
+  const tName = transcendentNames[packName] || packName.replace(" Pack", "") + " Unbound";
   items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.001).toFixed(4)];
   items.push([tName, "Transcendent" as Rarity, 0.001]);
 });
@@ -5088,9 +5086,33 @@ Object.keys(packs).forEach((packName) => {
 // === Add Ascendent rarity (0.0005%) to all existing packs ===
 Object.keys(packs).forEach((packName) => {
   const items = packs[packName];
-  const aName = packName.replace(" Pack", "") + " Ascendent";
+  const aName = ascendentNames[packName] || packName.replace(" Pack", "") + " Apex";
   items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.0005).toFixed(4)];
   items.push([aName, "Ascendent" as Rarity, 0.0005]);
+});
+
+// === Add Godly rarity (0.0001%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const gName = godlyNames[packName] || packName.replace(" Pack", "") + " Eternal";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.0001).toFixed(5)];
+  items.push([gName, "Godly" as Rarity, 0.0001]);
+});
+
+// === Add Galactic rarity (0.0000001% = 1 in a billion) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const glName = galacticNames[packName] || packName.replace(" Pack", "") + " Galactic";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.0000001).toFixed(8)];
+  items.push([glName, "Galactic" as Rarity, 0.0000001]);
+});
+
+// === Add Primordial rarity (0.0000000001% = 1 in a trillion) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const prName = primordialNames[packName] || packName.replace(" Pack", "") + " Primordial";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.0000000001).toFixed(11)];
+  items.push([prName, "Primordial" as Rarity, 0.0000000001]);
 });
 
 // === Merge daily packs (366 calendar packs) ===
@@ -5099,18 +5121,47 @@ import { dailyPacks, dailyPackEmojis } from "./dailyPacks";
 Object.assign(packs, dailyPacks);
 Object.assign(packEmojis, dailyPackEmojis);
 
-// Roll function with explicit chances
+// Hidden rarity boost — toggled by /change command or /luck command (global)
+export let hiddenRarityBoost = 1;
+export function setHiddenRarityBoost(multiplier: number) {
+  hiddenRarityBoost = multiplier;
+}
+
+// Season rarity boost — toggled by /change command (global, 1.75 when custom season active)
+export let seasonRarityBoost = 1;
+export function setSeasonRarityBoost(multiplier: number) {
+  seasonRarityBoost = multiplier;
+}
+
+// Private rarity boost — per-user toggle (stacks with global)
+export let privateRarityBoost = 1;
+export function setPrivateRarityBoost(multiplier: number) {
+  privateRarityBoost = multiplier;
+}
+
+const HIDDEN_RARITIES: Set<string> = new Set(
+  Object.entries(rarityInfo).filter(([, v]) => !v.show).map(([k]) => k)
+);
+
+// Roll function with explicit chances (respects hiddenRarityBoost)
 export function rollPack(packName: string): [string, Rarity, number] {
   const pack = packs[packName];
   if (!pack) return pack[0];
-  
-  const rand = Math.random() * 100;
+
+  // Build boosted weights (luck × season × private)
+  const boost = hiddenRarityBoost * seasonRarityBoost * privateRarityBoost;
+  const weights = pack.map(([, rarity, chance]) =>
+    HIDDEN_RARITIES.has(rarity) ? chance * boost : chance
+  );
+  const total = weights.reduce((a, b) => a + b, 0);
+
+  const rand = Math.random() * total;
   let sum = 0;
-  
-  for (const item of pack) {
-    sum += item[2];
-    if (rand <= sum) return item;
+
+  for (let i = 0; i < pack.length; i++) {
+    sum += weights[i];
+    if (rand <= sum) return pack[i];
   }
-  
+
   return pack[pack.length - 1];
 }

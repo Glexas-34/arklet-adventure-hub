@@ -45,11 +45,14 @@
     --rarity-secret: 291 64% 42%;
     --rarity-ultra-secret: 350 100% 55%;
     --rarity-mystical: 187 100% 45%;
-    --rarity-exotic: 330 100% 65%;
+    --rarity-exotic: 330 100% 65%; /* fallback; actual exotic uses rainbow gradients */
     --rarity-celestial: 45 100% 70%;
     --rarity-divine: 270 100% 80%;
     --rarity-transcendent: 0 100% 55%;
     --rarity-ascendent: 0 0% 100%;
+    --rarity-godly: 0 100% 40%;
+    --rarity-galactic: 195 100% 50%;
+    --rarity-primordial: 270 100% 10%;
 
     /* Gradients */
     --gradient-header: linear-gradient(90deg, hsl(330 100% 50%), hsl(280 80% 55%), hsl(170 100% 50%));
@@ -57,6 +60,10 @@
     --gradient-card: linear-gradient(135deg, hsl(280 50% 18%), hsl(300 45% 22%));
     --gradient-pack: linear-gradient(135deg, hsl(200 80% 50%), hsl(280 70% 55%));
     --gradient-button: linear-gradient(135deg, hsl(187 100% 50%), hsl(207 90% 54%));
+
+    /* Animated bg orbs */
+    --orb-1: 320 100% 50%;
+    --orb-2: 170 100% 50%;
 
     /* Shadows */
     --shadow-glow: 0 0 40px hsl(320 100% 50% / 0.5);
@@ -108,11 +115,43 @@
   .rarity-secret { color: hsl(var(--rarity-secret)); }
   .rarity-ultra-secret { color: hsl(var(--rarity-ultra-secret)); }
   .rarity-mystical { color: hsl(var(--rarity-mystical)); }
-  .rarity-exotic { color: hsl(var(--rarity-exotic)); }
+  .rarity-exotic {
+    background: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0088, #ff0000);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: exotic-rainbow-shift 3s linear infinite;
+  }
   .rarity-celestial { color: hsl(var(--rarity-celestial)); }
   .rarity-divine { color: hsl(var(--rarity-divine)); }
   .rarity-transcendent { color: hsl(var(--rarity-transcendent)); }
-  .rarity-ascendent { color: hsl(var(--rarity-ascendent)); }
+  .rarity-ascendent { color: hsl(0 0% 0%); }
+  .rarity-godly {
+    background: linear-gradient(90deg, #000000, #cc0000, #ff2200, #cc0000, #000000);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: godly-text-shift 2s linear infinite;
+  }
+  .rarity-galactic {
+    background: linear-gradient(90deg, #001133, #00ccff, #ffffff, #00ccff, #001133);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: galactic-text-shift 3s linear infinite;
+  }
+  .rarity-primordial {
+    background: linear-gradient(90deg, #1a0033, #000000, #330066, #000000, #1a0033);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: primordial-text-shift 4s linear infinite;
+    filter: blur(0.3px);
+  }
 
   .bg-rarity-common { background-color: hsl(var(--rarity-common)); }
   .bg-rarity-uncommon { background-color: hsl(var(--rarity-uncommon)); }
@@ -122,11 +161,14 @@
   .bg-rarity-secret { background-color: hsl(var(--rarity-secret)); }
   .bg-rarity-ultra-secret { background-color: hsl(var(--rarity-ultra-secret)); }
   .bg-rarity-mystical { background-color: hsl(var(--rarity-mystical)); }
-  .bg-rarity-exotic { background-color: hsl(var(--rarity-exotic)); }
+  .bg-rarity-exotic { background: linear-gradient(135deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0088); }
   .bg-rarity-celestial { background-color: hsl(var(--rarity-celestial)); }
   .bg-rarity-divine { background-color: hsl(var(--rarity-divine)); }
   .bg-rarity-transcendent { background-color: hsl(var(--rarity-transcendent)); }
   .bg-rarity-ascendent { background-color: hsl(var(--rarity-ascendent)); }
+  .bg-rarity-godly { background: linear-gradient(135deg, #000000, #cc0000, #000000); }
+  .bg-rarity-galactic { background: linear-gradient(135deg, #001133, #00ccff, #001133); }
+  .bg-rarity-primordial { background: linear-gradient(135deg, #1a0033, #000000, #330066); }
 
   .border-rarity-common { border-color: hsl(var(--rarity-common)); }
   .border-rarity-uncommon { border-color: hsl(var(--rarity-uncommon)); }
@@ -141,6 +183,9 @@
   .border-rarity-divine { border-color: hsl(var(--rarity-divine)); }
   .border-rarity-transcendent { border-color: hsl(var(--rarity-transcendent)); }
   .border-rarity-ascendent { border-color: hsl(var(--rarity-ascendent)); }
+  .border-rarity-godly { border-color: hsl(var(--rarity-godly)); }
+  .border-rarity-galactic { border-color: hsl(var(--rarity-galactic)); }
+  .border-rarity-primordial { border-color: hsl(var(--rarity-primordial)); }
 
   .glow-common { box-shadow: 0 0 20px hsl(var(--rarity-common) / 0.5); }
   .glow-uncommon { box-shadow: 0 0 20px hsl(var(--rarity-uncommon) / 0.6); }
@@ -154,8 +199,8 @@
     animation: mystical-pulse 2s ease-in-out infinite;
   }
   .glow-exotic {
-    box-shadow: 0 0 50px hsl(var(--rarity-exotic) / 0.9), 0 0 80px hsl(var(--rarity-exotic) / 0.5);
-    animation: exotic-pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 60px hsl(0 100% 60% / 0.9), 0 0 100px hsl(120 100% 60% / 0.5), 0 0 140px hsl(240 100% 60% / 0.3);
+    animation: exotic-hue-rotate 3s linear infinite;
   }
   .glow-celestial {
     box-shadow: 0 0 60px hsl(var(--rarity-celestial) / 1), 0 0 100px hsl(var(--rarity-celestial) / 0.6), 0 0 140px hsl(45 100% 85% / 0.3);
@@ -173,6 +218,18 @@
     box-shadow: 0 0 80px hsl(var(--rarity-ascendent) / 1), 0 0 140px hsl(var(--rarity-ascendent) / 0.8), 0 0 200px hsl(0 0% 100% / 0.5);
     animation: ascendent-pulse 1.5s ease-in-out infinite;
   }
+  .glow-godly {
+    box-shadow: 0 0 100px hsl(0 100% 30% / 1), 0 0 160px hsl(0 100% 20% / 0.7), 0 0 240px hsl(0 0% 0% / 0.5);
+    animation: godly-pulse 1.2s ease-in-out infinite;
+  }
+  .glow-galactic {
+    box-shadow: 0 0 120px hsl(195 100% 60% / 1), 0 0 200px hsl(195 100% 40% / 0.8), 0 0 300px hsl(220 100% 50% / 0.5);
+    animation: galactic-pulse 1s ease-in-out infinite;
+  }
+  .glow-primordial {
+    box-shadow: 0 0 150px hsl(270 100% 20% / 1), 0 0 250px hsl(0 0% 0% / 0.9), 0 0 350px hsl(270 100% 10% / 0.6);
+    animation: primordial-pulse 0.8s ease-in-out infinite;
+  }
 
   @keyframes transcendent-pulse {
     0%, 100% { box-shadow: 0 0 70px hsl(var(--rarity-transcendent) / 1), 0 0 120px hsl(var(--rarity-transcendent) / 0.7), 0 0 160px hsl(0 100% 70% / 0.4); }
@@ -182,6 +239,40 @@
   @keyframes ascendent-pulse {
     0%, 100% { box-shadow: 0 0 80px hsl(var(--rarity-ascendent) / 1), 0 0 140px hsl(var(--rarity-ascendent) / 0.8), 0 0 200px hsl(0 0% 100% / 0.5); }
     50% { box-shadow: 0 0 120px hsl(var(--rarity-ascendent) / 1), 0 0 180px hsl(var(--rarity-ascendent) / 1), 0 0 260px hsl(0 0% 100% / 0.7); }
+  }
+
+  @keyframes godly-pulse {
+    0% { box-shadow: 0 0 100px hsl(0 100% 30% / 1), 0 0 160px hsl(0 100% 20% / 0.7), 0 0 240px hsl(0 0% 0% / 0.5); }
+    50% { box-shadow: 0 0 140px hsl(0 100% 40% / 1), 0 0 200px hsl(0 100% 25% / 0.9), 0 0 300px hsl(0 0% 0% / 0.7); }
+    100% { box-shadow: 0 0 100px hsl(0 100% 30% / 1), 0 0 160px hsl(0 100% 20% / 0.7), 0 0 240px hsl(0 0% 0% / 0.5); }
+  }
+
+  @keyframes galactic-pulse {
+    0% { box-shadow: 0 0 120px hsl(195 100% 60% / 1), 0 0 200px hsl(195 100% 40% / 0.8), 0 0 300px hsl(220 100% 50% / 0.5); }
+    50% { box-shadow: 0 0 160px hsl(195 100% 70% / 1), 0 0 260px hsl(195 100% 50% / 1), 0 0 380px hsl(220 100% 60% / 0.7); }
+    100% { box-shadow: 0 0 120px hsl(195 100% 60% / 1), 0 0 200px hsl(195 100% 40% / 0.8), 0 0 300px hsl(220 100% 50% / 0.5); }
+  }
+
+  @keyframes primordial-pulse {
+    0% { box-shadow: 0 0 150px hsl(270 100% 20% / 1), 0 0 250px hsl(0 0% 0% / 0.9), 0 0 350px hsl(270 100% 10% / 0.6); }
+    50% { box-shadow: 0 0 200px hsl(270 100% 30% / 1), 0 0 320px hsl(0 0% 0% / 1), 0 0 450px hsl(270 100% 15% / 0.8); }
+    100% { box-shadow: 0 0 150px hsl(270 100% 20% / 1), 0 0 250px hsl(0 0% 0% / 0.9), 0 0 350px hsl(270 100% 10% / 0.6); }
+  }
+
+  @keyframes galactic-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes primordial-text-shift {
+    0% { background-position: 0% 50%; filter: blur(0.3px); }
+    50% { background-position: 100% 50%; filter: blur(0.8px); }
+    100% { background-position: 200% 50%; filter: blur(0.3px); }
+  }
+
+  @keyframes godly-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
   }
 
   @keyframes celestial-pulse {
@@ -197,6 +288,18 @@
   @keyframes exotic-pulse {
     0%, 100% { box-shadow: 0 0 50px hsl(var(--rarity-exotic) / 0.9), 0 0 80px hsl(var(--rarity-exotic) / 0.5); }
     50% { box-shadow: 0 0 70px hsl(var(--rarity-exotic) / 1), 0 0 100px hsl(var(--rarity-exotic) / 0.7); }
+  }
+
+  @keyframes exotic-rainbow-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  @keyframes exotic-hue-rotate {
+    0% { box-shadow: 0 0 60px hsl(0 100% 60% / 0.9), 0 0 100px hsl(120 100% 60% / 0.5), 0 0 140px hsl(240 100% 60% / 0.3); }
+    33% { box-shadow: 0 0 60px hsl(120 100% 60% / 0.9), 0 0 100px hsl(240 100% 60% / 0.5), 0 0 140px hsl(0 100% 60% / 0.3); }
+    66% { box-shadow: 0 0 60px hsl(240 100% 60% / 0.9), 0 0 100px hsl(0 100% 60% / 0.5), 0 0 140px hsl(120 100% 60% / 0.3); }
+    100% { box-shadow: 0 0 60px hsl(0 100% 60% / 0.9), 0 0 100px hsl(120 100% 60% / 0.5), 0 0 140px hsl(240 100% 60% / 0.3); }
   }
 
   @keyframes mystical-pulse {
@@ -316,7 +419,7 @@
   .animated-bg::before {
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, hsl(320 100% 50%), transparent 70%);
+    background: radial-gradient(circle, hsl(var(--orb-1)), transparent 70%);
     top: 10%;
     left: -5%;
     animation: float-bg 25s ease-in-out infinite;
@@ -325,7 +428,7 @@
   .animated-bg::after {
     width: 250px;
     height: 250px;
-    background: radial-gradient(circle, hsl(170 100% 50%), transparent 70%);
+    background: radial-gradient(circle, hsl(var(--orb-2)), transparent 70%);
     bottom: 10%;
     right: -5%;
     animation: float-bg 30s ease-in-out infinite reverse;

@@ -501,6 +501,98 @@ export function useSound() {
     setTimeout(() => playSweep(3000, 8000, 0.6, "triangle", 0.08), 1000);
   }, []);
 
+  // Galactic: applause-like burst — layered noise with bright tones simulating crowd clapping
+  const playGalacticReveal = useCallback(() => {
+    // Applause — layered noise bursts at different delays to simulate clapping
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => playNoise(0.15, 0.06 + Math.random() * 0.04), i * 80 + Math.random() * 40);
+    }
+    // After applause, bright ascending beam tones
+    setTimeout(() => {
+      playTone(440, 0.3, "sine", 0.25);
+      playTone(880, 0.3, "sine", 0.2, 0.15);
+      playTone(1320, 0.4, "sine", 0.2, 0.3);
+      playSweep(500, 4000, 1.5, "sine", 0.12);
+      playSweep(1000, 8000, 1.0, "triangle", 0.06);
+    }, 800);
+    // Second wave of applause
+    setTimeout(() => {
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => playNoise(0.1, 0.05), i * 60);
+      }
+    }, 1500);
+  }, []);
+
+  // Primordial: distorted low rumble, eerie reverse sweep, glitchy tones
+  const playPrimordialReveal = useCallback(() => {
+    // Deep ominous rumble
+    playTone(40, 2, "sawtooth", 0.15);
+    playTone(55, 1.5, "triangle", 0.1, 0.2);
+    // Reverse-style descending sweep (eerie)
+    playSweep(4000, 80, 2.5, "sawtooth", 0.08);
+    // Glitchy stuttered tones
+    setTimeout(() => {
+      playTone(200, 0.05, "square", 0.2);
+      playTone(300, 0.05, "square", 0.15, 0.08);
+      playTone(150, 0.05, "square", 0.2, 0.2);
+      playTone(400, 0.05, "square", 0.1, 0.3);
+    }, 1500);
+    // Eerie high whistle
+    setTimeout(() => {
+      playSweep(2000, 3000, 1.5, "sine", 0.06);
+      playNoise(1.0, 0.04);
+    }, 2500);
+  }, []);
+
+  // Exotic: 20-second cosmic reveal — deep rumble (0-5s), electrical crackle (5-10s), silence (10-12s), rainbow harmonic chord (12-20s)
+  const playExoticReveal = useCallback(() => {
+    // Phase 1 (0-5s): Deep cosmic rumble building
+    playTone(30, 5, "sawtooth", 0.12);
+    playTone(45, 4.5, "triangle", 0.08, 0.5);
+    playSweep(30, 80, 5, "sawtooth", 0.06);
+    // Building sub-bass
+    playTone(55, 3, "sine", 0.1, 2);
+    playSweep(60, 200, 3, "triangle", 0.08, 2);
+
+    // Phase 2 (5-10s): Violent electrical crackle
+    setTimeout(() => {
+      // Crackle bursts (rapid noise + high-freq sparks)
+      for (let i = 0; i < 12; i++) {
+        const d = i * 400 + Math.random() * 200;
+        setTimeout(() => {
+          playNoise(0.15, 0.12 + Math.random() * 0.06);
+          playTone(2000 + Math.random() * 4000, 0.06, "square", 0.08);
+          playTone(1000 + Math.random() * 3000, 0.08, "sawtooth", 0.06);
+        }, d);
+      }
+      // Underlying electrical hum
+      playTone(120, 4, "sawtooth", 0.08);
+      playSweep(100, 800, 4, "square", 0.04);
+    }, 5000);
+
+    // Phase 3 (10-12s): Silence — handled by gap (no sounds scheduled)
+
+    // Phase 4 (12-20s): Sweeping rainbow harmonic chord
+    setTimeout(() => {
+      // Major chord: C4, E4, G4, C5 — layered with harmonics
+      playTone(262, 6, "sine", 0.15);
+      playTone(330, 6, "sine", 0.12, 0.3);
+      playTone(392, 6, "sine", 0.12, 0.6);
+      playTone(523, 6, "sine", 0.15, 0.9);
+      // Higher harmonics
+      playTone(659, 5, "triangle", 0.08, 1.2);
+      playTone(784, 4, "triangle", 0.06, 1.5);
+      playTone(1047, 3, "sine", 0.05, 2);
+      // Sweeping shimmer
+      playSweep(500, 6000, 6, "sine", 0.06);
+      playSweep(1000, 10000, 4, "triangle", 0.04);
+      // Sparkle noise bursts
+      playNoise(0.5, 0.06);
+      setTimeout(() => playNoise(0.4, 0.05), 1500);
+      setTimeout(() => playNoise(0.3, 0.04), 3000);
+    }, 12000);
+  }, []);
+
   const playGameStart = useCallback(() => {
     playTone(523, 0.1, "square", 0.15);
     playTone(659, 0.1, "square", 0.15, 0.1);
@@ -616,6 +708,9 @@ export function useSound() {
     playMysticalReveal,
     playCelestialReveal,
     playDivineReveal,
+    playGalacticReveal,
+    playPrimordialReveal,
+    playExoticReveal,
     playGameStart,
     playGameWin,
     playGameLose,

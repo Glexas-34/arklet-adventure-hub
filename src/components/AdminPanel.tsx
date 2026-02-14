@@ -3,15 +3,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield } from "lucide-react";
 import { isAdminUser } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
-import { Rarity, rarityOrder, packs, BlookItem } from "@/data/gameData";
+import { Rarity, rarityOrder, packs, BlookItem, setHiddenRarityBoost } from "@/data/gameData";
 import { findDailyPackByQuery } from "@/data/dailyPacks";
+import { seasonalThemes } from "@/data/seasonalThemes";
 
 interface AdminPanelProps {
   nickname: string | null;
   onSimulatePull?: (item: BlookItem) => void;
+  onPendingPull?: (item: BlookItem) => void;
+  onlinePlayers?: string[];
 }
 
-export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
+export function AdminPanel({ nickname, onSimulatePull, onPendingPull, onlinePlayers = [] }: AdminPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [command, setCommand] = useState("");
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -26,14 +29,161 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
 
     const banMatch = trimmed.match(/^\/ban\s+(.+)$/i);
     const unbanMatch = trimmed.match(/^\/unban\s+(.+)$/i);
-    const giveMatch = trimmed.match(/^\/give\s+(\S+)\s+(.+)$/i);
+    const giveMatch = trimmed.match(/^\/give\s+(.+)$/i);
     const pullMatch = trimmed.match(/^\/pull\s+(.+)$/i);
     const spawnMatch = trimmed.match(/^\/spawn\s+(.+)$/i);
     const unspawnMatch = trimmed.match(/^\/unspawn\s+(.+)$/i);
+    const publicMatch = trimmed.match(/^\/public\s+(.+)$/i);
     const notifyMatch = trimmed.match(/^\/notify\s+(.+)$/i);
     const notifyClear = /^\/notify\s*$/i.test(trimmed);
+    const luckMatch = trimmed.match(/^\/luck\s+(\d+(?:\.\d+)?)$/i);
+    const luckRandom = /^\/luck\s*$/i.test(trimmed) && !luckMatch;
+    const changeMatch = trimmed.match(/^\/change\s+(\d+)$/i);
+    const changeReset = /^\/change\s*$/i.test(trimmed);
 
-    if (pullMatch) {
+    if (luckMatch || luckRandom) {
+      let multiplier: number;
+      if (luckRandom) {
+        // /luck with no number — random 1–50,000
+        multiplier = Math.floor(Math.random() * 50000) + 1;
+      } else {
+        multiplier = parseFloat(luckMatch![1]);
+        if (multiplier <= 0 || multiplier > 50000) {
+          setFeedback({ type: "error", text: "Multiplier must be between 1 and 50,000." });
+          return;
+        }
+      }
+
+      const { error } = await supabase
+        .from("site_announcements")
+        .upsert({ id: "luck", message: String(multiplier), set_by: nickname!, updated_at: new Date().toISOString() });
+
+      if (error) {
+        setFeedback({ type: "error", text: error.message });
+      } else {
+        setHiddenRarityBoost(multiplier);
+        setFeedback({ type: "success", text: `Luck set to ${multiplier.toLocaleString()}x globally!` });
+        setCommand("");
+      }
+      return;
+    } else if (changeMatch || changeReset) {
+      if (nickname !== "Admin___Levi") {
+        setFeedback({ type: "error", text: "Only Admin___Levi can use /change" });
+        return;
+      }
+
+      if (changeReset) {
+        // Reset to natural month theme globally
+        const { error } = await supabase
+          .from("site_announcements")
+          .upsert({ id: "season", message: "", set_by: nickname!, updated_at: new Date().toISOString() });
+        if (error) {
+          setFeedback({ type: "error", text: error.message });
+        } else {
+          setFeedback({ type: "success", text: "Season reset to default globally. Season rarity boost OFF." });
+          setCommand("");
+        }
+        return;
+      }
+
+      const monthNum = parseInt(changeMatch![1], 10);
+      if (monthNum < 1 || monthNum > 12) {
+        setFeedback({ type: "error", text: "Use /change 1-12 (1=Jan, 12=Dec). /change alone to reset." });
+        return;
+      }
+
+      const theme = seasonalThemes[monthNum - 1];
+      const { error } = await supabase
+        .from("site_announcements")
+        .upsert({ id: "season", message: String(monthNum), set_by: nickname!, updated_at: new Date().toISOString() });
+
+      if (error) {
+        setFeedback({ type: "error", text: error.message });
+      } else {
+        setFeedback({ type: "success", text: `Season changed to ${theme.emoji} ${theme.name} (month ${monthNum}) globally. Hidden rarity x1.75 active!` });
+        setCommand("");
+      }
+      return;
+    } else if (publicMatch) {
+      const rest = publicMatch[1];
+
+      // Build rarity map (case-insensitive)
+      const rarityMap: Record<string, Rarity> = {};
+      for (const r of rarityOrder) {
+        rarityMap[r.toLowerCase()] = r;
+      }
+
+      // Parse: Rarity (1-2 words) → ItemName (rest)
+      let matchedRarity: Rarity | undefined;
+      let itemName: string | undefined;
+
+      const words = rest.split(/\s+/);
+
+      // Try two-word rarity first (e.g. "Ultra Secret Cool Sword")
+      if (words.length >= 3) {
+        const twoWord = `${words[0]} ${words[1]}`.toLowerCase();
+        if (rarityMap[twoWord]) {
+          matchedRarity = rarityMap[twoWord];
+          itemName = words.slice(2).join(" ");
+        }
+      }
+      // Try one-word rarity (e.g. "Exotic Cool Sword")
+      if (!matchedRarity && words.length >= 2) {
+        const oneWord = words[0].toLowerCase();
+        if (rarityMap[oneWord]) {
+          matchedRarity = rarityMap[oneWord];
+          itemName = words.slice(1).join(" ");
+        }
+      }
+
+      if (!matchedRarity || !itemName) {
+        setFeedback({ type: "error", text: "Format: /public Rarity ItemName" });
+        return;
+      }
+
+      if (onlinePlayers.length === 0) {
+        setFeedback({ type: "error", text: "No online players detected." });
+        return;
+      }
+
+      // Insert admin_gifts rows for ALL online players
+      const rows = onlinePlayers.map((playerNickname) => ({
+        recipient_nickname: playerNickname,
+        item_name: itemName!,
+        rarity: matchedRarity!,
+        given_by: nickname!,
+      }));
+
+      const { error } = await supabase
+        .from("admin_gifts")
+        .insert(rows);
+
+      if (error) {
+        if (error.code === "42P01" || error.message?.includes("admin_gifts")) {
+          setFeedback({ type: "error", text: "Table not found. Run the admin_gifts migration SQL in Supabase Dashboard." });
+        } else {
+          setFeedback({ type: "error", text: error.message });
+        }
+        return;
+      }
+
+      // Broadcast to all other clients
+      // supabase.channel() returns the existing instance if usePublicGift already created it
+      const channel = supabase.channel("public-gift-broadcast");
+      // Send through the channel (it's already subscribed by usePublicGift on every client)
+      await channel.send({
+        type: "broadcast",
+        event: "public-gift",
+        payload: { rarity: matchedRarity, itemName, givenBy: nickname },
+      });
+
+      // Defer animation until admin navigates to Open Packs page
+      onPendingPull?.({ name: itemName, rarity: matchedRarity, chance: 0 });
+
+      setFeedback({ type: "success", text: `Public gift sent: "${itemName}" (${matchedRarity}) to ${onlinePlayers.length} players!` });
+      setCommand("");
+      return;
+    } else if (pullMatch) {
       const rest = pullMatch[1];
 
       // Build rarity map (case-insensitive)
@@ -63,41 +213,41 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
       }
 
       if (!matchedRarity || !packSearch) {
-        setFeedback({ type: "error", text: "Format: /pull Rarity PackName" });
+        setFeedback({ type: "error", text: "Format: /pull Rarity PackName  OR  /pull Rarity CustomItemName" });
         return;
       }
 
-      // Find pack (case-insensitive partial match)
+      // Try to find a pack first (case-insensitive partial match)
       const packNames = Object.keys(packs);
       const searchLower = packSearch.toLowerCase();
       const foundPack = packNames.find((p) => p.toLowerCase() === searchLower)
         || packNames.find((p) => p.toLowerCase().includes(searchLower));
 
-      if (!foundPack) {
-        setFeedback({ type: "error", text: `Pack "${packSearch}" not found. Available: ${packNames.join(", ")}` });
-        return;
+      let simulatedItem: BlookItem;
+
+      if (foundPack) {
+        // Found a pack — pick a random item of that rarity from it
+        const packItems = packs[foundPack];
+        const matchingItems = packItems.filter(([, r]) => r === matchedRarity);
+
+        if (matchingItems.length === 0) {
+          setFeedback({ type: "error", text: `No ${matchedRarity} items in ${foundPack}` });
+          return;
+        }
+
+        const picked = matchingItems[Math.floor(Math.random() * matchingItems.length)];
+        simulatedItem = { name: picked[0], rarity: picked[1], chance: picked[2] };
+        setFeedback({ type: "success", text: `Simulating ${matchedRarity} pull from ${foundPack}: ${picked[0]}` });
+      } else {
+        // No pack found — treat the rest as a custom item name
+        simulatedItem = { name: packSearch, rarity: matchedRarity, chance: 0 };
+        setFeedback({ type: "success", text: `Simulating custom ${matchedRarity}: "${packSearch}"` });
       }
-
-      // Find an item of that rarity in the pack
-      const packItems = packs[foundPack];
-      const matchingItems = packItems.filter(([, r]) => r === matchedRarity);
-
-      if (matchingItems.length === 0) {
-        setFeedback({ type: "error", text: `No ${matchedRarity} items in ${foundPack}` });
-        return;
-      }
-
-      // Pick a random one from matching items
-      const picked = matchingItems[Math.floor(Math.random() * matchingItems.length)];
-      const simulatedItem: BlookItem = { name: picked[0], rarity: picked[1], chance: picked[2] };
-
-      setFeedback({ type: "success", text: `Simulating ${matchedRarity} pull from ${foundPack}: ${picked[0]}` });
       setCommand("");
       onSimulatePull?.(simulatedItem);
       return;
     } else if (giveMatch) {
-      const recipient = giveMatch[1];
-      const rest = giveMatch[2]; // "Exotic Cool Sword" or "Ultra Secret Cool Sword"
+      const rest = giveMatch[1];
 
       // Build rarity map (case-insensitive)
       const rarityMap: Record<string, Rarity> = {};
@@ -105,34 +255,53 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
         rarityMap[r.toLowerCase()] = r;
       }
 
-      // Try two-word rarity first (e.g. "ultra secret"), then one-word
+      // Parse: Rarity (1-2 words) → Quantity (number) → ItemName (rest)
       let matchedRarity: Rarity | undefined;
+      let quantity = 1;
       let itemName: string | undefined;
 
       const words = rest.split(/\s+/);
-      if (words.length >= 3) {
+
+      // Try two-word rarity first (e.g. "Ultra Secret 3 Cool Sword")
+      if (words.length >= 4) {
         const twoWord = `${words[0]} ${words[1]}`.toLowerCase();
-        if (rarityMap[twoWord]) {
+        if (rarityMap[twoWord] && /^\d+$/.test(words[2])) {
           matchedRarity = rarityMap[twoWord];
-          itemName = words.slice(2).join(" ");
+          quantity = parseInt(words[2], 10);
+          itemName = words.slice(3).join(" ");
         }
       }
-      if (!matchedRarity && words.length >= 2) {
+      // Try one-word rarity (e.g. "Exotic 5 Cool Sword")
+      if (!matchedRarity && words.length >= 3) {
         const oneWord = words[0].toLowerCase();
-        if (rarityMap[oneWord]) {
+        if (rarityMap[oneWord] && /^\d+$/.test(words[1])) {
           matchedRarity = rarityMap[oneWord];
-          itemName = words.slice(1).join(" ");
+          quantity = parseInt(words[1], 10);
+          itemName = words.slice(2).join(" ");
         }
       }
 
       if (!matchedRarity || !itemName) {
-        setFeedback({ type: "error", text: `Format: /give Username Rarity ItemName` });
+        setFeedback({ type: "error", text: "Format: /give Rarity Quantity ItemName" });
         return;
       }
 
+      if (quantity < 1 || quantity > 100) {
+        setFeedback({ type: "error", text: "Quantity must be between 1 and 100." });
+        return;
+      }
+
+      // Insert one row per quantity
+      const rows = Array.from({ length: quantity }, () => ({
+        recipient_nickname: nickname!,
+        item_name: itemName!,
+        rarity: matchedRarity!,
+        given_by: nickname!,
+      }));
+
       const { error } = await supabase
         .from("admin_gifts")
-        .insert({ recipient_nickname: recipient, item_name: itemName, rarity: matchedRarity, given_by: nickname! });
+        .insert(rows);
 
       if (error) {
         if (error.code === "42P01" || error.message?.includes("admin_gifts")) {
@@ -141,7 +310,7 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
           setFeedback({ type: "error", text: error.message });
         }
       } else {
-        setFeedback({ type: "success", text: `Gave "${itemName}" (${matchedRarity}) to ${recipient}` });
+        setFeedback({ type: "success", text: `Gave ${quantity}x "${itemName}" (${matchedRarity})` });
         setCommand("");
       }
     } else if (banMatch) {
@@ -242,7 +411,7 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
         setCommand("");
       }
     } else {
-      setFeedback({ type: "error", text: "Unknown command. Try /give, /ban, /unban, /pull, /spawn, /unspawn, /notify" });
+      setFeedback({ type: "error", text: "Unknown command. Try /give, /public, /ban, /unban, /pull, /spawn, /unspawn, /notify, /change, /luck" });
     }
   };
 
@@ -275,7 +444,7 @@ export function AdminPanel({ nickname, onSimulatePull }: AdminPanelProps) {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleCommand();
                   }}
-                  placeholder="/give | /pull | /ban | /unban | /spawn | /unspawn | /notify"
+                  placeholder="/give | /public | /pull | /ban | /unban | /spawn | /unspawn | /notify | /change | /luck"
                   className="flex-1 px-3 py-2 rounded-lg bg-black/40 border border-red-500/20 text-foreground text-sm outline-none focus:border-red-500/50 transition-colors placeholder:text-muted-foreground"
                 />
                 <motion.button

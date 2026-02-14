@@ -246,6 +246,18 @@ for (const theme of monthlyThemes) {
     const ascendentChance = 0.0005;
     items[0] = [items[0][0], items[0][1], +(items[0][2] - ascendentChance).toFixed(4)];
     items.push([`${theme.name} ${day} Ascendent`, "Ascendent" as Rarity, ascendentChance]);
+    // Godly item unique per day
+    const godlyChance = 0.0001;
+    items[0] = [items[0][0], items[0][1], +(items[0][2] - godlyChance).toFixed(5)];
+    items.push([`${theme.name} ${day} Godly`, "Godly" as Rarity, godlyChance]);
+    // Galactic item unique per day (1 in a billion)
+    const galacticChance = 0.0000001;
+    items[0] = [items[0][0], items[0][1], +(items[0][2] - galacticChance).toFixed(8)];
+    items.push([`${theme.name} ${day} Galactic`, "Galactic" as Rarity, galacticChance]);
+    // Primordial item unique per day (1 in a trillion)
+    const primordialChance = 0.0000000001;
+    items[0] = [items[0][0], items[0][1], +(items[0][2] - primordialChance).toFixed(11)];
+    items.push([`${theme.name} ${day} Primordial`, "Primordial" as Rarity, primordialChance]);
 
     dailyPacks[packName] = items;
     dailyPackEmojis[packName] = theme.emoji;

@@ -219,4 +219,244 @@ export const newsArticles: NewsArticle[] = [
     content:
       "The actor was exposed when all seven accounts named 'NotTheRock1' through 'NotTheRock7' entered the same tournament lobby and immediately surrendered to his main account. 'I thought if I believed in myself seven times harder, it wasn't cheating,' Johnson explained in a tearful Instagram apology. He's been banned for 30 days and forced to donate his entire Divine collection to random new players.",
   },
+  {
+    id: "26",
+    emoji: "🌳",
+    title: "Players Demand Mourning Period for Deleted 'Tree' Ark Collection",
+    author: "Arklet Arborist Weekly",
+    date: "Feb 11, 2026",
+    category: "Player",
+    content:
+      "Following a mysterious server update that permanently deleted the entire 'Forest Friends' ark series, players are organizing a virtual funeral for thousands of beloved tree-themed arks. The 'Walk for Packs' movement saw users opening Commons for 15 weeks straight in solidarity, with monks reportedly achieving inner peace after pulling their 47th duplicate Uncommon Oak.",
+  },
+  {
+    id: "27",
+    emoji: "🚶",
+    title: "Player Completes 15-Week Walk to Arklet HQ Demanding Divine Drop Rate Buff",
+    author: "The Grinding Gazette",
+    date: "Feb 11, 2026",
+    category: "Trending",
+    content:
+      "After walking from California to Arklet headquarters, competitive player 'MonkMode87' arrived today clutching 3,000 unopened packs, demanding the developers witness his pack-opening luck in person. CEO reportedly hid under desk as player proceeded to pull 2,999 Commons and one Uncommon, validating his entire journey.",
+  },
+  {
+    id: "28",
+    emoji: "🎬",
+    title: "Marvel Star Admits Entire MCU Budget Spent on Arklet Packs",
+    author: "Hollywood Trade Report",
+    date: "Feb 11, 2026",
+    category: "Celebrity",
+    content:
+      "Chris Hemsworth shocked fans by revealing he spent his entire Thor salary trying to complete the Celestial 'Asgard Legends' collection, only to realize he was buying from the wrong pack series for eight months. 'I thought dedication and raw strength would help my RNG,' the actor said while opening his 10,000th Safari Pack.",
+  },
+  {
+    id: "29",
+    emoji: "💎",
+    title: "Grandmother Accidentally Trades Divine Ark for 'Pretty Sparkly One'",
+    author: "Elder Gamers Monthly",
+    date: "Feb 11, 2026",
+    category: "Player",
+    content:
+      "87-year-old Arklet newcomer Margaret Chen traded away a $50,000 Divine 'Cosmic Dragon' because she 'liked the colors better' on a Common butterfly ark, leaving the recipient in shocked silence for 20 minutes. Margaret says she has no regrets and rates the butterfly '10/10, very lovely fluttery thing.'",
+  },
+  {
+    id: "30",
+    emoji: "🎤",
+    title: "Rapper's New Album Flops After He Only Rhymes Ark Names for 18 Tracks",
+    author: "Billboard Beats",
+    date: "Feb 11, 2026",
+    category: "Celebrity",
+    content:
+      "DJ Crypto's highly anticipated album 'Legendary Drops' consists entirely of him rapidly listing ark names over trap beats, with the hook 'Mythic Mythic Mythic yeah' repeating 47 times per song. His label has filed for bankruptcy after he spent the entire marketing budget on Celestial packs during the recording sessions.",
+  },
+  {
+    id: "31",
+    emoji: "🏆",
+    title: "Top Leaderboard Player Revealed to Be 47 Kids in Trench Coat",
+    author: "Competitive Gaming Exposé",
+    date: "Feb 11, 2026",
+    category: "Trending",
+    content:
+      "The #1 ranked player 'UltimateArkLord9000' was unmasked at a tournament as actually being 47 elementary schoolers taking shifts, trading lunch money for pack funds. The operation fell apart when the top half wanted to open Aquatic packs but the bottom half staged a mutiny for Desert series, causing them to topple over mid-match.",
+  },
+  {
+    id: "32",
+    emoji: "🏫",
+    title: "Arklet Servers Shut Down Thursday as Devs Go on Strike",
+    author: "The Arklet Chronicle",
+    date: "Feb 12, 2026",
+    category: "Tech",
+    content:
+      "Arklet developers walked out demanding better pack odds and the removal of \"Divine\" rarity after realizing nobody has ever actually pulled one. Players attempted to negotiate by opening more packs, accidentally funding the company's record profits. The strike ended in 20 minutes.",
+  },
+  {
+    id: "33",
+    emoji: "⚽",
+    title: "Man United Owner Declares Self 'Custodian of Legendary Safari Ark'",
+    author: "Sports Arks Weekly",
+    date: "Feb 12, 2026",
+    category: "Celebrity",
+    content:
+      "Billionaire Jim Ratcliffe announced he's merely a 'temporary guardian' of his Legendary Safari Ark, not its owner, in an emotional press conference. Critics noted he's had the ark for 6 hours and has already declined 47 trade requests. His words apparently matter more than his 'nty' spam.",
+  },
+  {
+    id: "34",
+    emoji: "📊",
+    title: "Gallup Stops Tracking Which Ark Rarity Players Approve Of Most",
+    author: "Statistical Arks Quarterly",
+    date: "Feb 12, 2026",
+    category: "Trending",
+    content:
+      "After 80 years of polling, Gallup has given up measuring player satisfaction with ark rarities, citing 'existential exhaustion.' Every survey ended with players screaming 'DIVINE OR UNINSTALL' regardless of the question. Researchers last seen opening Celestial Packs in a dark room.",
+  },
+  {
+    id: "35",
+    emoji: "🎤",
+    title: "Taylor Swift Admits She's Only Been Opening Commons For 2 Years",
+    author: "Pop Star Ark Digest",
+    date: "Feb 12, 2026",
+    category: "Celebrity",
+    content:
+      "In a shocking tell-all interview, Swift revealed she exclusively opens Common packs and has never wanted anything rarer. 'Mythics are try-hard energy,' she explained while showing off her collection of 47,000 identical Gray Blobs. Her fans immediately declared Commons the new Divines.",
+  },
+  {
+    id: "36",
+    emoji: "👶",
+    title: "Local 8-Year-Old Defeats Pro Gamer Using Only Arks He Found On Ground",
+    author: "Playground Gazette",
+    date: "Feb 12, 2026",
+    category: "Player",
+    content:
+      "Timmy 'FingerGunz' Patterson crushed esports champion FaZe_Legendary using exclusively arks he picked up from other players' dropped trades. 'I don't even know what button opens packs,' Timmy told reporters while eating paste. FaZe has since retired and enrolled in third grade.",
+  },
+  {
+    id: "37",
+    emoji: "💸",
+    title: "Man Spends $10K Hunting Divine Ark, Pulls It, Immediately Trades For Common",
+    author: "Ark Economics Today",
+    date: "Feb 12, 2026",
+    category: "Player",
+    content:
+      "Local player Jeremy Chen finally pulled a Divine Radiant Phoenix after 10,000 packs, then instantly traded it for a Common Pencil 'because it looked cute.' His twitch stream of 50,000 viewers simultaneously experienced all five stages of grief. Jeremy says he has 'no regrets' and 'prefers graphite-based arks.'",
+  },
+  {
+    id: "38",
+    emoji: "🎣",
+    title: "Japan Confiscates Player's 'Fishing Pack' After Illegal Ark Farm",
+    author: "The Arklet Maritime Times",
+    date: "Feb 13, 2026",
+    category: "Trending",
+    content:
+      "Japanese Arklet moderators have seized a player's entire fishing-themed pack collection after discovering an elaborate scheme to farm Divine arks using 47 alt accounts and a fleet of automated bots. The player's skipper claimed he was just 'casually fishing' despite having pulled 892 Celestial arks in a single week, which statistically should take 14,000 years.",
+  },
+  {
+    id: "39",
+    emoji: "📡",
+    title: "Players Fall for Fake 'Premium Trading App' That Just Shows Location",
+    author: "Arklet Security Weekly",
+    date: "Feb 13, 2026",
+    category: "Tech",
+    content:
+      "Thousands of Arklet traders downloaded a suspicious app promising 'instant Divine ark trades' only to discover it was actually tracking their GPS coordinates and sending them to rival guild leaders. The scammers made $47,000 selling player location data before anyone noticed the app's only feature was a map with pins labeled 'EASY TARGET HERE.'",
+  },
+  {
+    id: "40",
+    emoji: "🏨",
+    title: "Game Devs Hire Hotel Manager to Run Arklet's National Parks Mode",
+    author: "The Confused Gamer Gazette",
+    date: "Feb 13, 2026",
+    category: "Tech",
+    content:
+      "Arklet announced their new 'National Parks' game mode will be managed by a former Holiday Inn executive with zero gaming experience but 'excellent skills in breakfast buffet coordination.' When asked about Ark balancing, he responded by offering players a complimentary continental breakfast and late checkout.",
+  },
+  {
+    id: "41",
+    emoji: "🎤",
+    title: "Beyoncé Rage-Quits Arklet After Opening 10,000 Packs With No Mythics",
+    author: "Celebrity Gaming Meltdowns",
+    date: "Feb 13, 2026",
+    category: "Celebrity",
+    content:
+      "Queen Bey allegedly threw her phone into a pool after spending $12,000 on Arklet packs during her Renaissance tour break and pulling nothing but Commons and Uncommons. Sources say she's now writing a diss track titled 'RNG Lemonade' specifically about the game's drop rates, with lyrics describing the pack odds as 'more fraudulent than ticket scalpers.'",
+  },
+  {
+    id: "42",
+    emoji: "🍕",
+    title: "Teen Trades Entire Divine Collection for Pizza, Immediately Regrets It",
+    author: "Arklet Trade Disasters Daily",
+    date: "Feb 13, 2026",
+    category: "Player",
+    content:
+      "A 14-year-old player accepted a trade offer of 'one large pepperoni pizza' for his full set of Divine arks after a 19-hour gaming session left him deliriously hungry. The pizza arrived cold, had pineapple on it despite his request, and his mom grounded him for a month when she found out his collection was worth approximately $28,000.",
+  },
+  {
+    id: "43",
+    emoji: "🏆",
+    title: "World Champion Admits He's Never Actually Played, Just Watches Others",
+    author: "Competitive Arklet Insider",
+    date: "Feb 13, 2026",
+    category: "Player",
+    content:
+      "The number one ranked Arklet player globally has confessed in a shocking interview that he doesn't know how to play and has been paying his little sister $20 per match to play for him while he provides 'strategic commentary' from the couch. His sister, age 9, says she's been carrying him for two years and demands a raise to $50 plus snacks.",
+  },
+  {
+    id: "44",
+    emoji: "🎯",
+    title: "Player Accidentally Opens 4,400 Common Packs, Still Gets Nothing Good",
+    author: "Arklet Statistical Anomaly Report",
+    date: "Feb 14, 2026",
+    category: "Player",
+    content:
+      "Local player Jeremy Chen filed a complaint after opening 4,400 consecutive Common packs without receiving a single Rare or higher Ark. Arklet developers responded that 'working as intended' and suggested he 'should have prayed to RNGesus harder.' Chen is now starting a support group for players with similar trauma.",
+  },
+  {
+    id: "45",
+    emoji: "💸",
+    title: "Millionaire Hosts 'Tax the Rich' Rally, Refuses to Trade Divine Arks",
+    author: "The Irony Times",
+    date: "Feb 14, 2026",
+    category: "Player",
+    content:
+      "Wealthy Arklet streamer 'CryptoKing2026' organized a massive in-game protest demanding Divine Ark redistribution to newer players. When asked to donate his own collection of 47 Divines, he disconnected and hasn't logged back in. His last message read 'I meant OTHER rich people lol.'",
+  },
+  {
+    id: "46",
+    emoji: "🐸",
+    title: "Rare 'Poison Dart Frog' Ark Banned After Players Use It Too Effectively",
+    author: "Competitive Meta Watch",
+    date: "Feb 14, 2026",
+    category: "Tech",
+    content:
+      "The South American Poison Dart Frog Ark has been emergency-disabled after players discovered it could instantly eliminate opponents in multiplayer matches. Over 10,000 rage-quit reports were filed in a single day. Developers apologized, stating 'we thought making it green and squishy would balance the lethality.'",
+  },
+  {
+    id: "47",
+    emoji: "🎮",
+    title: "Dwayne 'The Rock' Johnson Admits He's Never Actually Opened an Ark Pack",
+    author: "Celebrity Gaming Exposé",
+    date: "Feb 14, 2026",
+    category: "Celebrity",
+    content:
+      "After months of sponsored Arklet posts, The Rock confessed he thought Arks were 'those chocolate coins in foil wrappers.' His management team had been playing on his account the entire time. Fans are devastated to learn his 'legendary' pack opening video was actually his assistant Kevin screaming off-camera.",
+  },
+  {
+    id: "48",
+    emoji: "👑",
+    title: "Teen Trades Entire Life Savings of Arks for One Called 'Shiny Rock'",
+    author: "Trades Gone Wrong Weekly",
+    date: "Feb 14, 2026",
+    category: "Player",
+    content:
+      "15-year-old Madison Porter traded 200 Legendary Arks for a single Common Ark literally named 'Shiny Rock' because 'it had good vibes.' Her clan members staged an intervention, but she insists the rock 'speaks to her.' Therapists are now calling it 'the worst trade deal in the history of trade deals, maybe ever.'",
+  },
+  {
+    id: "49",
+    emoji: "🎪",
+    title: "Circus Performer Juggles 8 Phones, Climbs Leaderboard Simultaneously",
+    author: "Extreme Gaming Gazette",
+    date: "Feb 14, 2026",
+    category: "Trending",
+    content:
+      "Professional juggler turned Arklet streamer 'OctoGamer' went viral for piloting 8 accounts at once during a live tournament, finishing in the top 10 on seven of them. When asked how, he responded 'after juggling flaming chainsaws, tapping phones is basically meditation.' Arklet officials can't decide if they should ban him or hire him.",
+  },
 ];

@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { Rarity, InventoryItem, packs } from "@/data/gameData";
 
 const STORAGE_KEY = "blookInv";
-export const PRIVILEGED_USERS = ["Admin___Levi", "jamesishim", "Adam", "Admin___James", "rt3rockydagoat95"];
+export const PRIVILEGED_USERS = ["Admin___Levi", "jamesishim", "Adam", "Admin___James", "HUDSONDASHARK"];
+const CLEARED_USERS = ["rt3rockydagoat"];
 
 type Inventory = Record<string, InventoryItem>;
 
@@ -25,8 +26,22 @@ function isPrivilegedUser(): boolean {
   }
 }
 
+function isClearedUser(): boolean {
+  try {
+    const nick = localStorage.getItem("playerNickname");
+    return nick !== null && CLEARED_USERS.includes(nick);
+  } catch {
+    return false;
+  }
+}
+
 export function useInventory() {
   const [inventory, setInventory] = useState<Inventory>(() => {
+    // Force-clear inventory for cleared users
+    if (isClearedUser()) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({}));
+      return {};
+    }
     // If admin, always grant everything on load
     if (isPrivilegedUser()) {
       const fullInv = buildFullInventory();
@@ -46,6 +61,7 @@ export function useInventory() {
   }, [inventory]);
 
   const addItem = useCallback((name: string, rarity: Rarity) => {
+    if (isClearedUser()) return;
     setInventory((prev) => {
       const existing = prev[name];
       return {

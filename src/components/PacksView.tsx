@@ -13,16 +13,17 @@ interface PacksViewProps {
   onRareReveal?: (rarity: Rarity) => void;
   availablePackNames?: string[];
   announcement?: string;
+  seasonalPackName?: string;
 }
 
 const RARE_RARITIES: Rarity[] = ["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical"];
 
-export function PacksView({ onItemObtained, onRareReveal, availablePackNames, announcement }: PacksViewProps) {
+export function PacksView({ onItemObtained, onRareReveal, availablePackNames, announcement, seasonalPackName }: PacksViewProps) {
   const [hoveredPack, setHoveredPack] = useState<string | null>(null);
   const [previewVisible, setPreviewVisible] = useState(true);
   const [resultItem, setResultItem] = useState<BlookItem | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal } = useSound();
+  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal } = useSound();
 
   // Toggle preview with Enter key
   useEffect(() => {
@@ -45,7 +46,16 @@ export function PacksView({ onItemObtained, onRareReveal, availablePackNames, an
     trackEvent("pack_opened", { pack_name: packName, item_name: name, rarity });
 
     // Play sound based on rarity
-    if (rarity === "Ascendent" || rarity === "Transcendent") {
+    if (rarity === "Exotic") {
+      playExoticReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Primordial") {
+      playPrimordialReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Galactic") {
+      playGalacticReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Godly" || rarity === "Ascendent" || rarity === "Transcendent") {
       playDivineReveal();
       onRareReveal?.(rarity);
     } else if (rarity === "Divine") {
@@ -66,7 +76,7 @@ export function PacksView({ onItemObtained, onRareReveal, availablePackNames, an
     } else {
       playReveal();
     }
-  }, [onItemObtained, onRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal]);
+  }, [onItemObtained, onRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal]);
 
   const closeResult = () => {
     setShowResult(false);
@@ -77,13 +87,16 @@ export function PacksView({ onItemObtained, onRareReveal, availablePackNames, an
     ? availablePackNames.filter((name) => packs[name])
     : Object.keys(packs);
 
-  // Split into today's pack, spawned packs, and original packs when availablePackNames is provided
+  // Split into today's pack, seasonal pack, spawned packs, and original packs
   const todayPack = availablePackNames ? packNames[0] : null;
+  const seasonalPack = availablePackNames && seasonalPackName && packNames.includes(seasonalPackName)
+    ? seasonalPackName
+    : null;
   const spawnedPacks = availablePackNames
-    ? packNames.slice(1).filter((n) => n in dailyPacks)
+    ? packNames.slice(1).filter((n) => n in dailyPacks && n !== seasonalPackName)
     : [];
   const originalPacks = availablePackNames
-    ? packNames.filter((n) => !(n in dailyPacks))
+    ? packNames.filter((n) => !(n in dailyPacks) && n !== seasonalPackName)
     : [];
 
   return (
@@ -130,6 +143,28 @@ export function PacksView({ onItemObtained, onRareReveal, availablePackNames, an
                   <PackCard
                     name={todayPack}
                     onClick={() => openPack(todayPack)}
+                    disabled={showResult}
+                  />
+                </motion.div>
+              </div>
+            </>
+          )}
+
+          {/* Seasonal Pack section */}
+          {seasonalPack && (
+            <>
+              <h3 className="text-lg font-semibold text-foreground/80 mb-3">🌟 Seasonal Pack</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  onMouseEnter={() => setHoveredPack(seasonalPack)}
+                  onMouseLeave={() => setHoveredPack(null)}
+                >
+                  <PackCard
+                    name={seasonalPack}
+                    onClick={() => openPack(seasonalPack)}
                     disabled={showResult}
                   />
                 </motion.div>

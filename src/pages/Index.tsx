@@ -32,6 +32,7 @@ import { useFriends } from "@/hooks/useFriends";
 import { useShop } from "@/hooks/useShop";
 import { useAnnouncement } from "@/hooks/useAnnouncement";
 import { useLuckBoost } from "@/hooks/useLuckBoost";
+import { usePublicGift } from "@/hooks/usePublicGift";
 import { Rarity, InventoryItem, BlookItem, packs, setPrivateRarityBoost } from "@/data/gameData";
 import { getDailyPackName, dailyPacks } from "@/data/dailyPacks";
 import { useSpawnedPacks } from "@/hooks/useSpawnedPacks";
@@ -65,6 +66,9 @@ const Index = () => {
   const [simulatedItem, setSimulatedItem] = useState<BlookItem | null>(null);
   const [showSimulation, setShowSimulation] = useState(false);
   const [privateLuck, setPrivateLuck] = useState(false);
+  const [publicGiftDisplay, setPublicGiftDisplay] = useState<BlookItem | null>(null);
+  const [showPublicGift, setShowPublicGift] = useState(false);
+  const [pendingPublicPull, setPendingPublicPull] = useState<BlookItem | null>(null);
 
   const { inventory, addItem, getTotalItems, getUniqueCount, clearInventory, updateItemCount, grantAllBlooks } = useInventory();
   const {
@@ -120,7 +124,8 @@ const Index = () => {
   const { listings, listItem, buyItem, returnItem, isLoading: shopLoading } = useShop(nickname);
   const { announcement } = useAnnouncement();
   const luckState = useLuckBoost();
-  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal } = useSound();
+  const { publicGiftItem, clearPublicGift } = usePublicGift(nickname);
+  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal } = useSound();
 
   // Daily packs: today's pack + seasonal pack + admin-spawned packs + all original (non-daily) packs
   const availablePackNames = useMemo(() => {
@@ -275,6 +280,23 @@ const Index = () => {
     }
   }, [nickname, grantAllBlooks]);
 
+  // Handle incoming public gift broadcasts — show exotic animation immediately
+  useEffect(() => {
+    if (publicGiftItem) {
+      const giftBlook: BlookItem = {
+        name: publicGiftItem.itemName,
+        rarity: publicGiftItem.rarity,
+        chance: 0,
+      };
+      setPublicGiftDisplay(giftBlook);
+      setShowPublicGift(true);
+      playExoticReveal();
+      setConfettiIntensity("celestial");
+      setShowConfetti(true);
+      clearPublicGift();
+    }
+  }, [publicGiftItem, clearPublicGift, playExoticReveal]);
+
   // Track view changes
   useEffect(() => {
     trackPageView(currentView);
@@ -405,9 +427,10 @@ const Index = () => {
   }, [currentRoom?.status, reportScore]);
 
   const handleRareReveal = useCallback((rarity: Rarity) => {
-    if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical", "Celestial", "Divine", "Transcendent", "Ascendent"].includes(rarity)) {
+    if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical", "Exotic", "Celestial", "Divine", "Transcendent", "Ascendent", "Godly", "Galactic", "Primordial"].includes(rarity)) {
       setConfettiIntensity(
-        rarity === "Transcendent" || rarity === "Ascendent" ? "celestial"
+        rarity === "Primordial" || rarity === "Galactic" || rarity === "Exotic" ? "celestial"
+          : rarity === "Godly" || rarity === "Transcendent" || rarity === "Ascendent" ? "celestial"
           : rarity === "Celestial" || rarity === "Divine" ? "celestial"
           : rarity === "Mystical" ? "mystical"
           : "normal"
@@ -416,13 +439,21 @@ const Index = () => {
     }
   }, []);
 
+  // Admin /public deferred pull — store item, play animation when navigating to packs
+  const handlePendingPull = useCallback((item: BlookItem) => {
+    setPendingPublicPull(item);
+  }, []);
+
   // Admin /pull simulation — shows animation + sounds but no inventory change
   const handleSimulatePull = useCallback((item: BlookItem) => {
     setSimulatedItem(item);
     setShowSimulation(true);
 
     const rarity = item.rarity;
-    if (rarity === "Ascendent" || rarity === "Transcendent") playDivineReveal();
+    if (rarity === "Exotic") playExoticReveal();
+    else if (rarity === "Primordial") playPrimordialReveal();
+    else if (rarity === "Galactic") playGalacticReveal();
+    else if (rarity === "Godly" || rarity === "Ascendent" || rarity === "Transcendent") playDivineReveal();
     else if (rarity === "Divine") playDivineReveal();
     else if (rarity === "Celestial") playCelestialReveal();
     else if (rarity === "Mystical") playMysticalReveal();
@@ -431,7 +462,15 @@ const Index = () => {
     else playReveal();
 
     handleRareReveal(rarity);
-  }, [handleRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal]);
+  }, [handleRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal]);
+
+  // Trigger pending /public pull animation when navigating to packs
+  useEffect(() => {
+    if (currentView === "packs" && pendingPublicPull) {
+      handleSimulatePull(pendingPublicPull);
+      setPendingPublicPull(null);
+    }
+  }, [currentView, pendingPublicPull, handleSimulatePull]);
 
   const handleCreateRoom = async (nickname: string, targetRarity: Rarity, timeLimit: number, gameMode: GameMode) => {
     const result = await createRoom(nickname, targetRarity, timeLimit, gameMode);
@@ -589,7 +628,7 @@ const Index = () => {
                     />
                   )}
                   {currentView === "chat" && (
-                    <ChatView nickname={nickname} onSimulatePull={handleSimulatePull} />
+                    <ChatView nickname={nickname} onSimulatePull={handleSimulatePull} onPendingPull={handlePendingPull} onlinePlayers={onlinePlayers.map((p) => p.nickname)} />
                   )}
                   {currentView === "friends" && (
                     <FriendsView
@@ -654,6 +693,13 @@ const Index = () => {
             item={simulatedItem}
             isVisible={showSimulation}
             onClose={() => setShowSimulation(false)}
+          />
+
+          {/* Public gift result (admin /public command — shows for all online players) */}
+          <ResultBar
+            item={publicGiftDisplay}
+            isVisible={showPublicGift}
+            onClose={() => setShowPublicGift(false)}
           />
 
           {/* Modals */}

@@ -8,9 +8,11 @@ import { BlookItem } from "@/data/gameData";
 interface ChatViewProps {
   nickname: string | null;
   onSimulatePull?: (item: BlookItem) => void;
+  onPendingPull?: (item: BlookItem) => void;
+  onlinePlayers?: string[];
 }
 
-export function ChatView({ nickname, onSimulatePull }: ChatViewProps) {
+export function ChatView({ nickname, onSimulatePull, onPendingPull, onlinePlayers }: ChatViewProps) {
   const { messages, sendMessage, isLoading } = useChat();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -74,7 +76,7 @@ export function ChatView({ nickname, onSimulatePull }: ChatViewProps) {
 
   return (
     <div className="h-full flex flex-col max-w-2xl mx-auto">
-      <AdminPanel nickname={nickname} onSimulatePull={onSimulatePull} />
+      <AdminPanel nickname={nickname} onSimulatePull={onSimulatePull} onPendingPull={onPendingPull} onlinePlayers={onlinePlayers} />
 
       {/* Messages area — grows to fill, scrolls */}
       <div

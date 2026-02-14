@@ -50,7 +50,7 @@ export function LeaderboardView({ currentNickname }: LeaderboardViewProps) {
       let query = supabase
         .from("player_profiles")
          .select("id, nickname, unique_count, wins, successful_trades");
-      for (const name of [...PRIVILEGED_USERS, "pk2", "Pkbraz"]) {
+      for (const name of [...PRIVILEGED_USERS, "pk2", "Pkbraz", "HUDSONDASHARK", "rt3rockydagoat95"]) {
         query = query.neq("nickname", name);
       }
       const { data, error } = await query
