@@ -125,7 +125,7 @@ const Index = () => {
   const { announcement } = useAnnouncement();
   const luckState = useLuckBoost();
   const { publicGiftItem, clearPublicGift } = usePublicGift(nickname);
-  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal } = useSound();
+  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal, playChromafluxReveal, playVoidflareReveal, playSolaraReveal, playEclipticaReveal, playSingularisReveal, playChronovexReveal, playAetherionReveal, playQuantaraReveal, playParadoxisReveal, playGenesisReveal } = useSound();
 
   // Daily packs: today's pack + seasonal pack + admin-spawned packs + all original (non-daily) packs
   const availablePackNames = useMemo(() => {
@@ -427,10 +427,11 @@ const Index = () => {
   }, [currentRoom?.status, reportScore]);
 
   const handleRareReveal = useCallback((rarity: Rarity) => {
-    if (["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical", "Exotic", "Celestial", "Divine", "Transcendent", "Ascendent", "Godly", "Galactic", "Primordial"].includes(rarity)) {
+    const allSpecialRarities = ["Legendary", "Mythic", "Secret", "Ultra Secret", "Mystical", "Exotic", "Celestial", "Divine", "Transcendent", "Ascendent", "Godly", "Chromaflux", "Voidflare", "Solara", "Ecliptica", "Singularis", "Galactic", "Chronovex", "Aetherion", "Paradoxis", "Quantara", "Genesis", "Primordial"];
+    if (allSpecialRarities.includes(rarity)) {
       setConfettiIntensity(
-        rarity === "Primordial" || rarity === "Galactic" || rarity === "Exotic" ? "celestial"
-          : rarity === "Godly" || rarity === "Transcendent" || rarity === "Ascendent" ? "celestial"
+        rarity === "Genesis" || rarity === "Primordial" || rarity === "Quantara" || rarity === "Paradoxis" || rarity === "Aetherion" || rarity === "Chronovex" || rarity === "Galactic" || rarity === "Exotic" ? "celestial"
+          : rarity === "Singularis" || rarity === "Ecliptica" || rarity === "Solara" || rarity === "Voidflare" || rarity === "Chromaflux" || rarity === "Godly" || rarity === "Transcendent" || rarity === "Ascendent" ? "celestial"
           : rarity === "Celestial" || rarity === "Divine" ? "celestial"
           : rarity === "Mystical" ? "mystical"
           : "normal"
@@ -451,8 +452,18 @@ const Index = () => {
 
     const rarity = item.rarity;
     if (rarity === "Exotic") playExoticReveal();
+    else if (rarity === "Genesis") playGenesisReveal();
     else if (rarity === "Primordial") playPrimordialReveal();
+    else if (rarity === "Quantara") playQuantaraReveal();
+    else if (rarity === "Paradoxis") playParadoxisReveal();
+    else if (rarity === "Aetherion") playAetherionReveal();
+    else if (rarity === "Chronovex") playChronovexReveal();
     else if (rarity === "Galactic") playGalacticReveal();
+    else if (rarity === "Singularis") playSingularisReveal();
+    else if (rarity === "Ecliptica") playEclipticaReveal();
+    else if (rarity === "Solara") playSolaraReveal();
+    else if (rarity === "Voidflare") playVoidflareReveal();
+    else if (rarity === "Chromaflux") playChromafluxReveal();
     else if (rarity === "Godly" || rarity === "Ascendent" || rarity === "Transcendent") playDivineReveal();
     else if (rarity === "Divine") playDivineReveal();
     else if (rarity === "Celestial") playCelestialReveal();
@@ -462,7 +473,7 @@ const Index = () => {
     else playReveal();
 
     handleRareReveal(rarity);
-  }, [handleRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal]);
+  }, [handleRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal, playChromafluxReveal, playVoidflareReveal, playSolaraReveal, playEclipticaReveal, playSingularisReveal, playChronovexReveal, playAetherionReveal, playQuantaraReveal, playParadoxisReveal, playGenesisReveal]);
 
   // Trigger pending /public pull animation when navigating to packs
   useEffect(() => {

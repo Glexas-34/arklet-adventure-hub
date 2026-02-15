@@ -593,6 +593,214 @@ export function useSound() {
     }, 12000);
   }, []);
 
+  // Chromaflux: Electric buzzy burst → rapid cycling tones → sparkle shimmer
+  const playChromafluxReveal = useCallback(() => {
+    // Electric burst
+    playNoise(0.2, 0.12);
+    playTone(800, 0.15, "square", 0.15);
+    // Rapid cycling tones (cyan → magenta → lime feel)
+    setTimeout(() => {
+      playTone(1200, 0.1, "sine", 0.2);
+      playTone(600, 0.1, "sine", 0.2, 0.12);
+      playTone(1000, 0.1, "sine", 0.2, 0.24);
+      playTone(700, 0.1, "sine", 0.2, 0.36);
+      playTone(1100, 0.15, "sine", 0.25, 0.48);
+    }, 300);
+    // Shimmer sweep
+    setTimeout(() => {
+      playSweep(1000, 6000, 0.8, "sine", 0.08);
+      playNoise(0.4, 0.06);
+    }, 1000);
+  }, []);
+
+  // Voidflare: Heavy bass drop → crackling violet arcs → ominous hum
+  const playVoidflareReveal = useCallback(() => {
+    // Heavy compressed bass
+    playTone(35, 1.5, "sawtooth", 0.15);
+    playTone(50, 1, "triangle", 0.12, 0.2);
+    // Crackling arcs
+    setTimeout(() => {
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => {
+          playNoise(0.1, 0.1 + Math.random() * 0.05);
+          playTone(1500 + Math.random() * 3000, 0.05, "square", 0.07);
+        }, i * 200 + Math.random() * 100);
+      }
+    }, 800);
+    // Ominous hum
+    setTimeout(() => {
+      playTone(80, 2, "sawtooth", 0.06);
+      playSweep(200, 100, 2, "triangle", 0.05);
+    }, 2000);
+  }, []);
+
+  // Solara: Bright warm fanfare → golden ascending tones → radiant sustain
+  const playSolaraReveal = useCallback(() => {
+    // Warm ascending fanfare
+    playTone(330, 0.2, "sine", 0.3);
+    playTone(440, 0.2, "sine", 0.3, 0.12);
+    playTone(550, 0.2, "sine", 0.3, 0.24);
+    playTone(660, 0.25, "sine", 0.35, 0.36);
+    playTone(880, 0.4, "sine", 0.35, 0.5);
+    // Golden harmonics
+    playTone(440, 0.3, "triangle", 0.15, 0.3);
+    playTone(660, 0.3, "triangle", 0.12, 0.5);
+    playTone(880, 0.5, "triangle", 0.1, 0.7);
+    // Radiant shimmer
+    playSweep(1500, 8000, 1, "sine", 0.08);
+    setTimeout(() => playNoise(0.3, 0.06), 600);
+  }, []);
+
+  // Ecliptica: Darkness descends (low rumble) → silence → crimson fire ignition
+  const playEclipticaReveal = useCallback(() => {
+    // Darkness: descending rumble
+    playSweep(200, 30, 1.5, "sawtooth", 0.12);
+    playTone(40, 2, "triangle", 0.1);
+    // Silence gap, then crimson fire ignition
+    setTimeout(() => {
+      playNoise(0.3, 0.15);
+      playTone(150, 0.3, "sawtooth", 0.12);
+      playSweep(100, 600, 1, "sine", 0.1);
+      playTone(200, 0.8, "sine", 0.15, 0.3);
+      playTone(300, 0.6, "triangle", 0.1, 0.5);
+    }, 2000);
+  }, []);
+
+  // Singularis: Cosmic swirl → gravitational pull (descending) → starlight twinkle
+  const playSingularisReveal = useCallback(() => {
+    // Spiral ascending
+    playSweep(200, 1200, 2, "sine", 0.1);
+    playSweep(300, 900, 1.8, "triangle", 0.06);
+    // Gravitational pull down
+    setTimeout(() => {
+      playSweep(1200, 100, 1, "sine", 0.12);
+      playTone(60, 0.5, "triangle", 0.15);
+    }, 2200);
+    // Starlight twinkles
+    setTimeout(() => {
+      for (let i = 0; i < 5; i++) {
+        playTone(2000 + i * 300, 0.08, "sine", 0.06, i * 0.15);
+      }
+      playSweep(2000, 6000, 0.6, "sine", 0.05);
+    }, 3500);
+  }, []);
+
+  // Chronovex: Glass crack → time stutter (short repeating tones) → crystalline reform
+  const playChronovexReveal = useCallback(() => {
+    // Glass crack
+    playNoise(0.15, 0.2);
+    playTone(3000, 0.05, "square", 0.15);
+    // Time stutter — same tone repeated with gaps
+    setTimeout(() => {
+      for (let i = 0; i < 8; i++) {
+        playTone(600, 0.04, "sine", 0.12, i * 0.12);
+      }
+    }, 400);
+    // Brief reverse-feel sweep
+    setTimeout(() => {
+      playSweep(4000, 200, 0.3, "sawtooth", 0.08);
+    }, 1200);
+    // Crystalline reform
+    setTimeout(() => {
+      playTone(1047, 0.3, "sine", 0.15);
+      playTone(1319, 0.3, "sine", 0.12, 0.1);
+      playTone(1568, 0.4, "sine", 0.1, 0.2);
+      playSweep(2000, 8000, 0.5, "sine", 0.06);
+    }, 1800);
+  }, []);
+
+  // Aetherion: Soft divine bloom → ascending pastel chord → serene sustain
+  const playAetherionReveal = useCallback(() => {
+    // Soft bloom
+    playTone(262, 0.5, "sine", 0.1);
+    playTone(330, 0.5, "sine", 0.1, 0.2);
+    playTone(392, 0.5, "sine", 0.1, 0.4);
+    // Ascending pastel chord
+    playTone(523, 0.6, "sine", 0.15, 0.6);
+    playTone(659, 0.6, "sine", 0.15, 0.8);
+    playTone(784, 0.8, "sine", 0.15, 1.0);
+    playTone(1047, 1.0, "sine", 0.2, 1.2);
+    // Harmonic layer
+    playTone(330, 0.8, "triangle", 0.06, 0.6);
+    playTone(523, 0.8, "triangle", 0.06, 1.0);
+    playTone(784, 1.0, "triangle", 0.06, 1.2);
+    // Serene shimmer
+    playSweep(1000, 10000, 1.5, "sine", 0.04);
+    setTimeout(() => playNoise(0.5, 0.03), 1000);
+  }, []);
+
+  // Quantara: Digital glitch → scan line buzz → pixel reform
+  const playQuantaraReveal = useCallback(() => {
+    // Digital glitch bursts
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => {
+        playTone(200 + Math.random() * 2000, 0.03, "square", 0.12);
+        playNoise(0.05, 0.08);
+      }, i * 120);
+    }
+    // Scan line buzz
+    setTimeout(() => {
+      playTone(120, 0.8, "sawtooth", 0.08);
+      playSweep(500, 2000, 0.5, "square", 0.05);
+    }, 800);
+    // Pixel reform tones
+    setTimeout(() => {
+      playTone(800, 0.1, "square", 0.1);
+      playTone(1000, 0.1, "square", 0.1, 0.1);
+      playTone(1200, 0.15, "square", 0.12, 0.2);
+      playSweep(1000, 4000, 0.6, "sine", 0.06);
+    }, 1500);
+  }, []);
+
+  // Paradoxis: Impossible shifting tones → fractal bloom → infinite loop feel
+  const playParadoxisReveal = useCallback(() => {
+    // Shifting tones that never seem to resolve
+    playSweep(200, 800, 2, "sine", 0.08);
+    playSweep(400, 1600, 2, "triangle", 0.05);
+    playSweep(100, 400, 2.5, "sine", 0.06);
+    // Fractal bloom — overlapping ascending arpeggios
+    setTimeout(() => {
+      const notes = [262, 330, 392, 523, 659, 784, 1047, 1319];
+      notes.forEach((n, i) => {
+        playTone(n, 0.3, "sine", 0.06, i * 0.15);
+        playTone(n * 1.5, 0.2, "triangle", 0.03, i * 0.15 + 0.07);
+      });
+    }, 2000);
+    // Never-ending shimmer
+    setTimeout(() => {
+      playSweep(500, 8000, 1.5, "sine", 0.06);
+      playSweep(2000, 500, 1.5, "triangle", 0.04);
+    }, 3500);
+  }, []);
+
+  // Genesis: Absolute silence → Big Bang explosion → golden rings → eternal glow
+  const playGenesisReveal = useCallback(() => {
+    // 1.5s silence, then Big Bang
+    setTimeout(() => {
+      // Massive explosion
+      playNoise(0.8, 0.25);
+      playTone(30, 2, "sawtooth", 0.2);
+      playTone(60, 1.5, "triangle", 0.15);
+      // Shockwave sweep
+      playSweep(50, 4000, 1.5, "sine", 0.12);
+    }, 1500);
+    // Golden ring tones
+    setTimeout(() => {
+      playTone(440, 0.4, "sine", 0.2);
+      playTone(550, 0.4, "sine", 0.2, 0.2);
+      playTone(660, 0.4, "sine", 0.2, 0.4);
+      playTone(880, 0.5, "sine", 0.25, 0.6);
+      playTone(1100, 0.6, "sine", 0.2, 0.8);
+    }, 3500);
+    // Eternal radiant glow
+    setTimeout(() => {
+      playTone(440, 3, "sine", 0.08);
+      playTone(660, 3, "triangle", 0.05);
+      playTone(880, 2, "sine", 0.04);
+      playSweep(1000, 8000, 2, "sine", 0.04);
+    }, 5000);
+  }, []);
+
   const playGameStart = useCallback(() => {
     playTone(523, 0.1, "square", 0.15);
     playTone(659, 0.1, "square", 0.15, 0.1);
@@ -711,6 +919,16 @@ export function useSound() {
     playGalacticReveal,
     playPrimordialReveal,
     playExoticReveal,
+    playChromafluxReveal,
+    playVoidflareReveal,
+    playSolaraReveal,
+    playEclipticaReveal,
+    playSingularisReveal,
+    playChronovexReveal,
+    playAetherionReveal,
+    playQuantaraReveal,
+    playParadoxisReveal,
+    playGenesisReveal,
     playGameStart,
     playGameWin,
     playGameLose,

@@ -13,7 +13,17 @@ export type Rarity =
   | "Transcendent"
   | "Ascendent"
   | "Godly"
+  | "Chromaflux"
+  | "Voidflare"
+  | "Solara"
+  | "Ecliptica"
+  | "Singularis"
   | "Galactic"
+  | "Chronovex"
+  | "Aetherion"
+  | "Paradoxis"
+  | "Quantara"
+  | "Genesis"
   | "Primordial";
 
 export interface BlookItem {
@@ -43,7 +53,17 @@ export const rarityInfo: Record<Rarity, { color: string; show: boolean }> = {
   Transcendent: { color: "#ff4040", show: false },
   Ascendent: { color: "#000000", show: false },
   Godly: { color: "#cc0000", show: false },
+  Chromaflux: { color: "#00e5ff", show: false },
+  Voidflare: { color: "#7b00ff", show: false },
+  Solara: { color: "#ffc800", show: false },
+  Ecliptica: { color: "#cc0000", show: false },
+  Singularis: { color: "#4400aa", show: false },
   Galactic: { color: "#00ccff", show: false },
+  Chronovex: { color: "#c0c0c0", show: false },
+  Aetherion: { color: "#ffffff", show: false },
+  Paradoxis: { color: "#ff00ff", show: false },
+  Quantara: { color: "#00ffcc", show: false },
+  Genesis: { color: "#ffd700", show: false },
   Primordial: { color: "#1a0033", show: false },
 };
 
@@ -62,7 +82,17 @@ export const rarityColors: Record<Rarity, string> = {
   Transcendent: "rarity-transcendent",
   Ascendent: "rarity-ascendent",
   Godly: "rarity-godly",
+  Chromaflux: "rarity-chromaflux",
+  Voidflare: "rarity-voidflare",
+  Solara: "rarity-solara",
+  Ecliptica: "rarity-ecliptica",
+  Singularis: "rarity-singularis",
   Galactic: "rarity-galactic",
+  Chronovex: "rarity-chronovex",
+  Aetherion: "rarity-aetherion",
+  Paradoxis: "rarity-paradoxis",
+  Quantara: "rarity-quantara",
+  Genesis: "rarity-genesis",
   Primordial: "rarity-primordial",
 };
 
@@ -81,7 +111,17 @@ export const rarityBgColors: Record<Rarity, string> = {
   Transcendent: "bg-rarity-transcendent",
   Ascendent: "bg-rarity-ascendent",
   Godly: "bg-rarity-godly",
+  Chromaflux: "bg-rarity-chromaflux",
+  Voidflare: "bg-rarity-voidflare",
+  Solara: "bg-rarity-solara",
+  Ecliptica: "bg-rarity-ecliptica",
+  Singularis: "bg-rarity-singularis",
   Galactic: "bg-rarity-galactic",
+  Chronovex: "bg-rarity-chronovex",
+  Aetherion: "bg-rarity-aetherion",
+  Paradoxis: "bg-rarity-paradoxis",
+  Quantara: "bg-rarity-quantara",
+  Genesis: "bg-rarity-genesis",
   Primordial: "bg-rarity-primordial",
 };
 
@@ -100,7 +140,17 @@ export const rarityGlowColors: Record<Rarity, string> = {
   Transcendent: "glow-transcendent",
   Ascendent: "glow-ascendent",
   Godly: "glow-godly",
+  Chromaflux: "glow-chromaflux",
+  Voidflare: "glow-voidflare",
+  Solara: "glow-solara",
+  Ecliptica: "glow-ecliptica",
+  Singularis: "glow-singularis",
   Galactic: "glow-galactic",
+  Chronovex: "glow-chronovex",
+  Aetherion: "glow-aetherion",
+  Paradoxis: "glow-paradoxis",
+  Quantara: "glow-quantara",
+  Genesis: "glow-genesis",
   Primordial: "glow-primordial",
 };
 
@@ -119,7 +169,17 @@ export const rarityOrder: Rarity[] = [
   "Transcendent",
   "Ascendent",
   "Godly",
+  "Chromaflux",
+  "Voidflare",
+  "Solara",
+  "Ecliptica",
+  "Singularis",
   "Galactic",
+  "Chronovex",
+  "Aetherion",
+  "Paradoxis",
+  "Quantara",
+  "Genesis",
   "Primordial",
 ];
 
@@ -5099,12 +5159,92 @@ Object.keys(packs).forEach((packName) => {
   items.push([gName, "Godly" as Rarity, 0.0001]);
 });
 
+// === Add Chromaflux rarity (0.00005%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const cfName = packName.replace(" Pack", "") + " Chromaflux";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.00005).toFixed(6)];
+  items.push([cfName, "Chromaflux" as Rarity, 0.00005]);
+});
+
+// === Add Voidflare rarity (0.00001%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const vfName = packName.replace(" Pack", "") + " Voidflare";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.00001).toFixed(6)];
+  items.push([vfName, "Voidflare" as Rarity, 0.00001]);
+});
+
+// === Add Solara rarity (0.000005%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const slName = packName.replace(" Pack", "") + " Solara";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.000005).toFixed(7)];
+  items.push([slName, "Solara" as Rarity, 0.000005]);
+});
+
+// === Add Ecliptica rarity (0.000001%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const ecName = packName.replace(" Pack", "") + " Ecliptica";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.000001).toFixed(7)];
+  items.push([ecName, "Ecliptica" as Rarity, 0.000001]);
+});
+
+// === Add Singularis rarity (0.0000005%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const sgName = packName.replace(" Pack", "") + " Singularis";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.0000005).toFixed(8)];
+  items.push([sgName, "Singularis" as Rarity, 0.0000005]);
+});
+
 // === Add Galactic rarity (0.0000001% = 1 in a billion) to all existing packs ===
 Object.keys(packs).forEach((packName) => {
   const items = packs[packName];
   const glName = galacticNames[packName] || packName.replace(" Pack", "") + " Galactic";
   items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.0000001).toFixed(8)];
   items.push([glName, "Galactic" as Rarity, 0.0000001]);
+});
+
+// === Add Chronovex rarity (0.00000005%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const cvName = packName.replace(" Pack", "") + " Chronovex";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.00000005).toFixed(9)];
+  items.push([cvName, "Chronovex" as Rarity, 0.00000005]);
+});
+
+// === Add Aetherion rarity (0.00000001%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const aeName = packName.replace(" Pack", "") + " Aetherion";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.00000001).toFixed(9)];
+  items.push([aeName, "Aetherion" as Rarity, 0.00000001]);
+});
+
+// === Add Paradoxis rarity (0.00000001%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const pxName = packName.replace(" Pack", "") + " Paradoxis";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.00000001).toFixed(9)];
+  items.push([pxName, "Paradoxis" as Rarity, 0.00000001]);
+});
+
+// === Add Quantara rarity (0.000000005%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const qtName = packName.replace(" Pack", "") + " Quantara";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.000000005).toFixed(10)];
+  items.push([qtName, "Quantara" as Rarity, 0.000000005]);
+});
+
+// === Add Genesis rarity (0.0000000005%) to all existing packs ===
+Object.keys(packs).forEach((packName) => {
+  const items = packs[packName];
+  const gnName = packName.replace(" Pack", "") + " Genesis";
+  items[0] = [items[0][0], items[0][1], +(items[0][2] - 0.0000000005).toFixed(11)];
+  items.push([gnName, "Genesis" as Rarity, 0.0000000005]);
 });
 
 // === Add Primordial rarity (0.0000000001% = 1 in a trillion) to all existing packs ===

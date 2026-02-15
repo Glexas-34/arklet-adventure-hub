@@ -51,7 +51,17 @@
     --rarity-transcendent: 0 100% 55%;
     --rarity-ascendent: 0 0% 100%;
     --rarity-godly: 0 100% 40%;
+    --rarity-chromaflux: 187 100% 50%;
+    --rarity-voidflare: 270 100% 25%;
+    --rarity-solara: 42 100% 60%;
+    --rarity-ecliptica: 0 100% 40%;
+    --rarity-singularis: 260 100% 30%;
     --rarity-galactic: 195 100% 50%;
+    --rarity-chronovex: 0 0% 75%;
+    --rarity-aetherion: 0 0% 100%;
+    --rarity-paradoxis: 300 100% 50%;
+    --rarity-quantara: 165 100% 50%;
+    --rarity-genesis: 45 100% 50%;
     --rarity-primordial: 270 100% 10%;
 
     /* Gradients */
@@ -135,6 +145,46 @@
     color: transparent;
     animation: godly-text-shift 2s linear infinite;
   }
+  .rarity-chromaflux {
+    background: linear-gradient(90deg, #00e5ff, #ff0066, #7fff00, #00e5ff, #ff0066);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: chromaflux-text-shift 1s linear infinite;
+  }
+  .rarity-voidflare {
+    background: linear-gradient(90deg, #000000, #7b00ff, #4400aa, #7b00ff, #000000);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: voidflare-text-shift 2s linear infinite;
+  }
+  .rarity-solara {
+    background: linear-gradient(90deg, #ffffff, #ffc800, #ff8800, #ffc800, #ffffff);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: solara-text-shift 2.5s linear infinite;
+  }
+  .rarity-ecliptica {
+    background: linear-gradient(90deg, #000000, #cc0000, #ff2200, #cc0000, #000000);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: ecliptica-text-shift 3s linear infinite;
+  }
+  .rarity-singularis {
+    background: linear-gradient(90deg, #0a0030, #4400aa, #ffffff, #4400aa, #0a0030);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: singularis-text-shift 4s linear infinite;
+  }
   .rarity-galactic {
     background: linear-gradient(90deg, #001133, #00ccff, #ffffff, #00ccff, #001133);
     background-size: 200% 100%;
@@ -142,6 +192,46 @@
     background-clip: text;
     color: transparent;
     animation: galactic-text-shift 3s linear infinite;
+  }
+  .rarity-chronovex {
+    background: linear-gradient(90deg, #c0c0c0, #008080, #c0c0c0, #00cccc, #c0c0c0);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: chronovex-text-shift 1.5s linear infinite;
+  }
+  .rarity-aetherion {
+    background: linear-gradient(90deg, #ffffff, #ffd4e8, #d4f0ff, #e8ffd4, #fff4d4, #ffffff);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: aetherion-text-shift 4s linear infinite;
+  }
+  .rarity-paradoxis {
+    background: linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #0088ff, #8800ff, #ff0088, #ff0000, #00ffff, #ff00ff);
+    background-size: 500% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: paradoxis-text-shift 6s linear infinite;
+  }
+  .rarity-quantara {
+    background: linear-gradient(90deg, #000000, #00ffcc, #0066ff, #00ffcc, #000000);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: quantara-text-shift 1.5s steps(8) infinite;
+  }
+  .rarity-genesis {
+    background: linear-gradient(90deg, #000000, #ffd700, #ffffff, #ffd700, #000000);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: genesis-text-shift 3s linear infinite;
   }
   .rarity-primordial {
     background: linear-gradient(90deg, #1a0033, #000000, #330066, #000000, #1a0033);
@@ -167,7 +257,17 @@
   .bg-rarity-transcendent { background-color: hsl(var(--rarity-transcendent)); }
   .bg-rarity-ascendent { background-color: hsl(var(--rarity-ascendent)); }
   .bg-rarity-godly { background: linear-gradient(135deg, #000000, #cc0000, #000000); }
+  .bg-rarity-chromaflux { background: linear-gradient(135deg, #00e5ff, #ff0066, #7fff00); }
+  .bg-rarity-voidflare { background: linear-gradient(135deg, #000000, #7b00ff, #000000); }
+  .bg-rarity-solara { background: linear-gradient(135deg, #ffffff, #ffc800, #ff8800); }
+  .bg-rarity-ecliptica { background: linear-gradient(135deg, #000000, #cc0000, #000000); }
+  .bg-rarity-singularis { background: linear-gradient(135deg, #0a0030, #4400aa, #0a0030); }
   .bg-rarity-galactic { background: linear-gradient(135deg, #001133, #00ccff, #001133); }
+  .bg-rarity-chronovex { background: linear-gradient(135deg, #c0c0c0, #008080, #c0c0c0); }
+  .bg-rarity-aetherion { background: linear-gradient(135deg, #ffffff, #ffd4e8, #d4f0ff); }
+  .bg-rarity-paradoxis { background: linear-gradient(135deg, #ff0000, #00ff00, #0000ff, #ff00ff); }
+  .bg-rarity-quantara { background: linear-gradient(135deg, #000000, #00ffcc, #0066ff); }
+  .bg-rarity-genesis { background: linear-gradient(135deg, #000000, #ffd700, #ffffff); }
   .bg-rarity-primordial { background: linear-gradient(135deg, #1a0033, #000000, #330066); }
 
   .border-rarity-common { border-color: hsl(var(--rarity-common)); }
@@ -184,7 +284,17 @@
   .border-rarity-transcendent { border-color: hsl(var(--rarity-transcendent)); }
   .border-rarity-ascendent { border-color: hsl(var(--rarity-ascendent)); }
   .border-rarity-godly { border-color: hsl(var(--rarity-godly)); }
+  .border-rarity-chromaflux { border-color: hsl(var(--rarity-chromaflux)); }
+  .border-rarity-voidflare { border-color: hsl(var(--rarity-voidflare)); }
+  .border-rarity-solara { border-color: hsl(var(--rarity-solara)); }
+  .border-rarity-ecliptica { border-color: hsl(var(--rarity-ecliptica)); }
+  .border-rarity-singularis { border-color: hsl(var(--rarity-singularis)); }
   .border-rarity-galactic { border-color: hsl(var(--rarity-galactic)); }
+  .border-rarity-chronovex { border-color: hsl(var(--rarity-chronovex)); }
+  .border-rarity-aetherion { border-color: hsl(var(--rarity-aetherion)); }
+  .border-rarity-paradoxis { border-color: hsl(var(--rarity-paradoxis)); }
+  .border-rarity-quantara { border-color: hsl(var(--rarity-quantara)); }
+  .border-rarity-genesis { border-color: hsl(var(--rarity-genesis)); }
   .border-rarity-primordial { border-color: hsl(var(--rarity-primordial)); }
 
   .glow-common { box-shadow: 0 0 20px hsl(var(--rarity-common) / 0.5); }
@@ -222,9 +332,49 @@
     box-shadow: 0 0 100px hsl(0 100% 30% / 1), 0 0 160px hsl(0 100% 20% / 0.7), 0 0 240px hsl(0 0% 0% / 0.5);
     animation: godly-pulse 1.2s ease-in-out infinite;
   }
+  .glow-chromaflux {
+    box-shadow: 0 0 100px hsl(187 100% 50% / 1), 0 0 160px hsl(330 100% 50% / 0.7), 0 0 240px hsl(90 100% 50% / 0.4);
+    animation: chromaflux-pulse 1s linear infinite;
+  }
+  .glow-voidflare {
+    box-shadow: 0 0 100px hsl(270 100% 30% / 1), 0 0 180px hsl(270 100% 50% / 0.6), 0 0 260px hsl(0 0% 0% / 0.8);
+    animation: voidflare-pulse 1.2s ease-in-out infinite;
+  }
+  .glow-solara {
+    box-shadow: 0 0 120px hsl(42 100% 60% / 1), 0 0 200px hsl(30 100% 50% / 0.7), 0 0 280px hsl(45 100% 80% / 0.4);
+    animation: solara-pulse 1.5s ease-in-out infinite;
+  }
+  .glow-ecliptica {
+    box-shadow: 0 0 120px hsl(0 100% 30% / 1), 0 0 200px hsl(0 0% 0% / 0.9), 0 0 300px hsl(0 100% 20% / 0.5);
+    animation: ecliptica-pulse 2s ease-in-out infinite;
+  }
+  .glow-singularis {
+    box-shadow: 0 0 120px hsl(260 100% 30% / 1), 0 0 200px hsl(280 100% 40% / 0.7), 0 0 300px hsl(0 0% 100% / 0.3);
+    animation: singularis-pulse 1.5s ease-in-out infinite;
+  }
   .glow-galactic {
     box-shadow: 0 0 120px hsl(195 100% 60% / 1), 0 0 200px hsl(195 100% 40% / 0.8), 0 0 300px hsl(220 100% 50% / 0.5);
     animation: galactic-pulse 1s ease-in-out infinite;
+  }
+  .glow-chronovex {
+    box-shadow: 0 0 100px hsl(0 0% 80% / 1), 0 0 180px hsl(180 100% 30% / 0.6), 0 0 260px hsl(180 100% 40% / 0.3);
+    animation: chronovex-pulse 0.8s ease-in-out infinite;
+  }
+  .glow-aetherion {
+    box-shadow: 0 0 150px hsl(0 0% 100% / 1), 0 0 250px hsl(300 100% 90% / 0.5), 0 0 350px hsl(200 100% 90% / 0.3);
+    animation: aetherion-pulse 2s ease-in-out infinite;
+  }
+  .glow-paradoxis {
+    box-shadow: 0 0 120px hsl(0 100% 60% / 0.9), 0 0 200px hsl(120 100% 60% / 0.5), 0 0 300px hsl(240 100% 60% / 0.3);
+    animation: paradoxis-pulse 0.5s linear infinite;
+  }
+  .glow-quantara {
+    box-shadow: 0 0 120px hsl(165 100% 50% / 1), 0 0 200px hsl(210 100% 50% / 0.7), 0 0 280px hsl(0 0% 0% / 0.5);
+    animation: quantara-pulse 0.6s steps(4) infinite;
+  }
+  .glow-genesis {
+    box-shadow: 0 0 200px hsl(0 0% 100% / 1), 0 0 300px hsl(45 100% 50% / 0.8), 0 0 450px hsl(0 0% 0% / 0.5);
+    animation: genesis-pulse 1s ease-in-out infinite;
   }
   .glow-primordial {
     box-shadow: 0 0 150px hsl(270 100% 20% / 1), 0 0 250px hsl(0 0% 0% / 0.9), 0 0 350px hsl(270 100% 10% / 0.6);
@@ -257,6 +407,111 @@
     0% { box-shadow: 0 0 150px hsl(270 100% 20% / 1), 0 0 250px hsl(0 0% 0% / 0.9), 0 0 350px hsl(270 100% 10% / 0.6); }
     50% { box-shadow: 0 0 200px hsl(270 100% 30% / 1), 0 0 320px hsl(0 0% 0% / 1), 0 0 450px hsl(270 100% 15% / 0.8); }
     100% { box-shadow: 0 0 150px hsl(270 100% 20% / 1), 0 0 250px hsl(0 0% 0% / 0.9), 0 0 350px hsl(270 100% 10% / 0.6); }
+  }
+
+  @keyframes chromaflux-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  @keyframes chromaflux-pulse {
+    0% { box-shadow: 0 0 100px hsl(187 100% 50% / 1), 0 0 160px hsl(330 100% 50% / 0.7), 0 0 240px hsl(90 100% 50% / 0.4); }
+    33% { box-shadow: 0 0 100px hsl(330 100% 50% / 1), 0 0 160px hsl(90 100% 50% / 0.7), 0 0 240px hsl(187 100% 50% / 0.4); }
+    66% { box-shadow: 0 0 100px hsl(90 100% 50% / 1), 0 0 160px hsl(187 100% 50% / 0.7), 0 0 240px hsl(330 100% 50% / 0.4); }
+    100% { box-shadow: 0 0 100px hsl(187 100% 50% / 1), 0 0 160px hsl(330 100% 50% / 0.7), 0 0 240px hsl(90 100% 50% / 0.4); }
+  }
+
+  @keyframes voidflare-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes voidflare-pulse {
+    0%, 100% { box-shadow: 0 0 100px hsl(270 100% 30% / 1), 0 0 180px hsl(270 100% 50% / 0.6), 0 0 260px hsl(0 0% 0% / 0.8); }
+    50% { box-shadow: 0 0 140px hsl(270 100% 40% / 1), 0 0 220px hsl(270 100% 60% / 0.8), 0 0 320px hsl(0 0% 0% / 0.9); }
+  }
+
+  @keyframes solara-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes solara-pulse {
+    0%, 100% { box-shadow: 0 0 120px hsl(42 100% 60% / 1), 0 0 200px hsl(30 100% 50% / 0.7), 0 0 280px hsl(45 100% 80% / 0.4); }
+    50% { box-shadow: 0 0 180px hsl(42 100% 70% / 1), 0 0 260px hsl(30 100% 60% / 0.9), 0 0 340px hsl(45 100% 90% / 0.6); }
+  }
+
+  @keyframes ecliptica-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes ecliptica-pulse {
+    0%, 100% { box-shadow: 0 0 120px hsl(0 100% 30% / 1), 0 0 200px hsl(0 0% 0% / 0.9), 0 0 300px hsl(0 100% 20% / 0.5); }
+    50% { box-shadow: 0 0 160px hsl(0 100% 40% / 1), 0 0 250px hsl(0 0% 0% / 1), 0 0 380px hsl(0 100% 25% / 0.7); }
+  }
+
+  @keyframes singularis-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes singularis-pulse {
+    0%, 100% { box-shadow: 0 0 120px hsl(260 100% 30% / 1), 0 0 200px hsl(280 100% 40% / 0.7), 0 0 300px hsl(0 0% 100% / 0.3); }
+    50% { box-shadow: 0 0 160px hsl(260 100% 40% / 1), 0 0 260px hsl(280 100% 50% / 0.9), 0 0 380px hsl(0 0% 100% / 0.5); }
+  }
+
+  @keyframes chronovex-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes chronovex-pulse {
+    0%, 100% { box-shadow: 0 0 100px hsl(0 0% 80% / 1), 0 0 180px hsl(180 100% 30% / 0.6), 0 0 260px hsl(180 100% 40% / 0.3); }
+    50% { box-shadow: 0 0 140px hsl(0 0% 90% / 1), 0 0 220px hsl(180 100% 40% / 0.8), 0 0 320px hsl(180 100% 50% / 0.5); }
+  }
+
+  @keyframes aetherion-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  @keyframes aetherion-pulse {
+    0%, 100% { box-shadow: 0 0 150px hsl(0 0% 100% / 1), 0 0 250px hsl(300 100% 90% / 0.5), 0 0 350px hsl(200 100% 90% / 0.3); }
+    50% { box-shadow: 0 0 200px hsl(0 0% 100% / 1), 0 0 320px hsl(300 100% 95% / 0.7), 0 0 450px hsl(200 100% 95% / 0.5); }
+  }
+
+  @keyframes paradoxis-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 500% 50%; }
+  }
+
+  @keyframes paradoxis-pulse {
+    0% { box-shadow: 0 0 120px hsl(0 100% 60% / 0.9), 0 0 200px hsl(120 100% 60% / 0.5), 0 0 300px hsl(240 100% 60% / 0.3); }
+    25% { box-shadow: 0 0 120px hsl(60 100% 60% / 0.9), 0 0 200px hsl(180 100% 60% / 0.5), 0 0 300px hsl(300 100% 60% / 0.3); }
+    50% { box-shadow: 0 0 120px hsl(120 100% 60% / 0.9), 0 0 200px hsl(240 100% 60% / 0.5), 0 0 300px hsl(0 100% 60% / 0.3); }
+    75% { box-shadow: 0 0 120px hsl(200 100% 60% / 0.9), 0 0 200px hsl(320 100% 60% / 0.5), 0 0 300px hsl(80 100% 60% / 0.3); }
+    100% { box-shadow: 0 0 120px hsl(0 100% 60% / 0.9), 0 0 200px hsl(120 100% 60% / 0.5), 0 0 300px hsl(240 100% 60% / 0.3); }
+  }
+
+  @keyframes quantara-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes quantara-pulse {
+    0%, 100% { box-shadow: 0 0 120px hsl(165 100% 50% / 1), 0 0 200px hsl(210 100% 50% / 0.7), 0 0 280px hsl(0 0% 0% / 0.5); }
+    50% { box-shadow: 0 0 60px hsl(165 100% 50% / 0.5), 0 0 100px hsl(210 100% 50% / 0.3), 0 0 140px hsl(0 0% 0% / 0.2); }
+  }
+
+  @keyframes genesis-text-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  @keyframes genesis-pulse {
+    0%, 100% { box-shadow: 0 0 200px hsl(0 0% 100% / 1), 0 0 300px hsl(45 100% 50% / 0.8), 0 0 450px hsl(0 0% 0% / 0.5); }
+    50% { box-shadow: 0 0 300px hsl(0 0% 100% / 1), 0 0 450px hsl(45 100% 60% / 1), 0 0 600px hsl(0 0% 0% / 0.7); }
   }
 
   @keyframes galactic-text-shift {

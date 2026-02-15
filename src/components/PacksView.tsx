@@ -23,7 +23,7 @@ export function PacksView({ onItemObtained, onRareReveal, availablePackNames, an
   const [previewVisible, setPreviewVisible] = useState(true);
   const [resultItem, setResultItem] = useState<BlookItem | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal } = useSound();
+  const { playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal, playChromafluxReveal, playVoidflareReveal, playSolaraReveal, playEclipticaReveal, playSingularisReveal, playChronovexReveal, playAetherionReveal, playQuantaraReveal, playParadoxisReveal, playGenesisReveal } = useSound();
 
   // Toggle preview with Enter key
   useEffect(() => {
@@ -49,11 +49,41 @@ export function PacksView({ onItemObtained, onRareReveal, availablePackNames, an
     if (rarity === "Exotic") {
       playExoticReveal();
       onRareReveal?.(rarity);
+    } else if (rarity === "Genesis") {
+      playGenesisReveal();
+      onRareReveal?.(rarity);
     } else if (rarity === "Primordial") {
       playPrimordialReveal();
       onRareReveal?.(rarity);
+    } else if (rarity === "Quantara") {
+      playQuantaraReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Paradoxis") {
+      playParadoxisReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Aetherion") {
+      playAetherionReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Chronovex") {
+      playChronovexReveal();
+      onRareReveal?.(rarity);
     } else if (rarity === "Galactic") {
       playGalacticReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Singularis") {
+      playSingularisReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Ecliptica") {
+      playEclipticaReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Solara") {
+      playSolaraReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Voidflare") {
+      playVoidflareReveal();
+      onRareReveal?.(rarity);
+    } else if (rarity === "Chromaflux") {
+      playChromafluxReveal();
       onRareReveal?.(rarity);
     } else if (rarity === "Godly" || rarity === "Ascendent" || rarity === "Transcendent") {
       playDivineReveal();
@@ -76,7 +106,7 @@ export function PacksView({ onItemObtained, onRareReveal, availablePackNames, an
     } else {
       playReveal();
     }
-  }, [onItemObtained, onRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal]);
+  }, [onItemObtained, onRareReveal, playReveal, playRareReveal, playEpicReveal, playMysticalReveal, playCelestialReveal, playDivineReveal, playGalacticReveal, playPrimordialReveal, playExoticReveal, playChromafluxReveal, playVoidflareReveal, playSolaraReveal, playEclipticaReveal, playSingularisReveal, playChronovexReveal, playAetherionReveal, playQuantaraReveal, playParadoxisReveal, playGenesisReveal]);
 
   const closeResult = () => {
     setShowResult(false);
