@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 const path = require('path');
-const { execSync, spawn } = require('child_process');
+const { execSync } = require('child_process');
 
 // ===== STORE LIST =====
 const stores = [
@@ -36,437 +36,207 @@ const stores = [
 const PROGRESS_FILE = path.join(__dirname, 'scrape-progress.json');
 const OUTPUT_FILE = path.join(__dirname, 'deals-data.json');
 const OUTPUT_FILE_ALL = path.join(__dirname, 'deals-data-all.json');
-const VPN_AUTH_FILE = '/home/pi/arklet/nordvpn-auth.txt';
-const VPN_CONFIGS = [
-  '/home/pi/arklet/us5063.nordvpn.com.udp.ovpn',
-  '/home/pi/arklet/us8563.nordvpn.com.udp.ovpn',
-  '/home/pi/arklet/us5063.nordvpn.com.tcp.ovpn',
-  '/home/pi/arklet/us8563.nordvpn.com.tcp.ovpn',
-];
-const TARGET_IPS = ['216.150.16.1', '216.150.16.193'];
 
-// Delays (ms) - generous to avoid detection
-const DELAY_BETWEEN_PAGES_MIN = 3000;
-const DELAY_BETWEEN_PAGES_MAX = 7000;
-const DELAY_BETWEEN_STORES_MIN = 8000;
-const DELAY_BETWEEN_STORES_MAX = 15000;
-const DELAY_AFTER_BLOCK = 60000;
-const VPN_ROTATE_EVERY_N_STORES = 8; // Rotate VPN every N stores
+// Delays (ms) - generous to avoid rate limits
+const DELAY_BETWEEN_PAGES_MIN = 2000;
+const DELAY_BETWEEN_PAGES_MAX = 4000;
+const DELAY_BETWEEN_STORES_MIN = 4000;
+const DELAY_BETWEEN_STORES_MAX = 8000;
 
-// User agents to rotate
-const USER_AGENTS = [
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15',
-  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0',
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0',
-];
-
-// ===== HELPERS =====
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const randomDelay = (min, max) => sleep(min + Math.floor(Math.random() * (max - min)));
-const randomUA = () => USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 const log = (msg) => {
   const ts = new Date().toISOString().replace('T', ' ').slice(0, 19);
   console.log(`[${ts}] ${msg}`);
 };
 
-// ===== VPN MANAGEMENT =====
-let currentVpnConfig = -1;
-let vpnProcess = null;
-
-function killVpn() {
-  try {
-    execSync('sudo killall openvpn 2>/dev/null', { stdio: 'ignore' });
-  } catch (e) {}
-  vpnProcess = null;
-  // Wait for tun to go down
-  for (let i = 0; i < 10; i++) {
-    try {
-      execSync('ip link show tun0 2>/dev/null', { stdio: 'ignore' });
-      execSync('sleep 1');
-    } catch {
-      break; // tun0 is gone
-    }
-  }
-}
-
-function connectVpn(configIdx) {
-  killVpn();
-  const config = VPN_CONFIGS[configIdx % VPN_CONFIGS.length];
-  log(`VPN: Connecting via ${path.basename(config)}...`);
-
-  try {
-    // Start openvpn with split tunneling (--route-nopull preserves default route/SSH)
-    execSync(
-      `sudo openvpn --config "${config}" --auth-user-pass "${VPN_AUTH_FILE}" ` +
-      `--route-nopull --daemon --log /tmp/openvpn.log --writepid /tmp/openvpn.pid`,
-      { stdio: 'inherit', timeout: 15000 }
-    );
-
-    // Wait for tun0 to come up (max 30s)
-    let connected = false;
-    for (let i = 0; i < 30; i++) {
-      try {
-        execSync('ip link show tun0 2>/dev/null', { stdio: 'ignore' });
-        connected = true;
-        break;
-      } catch {
-        execSync('sleep 1');
-      }
-    }
-
-    if (!connected) {
-      log('VPN: tun0 did not come up. Checking log...');
-      try {
-        const vpnLog = execSync('tail -20 /tmp/openvpn.log').toString();
-        log(`VPN log:\n${vpnLog}`);
-      } catch (e) {}
-      return false;
-    }
-
-    // Add routes for rebelsavings.com through VPN tunnel
-    for (const ip of TARGET_IPS) {
-      try {
-        execSync(`sudo ip route add ${ip}/32 dev tun0 2>/dev/null`, { stdio: 'ignore' });
-      } catch (e) {} // May already exist
-    }
-
-    // Verify the route
-    const myIp = getPublicIp();
-    log(`VPN: Connected! tun0 is up. Public IP for target: routing through VPN`);
-    return true;
-  } catch (e) {
-    log(`VPN: Connection failed: ${e.message}`);
-    return false;
-  }
-}
-
-function rotateVpn() {
-  currentVpnConfig++;
-  return connectVpn(currentVpnConfig);
-}
-
-function getPublicIp() {
-  try {
-    return execSync('curl -s --max-time 5 https://api.ipify.org 2>/dev/null').toString().trim();
-  } catch {
-    return 'unknown';
-  }
-}
-
-// ===== PROGRESS MANAGEMENT =====
+// ===== PROGRESS =====
 function loadProgress() {
-  try {
-    return JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8'));
-  } catch {
-    return { completedStores: {}, startedAt: new Date().toISOString() };
-  }
+  try { return JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8')); }
+  catch { return { completedStores: {} }; }
 }
-
 function saveProgress(progress) {
   fs.writeFileSync(PROGRESS_FILE, JSON.stringify(progress, null, 2));
 }
-
 function saveResults(allStoreData) {
-  allStoreData.sort((a, b) => (a.distance || 999) - (b.distance || 999));
-  const json = JSON.stringify(allStoreData, null, 2);
-  fs.writeFileSync(OUTPUT_FILE, json);
-  fs.writeFileSync(OUTPUT_FILE_ALL, json);
+  const sorted = [...allStoreData].sort((a, b) => (a.distance || 999) - (b.distance || 999));
+  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(sorted, null, 2));
+  fs.writeFileSync(OUTPUT_FILE_ALL, JSON.stringify(sorted, null, 2));
 }
 
-// ===== MAIN SCRAPER =====
+// ===== MAIN =====
 (async () => {
-  const useVpn = process.argv.includes('--vpn');
   const resumeMode = process.argv.includes('--resume');
+  log('=== Home Depot Scraper (Full Pagination) ===');
+  log(`Resume: ${resumeMode ? 'YES' : 'fresh'} | Stores: ${stores.length}`);
 
-  log('=== Home Depot Robust Scraper ===');
-  log(`VPN mode: ${useVpn ? 'ENABLED' : 'disabled'}`);
-  log(`Resume mode: ${resumeMode ? 'ENABLED' : 'fresh start'}`);
-  log(`Stores to scrape: ${stores.length}`);
+  let progress = resumeMode ? loadProgress() : { completedStores: {} };
 
-  // Load previous progress if resuming
-  let progress = resumeMode ? loadProgress() : { completedStores: {}, startedAt: new Date().toISOString() };
-
-  // Connect VPN if requested
-  if (useVpn) {
-    const vpnOk = rotateVpn();
-    if (!vpnOk) {
-      log('WARNING: VPN connection failed. Proceeding without VPN.');
-    }
+  // Clean up old profile
+  const userDataDir = '/tmp/puppeteer-scrape-profile';
+  if (!resumeMode) {
+    try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch(e) {}
   }
-
-  // Delete old browser profile for fresh session
-  const userDataDir = '/tmp/puppeteer-robust-profile';
-  try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch (e) {}
-
-  const ua = randomUA();
-  log(`Using User-Agent: ${ua.slice(0, 60)}...`);
 
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/chromium',
     headless: true,
     userDataDir,
+    protocolTimeout: 300000, // 5 min timeout for slow Pi
     args: [
       '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
       '--disable-blink-features=AutomationControlled',
-      '--disable-features=IsolateOrigins,site-per-process',
-      '--disable-web-security',
-      '--window-size=1920,1080',
+      '--disable-gpu', '--single-process',
     ]
   });
 
-  let page = await browser.newPage();
+  const page = await browser.newPage();
 
-  // Comprehensive stealth
   await page.evaluateOnNewDocument(() => {
-    // Hide webdriver
     Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-    // Fake plugins
-    Object.defineProperty(navigator, 'plugins', {
-      get: () => [1, 2, 3, 4, 5].map(() => ({ length: 1 }))
-    });
-    // Fake languages
-    Object.defineProperty(navigator, 'languages', {
-      get: () => ['en-US', 'en']
-    });
-    // Chrome runtime
     window.chrome = { runtime: {} };
-    // Permission query
-    const origQuery = window.navigator.permissions.query;
-    window.navigator.permissions.query = (params) =>
-      params.name === 'notifications'
-        ? Promise.resolve({ state: Notification.permission })
-        : origQuery(params);
-    // WebGL vendor
-    const getParam = WebGLRenderingContext.prototype.getParameter;
-    WebGLRenderingContext.prototype.getParameter = function(p) {
-      if (p === 37445) return 'Intel Inc.';
-      if (p === 37446) return 'Intel Iris OpenGL Engine';
-      return getParam.call(this, p);
-    };
   });
 
-  await page.setUserAgent(ua);
-  await page.setExtraHTTPHeaders({
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'none',
-    'Sec-Fetch-User': '?1',
-    'Upgrade-Insecure-Requests': '1',
-  });
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
+  await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
 
-  await page.setViewport({ width: 1920, height: 1080 });
-
-  // Navigate to site
   log('Loading rebelsavings.com...');
-  await page.goto('https://rebelsavings.com/', { waitUntil: 'networkidle2', timeout: 60000 });
-  await sleep(8000);
+  await page.goto('https://rebelsavings.com/', { waitUntil: 'networkidle2', timeout: 90000 });
+  await sleep(12000);
 
-  const pageTitle = await page.title();
-  const pageUrl = page.url();
-  log(`Page loaded: "${pageTitle}" at ${pageUrl}`);
+  let title = await page.title();
+  log(`Page: "${title}"`);
 
-  // Handle security checkpoints
-  if (pageTitle.includes('Just a moment') || pageTitle.includes('Checking') || pageTitle.includes('Security') || pageTitle.includes('Vercel')) {
-    log('Security checkpoint detected, waiting 30s...');
-    await sleep(30000);
-    const newTitle = await page.title();
-    log(`After wait: "${newTitle}"`);
-
-    if (newTitle.includes('Just a moment') || newTitle.includes('Checking')) {
-      log('Still blocked. Will try VPN rotation...');
-      if (useVpn) {
-        rotateVpn();
-        await sleep(5000);
-        await page.reload({ waitUntil: 'networkidle2', timeout: 60000 });
-        await sleep(10000);
-      }
-    }
+  // Handle security checkpoint
+  for (let attempt = 0; attempt < 5; attempt++) {
+    if (title.includes('Just a moment') || title.includes('Checking') || title.includes('Security') || title.includes('Vercel')) {
+      log(`Security checkpoint, waiting 20s (${attempt + 1}/5)...`);
+      await sleep(20000);
+      title = await page.title();
+      log(`Now: "${title}"`);
+    } else break;
   }
 
   // Test API
   log('Testing API...');
-  let apiWorking = false;
-  for (let testAttempt = 1; testAttempt <= 5; testAttempt++) {
-    const test = await page.evaluate(async () => {
-      try {
-        const res = await fetch('/api/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            retailer: "hd", sortBy: "dateAdded:desc", filterBy: "stock:>0",
-            page: 1, query: "*", perPage: 1
-          })
-        });
-        const text = await res.text();
-        try {
-          const data = JSON.parse(text);
-          return { status: res.status, found: data.found, hasError: !!data.error, raw: text.slice(0, 500) };
-        } catch {
-          return { status: res.status, hasError: true, raw: text.slice(0, 500) };
-        }
-      } catch (e) {
-        return { hasError: true, raw: e.message };
-      }
+  const test = await page.evaluate(async () => {
+    const res = await fetch('/api/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        retailer: "hd", sortBy: "dateAdded:desc",
+        filterBy: "store:6644", page: 1, query: "*", perPage: 250
+      })
     });
+    const data = await res.json();
+    return { found: data.found, hits: data.hits?.length, error: data.error };
+  });
 
-    log(`API test ${testAttempt}: status=${test.status}, found=${test.found}, error=${test.hasError}`);
-    if (test.hasError) log(`  Response: ${test.raw}`);
+  log(`API test: found=${test.found}, hits=${test.hits}${test.error ? ', error=' + JSON.stringify(test.error) : ''}`);
 
-    if (!test.hasError && test.found !== undefined) {
-      log(`API working! Total deals in system: ${test.found}`);
-      apiWorking = true;
-      break;
-    }
-
-    if (testAttempt < 5) {
-      log(`Waiting 15s before retry...`);
-      await sleep(15000);
-    }
-  }
-
-  if (!apiWorking) {
-    log('API NOT WORKING after all retries. Exiting.');
+  if (!test.found && !test.hits) {
+    log('API not working. Exiting.');
     await browser.close();
-    if (useVpn) killVpn();
     process.exit(1);
   }
 
-  // Fetch a single page with comprehensive retry logic
-  async function fetchPage(payload, maxRetries = 8) {
+  // Helper: fetch one page with retry
+  async function fetchPage(storeNum, pageNum, maxRetries = 6) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const result = await page.evaluate(async (p) => {
+        const result = await page.evaluate(async (sn, pn) => {
           try {
             const res = await fetch('/api/search', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(p)
+              body: JSON.stringify({
+                retailer: "hd", sortBy: "dateAdded:desc",
+                filterBy: `store:${sn}`, page: pn, query: "*", perPage: 250
+              })
             });
-            const text = await res.text();
-            try {
-              const data = JSON.parse(text);
-              return { status: res.status, ...data };
-            } catch {
-              return { status: res.status, error: { code: String(res.status) }, raw: text.slice(0, 300) };
-            }
+            if (!res.ok) return { httpStatus: res.status, error: true };
+            const data = await res.json();
+            return data;
           } catch (e) {
-            return { error: { code: 'network', message: e.message } };
+            return { error: true, message: e.message };
           }
-        }, payload);
+        }, storeNum, pageNum);
 
-        // Check for rate limit
         if (result.error) {
-          const code = result.error.code;
-          if (code === '429' || code === '503' || code === '502') {
-            const backoff = Math.min(attempt * 8000, 60000) + Math.random() * 5000;
-            log(`    Rate limited (${code}). Backoff ${(backoff/1000).toFixed(1)}s (attempt ${attempt}/${maxRetries})...`);
+          const code = result.httpStatus || 'unknown';
+          if (code === 429 || code === 503) {
+            const backoff = attempt * 8000 + Math.random() * 3000;
+            log(`    Rate limited (${code}). Backoff ${(backoff/1000).toFixed(0)}s (${attempt}/${maxRetries})`);
             await sleep(backoff);
             continue;
           }
-          if (code === '403') {
-            log(`    Forbidden (403). May need VPN rotation.`);
-            return { hits: [], blocked: true };
+          if (code === 403) {
+            log(`    Forbidden (403). Refreshing page...`);
+            await page.reload({ waitUntil: 'networkidle2', timeout: 90000 });
+            await sleep(15000);
+            continue;
           }
+          log(`    Error: ${JSON.stringify(result).slice(0, 200)}. Retrying (${attempt}/${maxRetries})...`);
+          await sleep(5000);
+          continue;
         }
-
         return result;
       } catch (e) {
-        log(`    Page evaluate error: ${e.message}. Retrying...`);
-        await sleep(5000);
+        log(`    Evaluate error: ${e.message.slice(0, 100)}. Retrying (${attempt}/${maxRetries})...`);
+        // If protocol error, try reloading the page
+        if (e.message.includes('timed out') || e.message.includes('Protocol')) {
+          log(`    Reloading page due to protocol error...`);
+          try {
+            await page.reload({ waitUntil: 'networkidle2', timeout: 90000 });
+            await sleep(15000);
+          } catch (reloadErr) {
+            log(`    Reload also failed: ${reloadErr.message.slice(0, 80)}`);
+          }
+        }
+        await sleep(5000 * attempt);
       }
     }
-    log(`    WARNING: All ${maxRetries} retries exhausted`);
-    return { hits: [] };
+    return { hits: [], found: 0 };
   }
 
-  // ===== MAIN SCRAPING LOOP =====
+  // ===== SCRAPING LOOP =====
   const allStoreData = [];
 
-  // Load previously completed stores if resuming
+  // Load completed stores (resume)
   if (resumeMode) {
-    for (const [storeNum, storeData] of Object.entries(progress.completedStores)) {
+    for (const storeData of Object.values(progress.completedStores)) {
       allStoreData.push(storeData);
     }
-    log(`Resumed with ${allStoreData.length} previously scraped stores`);
+    log(`Resumed with ${allStoreData.length} stores already scraped`);
   }
-
-  let consecutiveBlocks = 0;
-  let storesSinceVpnRotation = 0;
 
   for (let i = 0; i < stores.length; i++) {
     const store = stores[i];
 
-    // Skip if already completed (resume mode)
     if (progress.completedStores[store.num]) {
-      log(`[${i + 1}/${stores.length}] Store #${store.num} (${store.city}) - SKIPPED (already scraped)`);
+      log(`[${i + 1}/${stores.length}] #${store.num} (${store.city}) - SKIP`);
       continue;
-    }
-
-    // VPN rotation every N stores
-    if (useVpn && storesSinceVpnRotation >= VPN_ROTATE_EVERY_N_STORES) {
-      log(`Rotating VPN (every ${VPN_ROTATE_EVERY_N_STORES} stores)...`);
-      rotateVpn();
-      storesSinceVpnRotation = 0;
-      await sleep(5000);
-      // Reload page to get new session with new IP
-      await page.reload({ waitUntil: 'networkidle2', timeout: 60000 });
-      await sleep(5000);
     }
 
     log(`[${i + 1}/${stores.length}] Store #${store.num} (${store.city})...`);
 
     const allDeals = [];
     let pageNum = 1;
-    let hasMore = true;
-    let storeBlocked = false;
+    let totalExpected = null;
+    let emptyPages = 0;
 
-    while (hasMore) {
-      const result = await fetchPage({
-        retailer: "hd",
-        sortBy: "dateAdded:desc",
-        filterBy: `store:${store.num}`,
-        page: pageNum,
-        query: "*",
-        perPage: 250 // API may cap this, but we request max
-      });
+    while (true) {
+      const result = await fetchPage(store.num, pageNum);
 
-      if (result.blocked) {
-        storeBlocked = true;
-        consecutiveBlocks++;
-        log(`  BLOCKED on store #${store.num}. Consecutive blocks: ${consecutiveBlocks}`);
-
-        if (useVpn && consecutiveBlocks <= 4) {
-          log(`  Rotating VPN and retrying store...`);
-          rotateVpn();
-          storesSinceVpnRotation = 0;
-          await sleep(10000);
-          await page.reload({ waitUntil: 'networkidle2', timeout: 60000 });
-          await sleep(8000);
-          // Retry this store from scratch
-          allDeals.length = 0;
-          pageNum = 1;
-          storeBlocked = false;
-          continue;
-        } else {
-          log(`  Waiting ${DELAY_AFTER_BLOCK/1000}s before continuing...`);
-          await sleep(DELAY_AFTER_BLOCK);
-          break;
-        }
+      if (result.found !== undefined) {
+        totalExpected = result.found;
       }
 
       if (result.hits && result.hits.length > 0) {
-        consecutiveBlocks = 0;
-        const totalFound = result.found || 0;
-        log(`    Page ${pageNum}: ${result.hits.length} hits (${totalFound} total for store, ${allDeals.length + result.hits.length} fetched so far)`);
+        emptyPages = 0;
+        log(`    Page ${pageNum}: ${result.hits.length} hits (total: ${totalExpected}, fetched: ${allDeals.length + result.hits.length})`);
 
-        result.hits.forEach(h => {
+        for (const h of result.hits) {
           const d = h.document;
           const discountPct = d.discount / 100;
           const originalPrice = discountPct < 1 ? d.price / (1 - discountPct) : d.price;
@@ -475,77 +245,52 @@ function saveResults(allStoreData) {
             originalPrice: Math.round(originalPrice * 100) / 100,
             dollarSaved: Math.round((originalPrice - d.price) * 100) / 100,
           });
-        });
+        }
 
         // Check if we have all deals
-        hasMore = allDeals.length < totalFound;
+        if (totalExpected && allDeals.length >= totalExpected) {
+          break; // Done with this store
+        }
         pageNum++;
       } else {
-        // Empty result
-        if (result.found !== undefined && result.found > 0 && allDeals.length < result.found) {
-          log(`    Page ${pageNum}: empty but ${result.found} expected (have ${allDeals.length}). Retrying...`);
-          await sleep(5000);
-          const retry = await fetchPage({
-            retailer: "hd", sortBy: "dateAdded:desc",
-            filterBy: `store:${store.num}`, page: pageNum,
-            query: "*", perPage: 250
-          });
-          if (retry.hits && retry.hits.length > 0) {
-            // Don't increment pageNum, re-enter loop to process this result
-            continue;
-          }
-          // Still empty - try next page in case of API gap
-          if (pageNum < Math.ceil((result.found || 0) / 25) + 2) {
-            log(`    Skipping to next page...`);
-            pageNum++;
-            continue;
-          }
+        emptyPages++;
+        if (emptyPages >= 2 || !totalExpected || allDeals.length >= totalExpected) {
+          break;
         }
-        hasMore = false;
+        // Try skipping a page in case of API gap
+        log(`    Page ${pageNum}: empty (have ${allDeals.length}/${totalExpected}). Skipping...`);
+        pageNum++;
       }
 
-      // Random delay between pages
-      if (hasMore) {
-        await randomDelay(DELAY_BETWEEN_PAGES_MIN, DELAY_BETWEEN_PAGES_MAX);
-      }
+      // Delay between pages
+      await randomDelay(DELAY_BETWEEN_PAGES_MIN, DELAY_BETWEEN_PAGES_MAX);
     }
 
-    // Sort deals by dollar saved
     allDeals.sort((a, b) => b.dollarSaved - a.dollarSaved);
-
     const storeResult = { ...store, deals: allDeals };
     allStoreData.push(storeResult);
 
-    // Save progress
+    // Save progress incrementally
     progress.completedStores[store.num] = storeResult;
     saveProgress(progress);
-
-    log(`  => ${allDeals.length} deals total for ${store.city}`);
-    storesSinceVpnRotation++;
-
-    // Save intermediate results
     saveResults([...allStoreData]);
 
-    // Random delay between stores
+    log(`  => ${allDeals.length} deals (expected: ${totalExpected || '?'})`);
+
     if (i < stores.length - 1) {
-      const delay = DELAY_BETWEEN_STORES_MIN + Math.floor(Math.random() * (DELAY_BETWEEN_STORES_MAX - DELAY_BETWEEN_STORES_MIN));
-      log(`  Waiting ${(delay/1000).toFixed(1)}s before next store...`);
-      await sleep(delay);
+      await randomDelay(DELAY_BETWEEN_STORES_MIN, DELAY_BETWEEN_STORES_MAX);
     }
   }
 
   await browser.close();
-  if (useVpn) killVpn();
 
   // Final save
   saveResults(allStoreData);
-
-  // Clean up progress file
-  try { fs.unlinkSync(PROGRESS_FILE); } catch (e) {}
+  try { fs.unlinkSync(PROGRESS_FILE); } catch {}
 
   // Summary
   let total = 0;
-  allStoreData.forEach(s => { total += s.deals.length; });
+  allStoreData.forEach(s => total += s.deals.length);
   log(`\n===== SCRAPE COMPLETE =====`);
   log(`${total} total deals across ${allStoreData.length} stores\n`);
   allStoreData
@@ -558,11 +303,5 @@ function saveResults(allStoreData) {
     storesWithZero.forEach(s => log(`  - ${s.city} (#${s.num})`));
   }
 
-  const storesWith25 = allStoreData.filter(s => s.deals.length === 25);
-  if (storesWith25.length > 0) {
-    log(`\nWARNING: ${storesWith25.length} stores have exactly 25 deals (may indicate pagination failure):`);
-    storesWith25.forEach(s => log(`  - ${s.city} (#${s.num})`));
-  }
-
-  log(`\nResults saved to ${OUTPUT_FILE}`);
+  log(`\nSaved to ${OUTPUT_FILE}`);
 })();

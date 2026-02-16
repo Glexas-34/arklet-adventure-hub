@@ -34,6 +34,8 @@ const stores = [
 const userDataDir = '/tmp/puppeteer-fresh-profile';
 try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch(e) {}
 
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
 (async () => {
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/chromium',
@@ -56,31 +58,88 @@ try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch(e) {}
   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
 
   console.log('Loading page with fresh profile...');
-  await page.goto('https://www.rebelsavings.com/', { waitUntil: 'networkidle2', timeout: 60000 });
-  await new Promise(r => setTimeout(r, 8000));
+  await page.goto('https://rebelsavings.com/', { waitUntil: 'networkidle2', timeout: 60000 });
+  await sleep(8000);
 
-  // Test if API works
-  const test = await page.evaluate(async () => {
-    const res = await fetch('/api/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        retailer: "hd", sortBy: "dateAdded:desc", filterBy: "stock:>0",
-        page: 1, query: "*", perPage: 1
-      })
+  // Check what the page looks like (debug Cloudflare etc.)
+  const pageTitle = await page.title();
+  const pageUrl = page.url();
+  console.log(`Page loaded: "${pageTitle}" at ${pageUrl}`);
+
+  // If security checkpoint, wait longer for it to resolve
+  if (pageTitle.includes('Just a moment') || pageTitle.includes('Checking') || pageTitle.includes('Security') || pageTitle.includes('Vercel')) {
+    console.log('Security checkpoint detected, waiting 20s for auto-resolve...');
+    await sleep(20000);
+    const newTitle = await page.title();
+    const newUrl = page.url();
+    console.log(`After wait: "${newTitle}" at ${newUrl}`);
+  }
+
+  // Test if API works - retry a few times
+  let test = null;
+  for (let testAttempt = 1; testAttempt <= 3; testAttempt++) {
+    test = await page.evaluate(async () => {
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          retailer: "hd", sortBy: "dateAdded:desc", filterBy: "stock:>0",
+          page: 1, query: "*", perPage: 1
+        })
+      });
+      const text = await res.text();
+      try {
+        const data = JSON.parse(text);
+        return { status: res.status, found: data.found, hasError: !!data.error, raw: text.slice(0, 300) };
+      } catch {
+        return { status: res.status, hasError: true, raw: text.slice(0, 300) };
+      }
     });
-    const data = await res.json();
-    return { status: res.status, found: data.found, hasError: !!data.error };
-  });
+
+    console.log(`API test attempt ${testAttempt}: status=${test.status}, found=${test.found}, error=${test.hasError}`);
+    if (test.hasError) console.log(`  Response: ${test.raw}`);
+
+    if (!test.hasError && test.found !== undefined) break;
+    if (testAttempt < 3) {
+      console.log(`  Waiting 10s before retry...`);
+      await sleep(10000);
+    }
+  }
 
   if (test.hasError || test.found === undefined) {
-    console.log('API still blocked. Test result:', JSON.stringify(test));
-    console.log('Will use cached data from earlier scrape and remove filters in HTML generation.');
+    console.log('API blocked after retries. Exiting.');
     await browser.close();
     process.exit(1);
   }
 
   console.log(`API working! Total deals in system: ${test.found}`);
+
+  // Helper: fetch a single page with retry on 429
+  async function fetchPage(payload, maxRetries = 5) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      const result = await page.evaluate(async (p) => {
+        const res = await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(p)
+        });
+        const data = await res.json();
+        return { status: res.status, ...data };
+      }, payload);
+
+      if (result.error && result.error.code === '429') {
+        const backoff = attempt * 5000; // 5s, 10s, 15s, 20s, 25s
+        console.log(`    Rate limited (429). Waiting ${backoff/1000}s before retry ${attempt}/${maxRetries}...`);
+        await sleep(backoff);
+        continue;
+      }
+
+      return result;
+    }
+    // All retries exhausted
+    console.log(`    WARNING: All ${maxRetries} retries exhausted for this page`);
+    return { hits: [] };
+  }
 
   const allStoreData = [];
 
@@ -93,14 +152,7 @@ try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch(e) {}
     let hasMore = true;
 
     while (hasMore) {
-      const result = await page.evaluate(async (payload) => {
-        const res = await fetch('/api/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        return res.json();
-      }, {
+      const result = await fetchPage({
         retailer: "hd",
         sortBy: "dateAdded:desc",
         filterBy: `store:${store.num}`,
@@ -110,8 +162,8 @@ try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch(e) {}
       });
 
       if (result.hits && result.hits.length > 0) {
-        const found = result.found || '?';
-        console.log(`    Page ${pageNum}: ${result.hits.length} hits (${found} total found)`);
+        const totalFound = result.found || 0;
+        console.log(`    Page ${pageNum}: ${result.hits.length} hits (${totalFound} total, ${allDeals.length + result.hits.length} fetched)`);
         result.hits.forEach(h => {
           const d = h.document;
           const discountPct = d.discount / 100;
@@ -122,27 +174,38 @@ try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch(e) {}
             dollarSaved: Math.round((originalPrice - d.price) * 100) / 100,
           });
         });
-        hasMore = result.hits.length === 250;
+        // API caps at 25 per page regardless of perPage setting
+        hasMore = allDeals.length < totalFound;
         pageNum++;
       } else {
-        if (result.found !== undefined) {
-          console.log(`    Page ${pageNum}: 0 hits (found: ${result.found})`);
-        } else {
-          console.log(`    Page ${pageNum}: no results - response:`, JSON.stringify(result).slice(0, 200));
+        if (result.found !== undefined && result.found > 0 && allDeals.length < result.found) {
+          // Got empty page but there should be more - might be a transient issue
+          console.log(`    Page ${pageNum}: empty but ${result.found} expected. Retrying after delay...`);
+          await sleep(3000);
+          // Try one more time
+          const retry = await fetchPage({
+            retailer: "hd", sortBy: "dateAdded:desc",
+            filterBy: `store:${store.num}`, page: pageNum,
+            query: "*", perPage: 250
+          });
+          if (retry.hits && retry.hits.length > 0) {
+            continue; // This will re-enter the loop naturally
+          }
         }
         hasMore = false;
       }
 
-      if (hasMore) await new Promise(r => setTimeout(r, 500));
+      // Delay between pages to avoid rate limiting
+      if (hasMore) await sleep(1000);
     }
 
     allDeals.sort((a, b) => b.dollarSaved - a.dollarSaved);
 
     allStoreData.push({ ...store, deals: allDeals });
-    console.log(`  ${allDeals.length} deals`);
+    console.log(`  => ${allDeals.length} deals total`);
 
-    // Longer delay between stores to avoid rate limiting
-    await new Promise(r => setTimeout(r, 1500));
+    // Delay between stores to avoid rate limiting
+    await sleep(3000);
   }
 
   await browser.close();
@@ -158,7 +221,6 @@ try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch(e) {}
   console.log(`\nDone! ${total} total deals across ${allStoreData.length} stores`);
   allStoreData.forEach(s => console.log(`  ${s.city} (#${s.num}): ${s.deals.length} deals, ${s.distance} mi`));
 
-  // Also log per-page breakdown for verification
   const storesWithZero = allStoreData.filter(s => s.deals.length === 0);
   if (storesWithZero.length > 0) {
     console.log(`\nWARNING: ${storesWithZero.length} stores have 0 deals:`);
