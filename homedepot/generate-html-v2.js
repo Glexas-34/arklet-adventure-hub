@@ -285,6 +285,26 @@ let html = `<!DOCTYPE html>
     }
     .footer a { color: #f96302; text-decoration: none; }
 
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: #f96302;
+      color: white;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      z-index: 200;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .scroll-top-btn:hover { background: #e55b00; transform: scale(1.1); }
+    .scroll-top-btn:active { transform: scale(0.95); }
+
     @media (max-width: 768px) {
       .header h1 { font-size: 18px; }
       .top-controls { top: 95px; flex-wrap: wrap; }
@@ -646,6 +666,8 @@ html += `</div>
   checkScrapeStatus();
 })();
 </script>
+
+<button class="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Scroll to top">&#9650;</button>
 
 </body>
 </html>`;
