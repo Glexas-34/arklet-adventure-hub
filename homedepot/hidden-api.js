@@ -1,9 +1,16 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const HIDDEN_FILE = path.join(__dirname, 'hidden-deals.json');
 const PORT = 3457;
+
+// === Scrape job state ===
+let scrapeRunning = false;
+let scrapeLog = '';
+let scrapeStartTime = null;
+let scrapeExitCode = null;
 
 function readHidden() {
   try {
@@ -59,6 +66,54 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ error: e.message }));
       }
     });
+    return;
+  }
+
+  // === Scrape status ===
+  if (req.url === '/scrape-status' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      running: scrapeRunning,
+      startTime: scrapeStartTime,
+      exitCode: scrapeExitCode,
+      logTail: scrapeLog.slice(-2000),
+    }));
+    return;
+  }
+
+  // === Start scrape ===
+  if (req.url === '/scrape-start' && req.method === 'POST') {
+    if (scrapeRunning) {
+      res.writeHead(409, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Scrape already running', startTime: scrapeStartTime }));
+      return;
+    }
+
+    scrapeRunning = true;
+    scrapeLog = '';
+    scrapeStartTime = new Date().toISOString();
+    scrapeExitCode = null;
+
+    const child = spawn('/bin/bash', [
+      path.join(__dirname, 'run-full-pipeline.sh')
+    ], { cwd: __dirname });
+
+    child.stdout.on('data', (data) => {
+      scrapeLog += data.toString();
+      // Keep log from growing unbounded
+      if (scrapeLog.length > 50000) scrapeLog = scrapeLog.slice(-40000);
+    });
+    child.stderr.on('data', (data) => {
+      scrapeLog += data.toString();
+      if (scrapeLog.length > 50000) scrapeLog = scrapeLog.slice(-40000);
+    });
+    child.on('close', (code) => {
+      scrapeRunning = false;
+      scrapeExitCode = code;
+    });
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, message: 'Scrape started' }));
     return;
   }
 

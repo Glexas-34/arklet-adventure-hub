@@ -131,6 +131,40 @@ let html = `<!DOCTYPE html>
 
     .hidden-count.zero { background: #ccc; }
 
+    .update-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border: 2px solid #f96302;
+      border-radius: 6px;
+      background: #f96302;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      transition: all 0.2s;
+    }
+    .update-btn:hover:not(:disabled) { background: #e55b00; border-color: #e55b00; }
+    .update-btn:disabled {
+      background: #ccc;
+      border-color: #ccc;
+      cursor: not-allowed;
+      color: #fff;
+    }
+    .update-btn .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .update-btn.running .spinner { display: inline-block; }
+    .update-btn.running .btn-icon { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
 
     .stats-bar {
@@ -280,6 +314,11 @@ let html = `<!DOCTYPE html>
     <span class="hidden-count zero" id="hiddenCountBadge">0</span>
   </button>
   <span style="font-size:12px;color:#999;" id="hiddenInfo">No hidden deals</span>
+  <button class="update-btn" id="updateBtn" onclick="startScrape()">
+    <span class="btn-icon">&#x21bb;</span>
+    <span class="spinner"></span>
+    <span class="btn-label">Update Deals</span>
+  </button>
 </div>
 
 <div class="container">
@@ -315,7 +354,7 @@ data.forEach(store => {
   const hasDeals = store.deals.length > 0;
   html += `      <a href="#store-${store.num}" class="${hasDeals ? '' : 'no-deals'}">${store.city}`;
   if (store.distance) html += ` <span class="distance">${store.distance}mi</span>`;
-  if (hasDeals) html += ` <span class="deal-count">${store.deals.length}</span>`;
+  if (hasDeals) html += ` <span class="deal-count" data-store="${store.num}">${store.deals.length}</span>`;
   html += `</a>\n`;
 });
 
@@ -490,6 +529,18 @@ html += `</div>
       ? 'No hidden deals'
       : hiddenCount + ' deal row' + (hiddenCount !== 1 ? 's' : '') + ' hidden (' + uniqueHidden + ' product' + (uniqueHidden !== 1 ? 's' : '') + ')';
     visibleCount.textContent = ${totalDeals} - hiddenCount;
+
+    // Update jump-to-store nav counts to show only visible deals
+    document.querySelectorAll('.store-nav .deal-count[data-store]').forEach(badge => {
+      const storeNum = badge.getAttribute('data-store');
+      const section = document.getElementById('store-' + storeNum);
+      if (!section) return;
+      const totalRows = section.querySelectorAll('tr[data-pkey]').length;
+      const hiddenRows = section.querySelectorAll('tr[data-pkey].hidden-deal').length;
+      const showHidden = showingHidden;
+      const visibleRows = showHidden ? totalRows : totalRows - hiddenRows;
+      badge.textContent = visibleRows;
+    });
   }
 
   window.toggleHide = async function(checkbox) {
@@ -534,6 +585,65 @@ html += `</div>
 
   // Load hidden state from server on page load
   loadHidden();
+
+  // ===== UPDATE / SCRAPE BUTTON =====
+  const updateBtn = document.getElementById('updateBtn');
+  const btnLabel = updateBtn.querySelector('.btn-label');
+
+  function setRunning(running) {
+    updateBtn.disabled = running;
+    if (running) {
+      updateBtn.classList.add('running');
+      btnLabel.textContent = 'Updating...';
+    } else {
+      updateBtn.classList.remove('running');
+      btnLabel.textContent = 'Update Deals';
+    }
+  }
+
+  async function checkScrapeStatus() {
+    try {
+      const res = await fetch(API_BASE + '/scrape-status');
+      const data = await res.json();
+      if (data.running) {
+        setRunning(true);
+      } else if (data.exitCode === 0 && updateBtn.classList.contains('running')) {
+        // Just finished successfully — reload the page to show new data
+        setRunning(false);
+        location.reload();
+      } else {
+        setRunning(false);
+      }
+      return data.running;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  window.startScrape = async function() {
+    if (updateBtn.disabled) return;
+    setRunning(true);
+    try {
+      const res = await fetch(API_BASE + '/scrape-start', { method: 'POST' });
+      const data = await res.json();
+      if (data.error) {
+        // Already running
+        setRunning(true);
+      }
+    } catch (e) {
+      setRunning(false);
+      alert('Failed to start update: ' + e.message);
+      return;
+    }
+    // Poll for completion
+    const poll = setInterval(async () => {
+      const running = await checkScrapeStatus();
+      if (!running) clearInterval(poll);
+    }, 5000);
+  };
+
+  // Check on page load if a scrape is already running
+  checkScrapeStatus();
 })();
 </script>
 

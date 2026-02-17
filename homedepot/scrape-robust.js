@@ -50,6 +50,25 @@ const log = (msg) => {
   console.log(`[${ts}] ${msg}`);
 };
 
+function getMemAvailableMB() {
+  try {
+    const meminfo = fs.readFileSync('/proc/meminfo', 'utf8');
+    const match = meminfo.match(/MemAvailable:\s+(\d+)/);
+    return match ? Math.round(parseInt(match[1]) / 1024) : null;
+  } catch { return null; }
+}
+
+function checkMemoryOrAbort(label) {
+  const mb = getMemAvailableMB();
+  if (mb !== null && mb < 50) {
+    log(`ABORT (${label}): Only ${mb}MB available. Exiting to prevent freeze.`);
+    process.exit(2);
+  }
+  if (mb !== null && mb < 100) {
+    log(`WARNING (${label}): Only ${mb}MB available.`);
+  }
+}
+
 // ===== PROGRESS =====
 function loadProgress() {
   try { return JSON.parse(fs.readFileSync(PROGRESS_FILE, 'utf8')); }
@@ -78,6 +97,7 @@ function saveResults(allStoreData) {
     try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch(e) {}
   }
 
+  checkMemoryOrAbort('pre-launch');
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/chromium',
     headless: true,
@@ -87,6 +107,14 @@ function saveResults(allStoreData) {
       '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
       '--disable-blink-features=AutomationControlled',
       '--disable-gpu', '--single-process',
+      '--js-flags=--max-old-space-size=128',
+      '--disable-background-networking',
+      '--disable-default-apps',
+      '--disable-sync',
+      '--disable-translate',
+      '--metrics-recording-only',
+      '--no-first-run',
+      '--renderer-process-limit=1',
     ]
   });
 
@@ -218,6 +246,7 @@ function saveResults(allStoreData) {
       continue;
     }
 
+    checkMemoryOrAbort(`before store ${store.num}`);
     log(`[${i + 1}/${stores.length}] Store #${store.num} (${store.city})...`);
 
     const allDeals = [];

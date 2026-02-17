@@ -3,10 +3,12 @@ set -e
 cd /home/pi/arklet/homedepot
 
 LOG_FILE="/home/pi/arklet/homedepot/pipeline-$(date +%Y%m%d-%H%M%S).log"
+NODE_HEAP="--max-old-space-size=300"
 
 echo "=== Home Depot Full Pipeline ===" | tee "$LOG_FILE"
 echo "Started: $(date)" | tee -a "$LOG_FILE"
 echo "Log: $LOG_FILE" | tee -a "$LOG_FILE"
+echo "Memory: $(awk '/MemAvailable/ {printf "%.0fMB", $2/1024}' /proc/meminfo) available" | tee -a "$LOG_FILE"
 echo "" | tee -a "$LOG_FILE"
 
 # ===== Step 1: Scrape all deals =====
@@ -14,12 +16,12 @@ echo "=== Step 1: Scraping all deals (robust mode) ===" | tee -a "$LOG_FILE"
 
 # Try without VPN first
 echo "Attempting scrape without VPN..." | tee -a "$LOG_FILE"
-if node scrape-robust.js 2>&1 | tee -a "$LOG_FILE"; then
+if timeout 2700 node $NODE_HEAP scrape-robust.js 2>&1 | tee -a "$LOG_FILE"; then
   echo "Scrape succeeded!" | tee -a "$LOG_FILE"
 else
   echo "Scrape failed without VPN. Trying with VPN..." | tee -a "$LOG_FILE"
   # Resume with VPN enabled
-  node scrape-robust.js --vpn --resume 2>&1 | tee -a "$LOG_FILE" || {
+  timeout 2700 node $NODE_HEAP scrape-robust.js --vpn --resume 2>&1 | tee -a "$LOG_FILE" || {
     echo "Scrape failed even with VPN." | tee -a "$LOG_FILE"
     exit 1
   }
